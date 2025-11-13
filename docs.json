@@ -44,10 +44,49 @@
                     {
                         "group": "SIP Trunks",
                         "pages": [
-                            "api-reference/sip-trunks/get",
+                            "api-reference/sip-trunks/list",
                             "api-reference/sip-trunks/create",
-                            "api-reference/sip-trunks/delete",
-                            "api-reference/sip-trunks/webhook"
+                            "api-reference/sip-trunks/get",
+                            "api-reference/sip-trunks/update",
+                            "api-reference/sip-trunks/delete"
+                        ]
+                    },
+                    {
+                        "group": "Agents",
+                        "pages": [
+                            "api-reference/agents/list",
+                            "api-reference/agents/create",
+                            "api-reference/agents/get",
+                            "api-reference/agents/update",
+                            "api-reference/agents/delete",
+                            "api-reference/agents/list-phone-numbers",
+                            "api-reference/agents/add-phone-number",
+                            "api-reference/agents/remove-phone-number",
+                            "api-reference/agents/list-custom-tools",
+                            "api-reference/agents/create-custom-tool",
+                            "api-reference/agents/update-custom-tool",
+                            "api-reference/agents/delete-custom-tool"
+                        ]
+                    },
+                    {
+                        "group": "Calls",
+                        "pages": [
+                            "api-reference/calls/list",
+                            "api-reference/calls/create-outbound",
+                            "api-reference/calls/get"
+                        ]
+                    },
+                    {
+                        "group": "Analytics",
+                        "pages": [
+                            "api-reference/analytics/overview"
+                        ]
+                    },
+                    {
+                        "group": "Webhooks",
+                        "pages": [
+                            "api-reference/webhooks/pre-call",
+                            "api-reference/webhooks/post-call"
                         ]
                     }
                 ]
