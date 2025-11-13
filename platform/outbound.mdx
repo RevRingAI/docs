@@ -1,11 +1,380 @@
 ---
 title: 'Outbound Calls'
-description: 'Sending outbound phone calls with your agents'
+description: 'Send outbound calls through your AI agents'
 icon: 'arrow-right-to-line'
 ---
 
-Page showing how to configure agents for outbound phone calls with an example.
+Configure your AI agents to initiate outbound phone calls for sales, surveys, reminders, and more.
 
-## Heading
+## How Outbound Calls Work
 
-Something here.
+When you send an outbound call through RevRing:
+
+1. You specify the agent, from number (caller ID), to number (recipient), and optional variables
+2. RevRing initiates the call through your SIP trunk
+3. When the recipient answers, the agent begins speaking based on its first message and prompt
+4. The conversation proceeds according to your agent's configuration
+5. After the call ends, RevRing sends complete call details to your post-call webhook (if configured)
+
+## Sending Test Calls via Dashboard
+
+The dashboard provides an easy way to send test outbound calls and validate your agent configuration.
+
+### Using the Test Agent Tab
+
+1. Navigate to [Agents](https://dashboard.revring.ai/app/agents) and select your agent
+2. Click the **Test Agent** tab
+3. Configure the test call:
+   - **Agent**: Pre-selected (your current agent)
+   - **From Number**: Select a phone number from your SIP trunk
+   - **To Number**: Enter the recipient's number in E.164 format (e.g., `+14155552671`)
+   - **Variables** (optional): Add key-value pairs to personalize the call
+4. Click **Send Test Call**
+
+The call will initiate within seconds, and the **Live Transcript** will update in real-time as the conversation progresses.
+
+<Tip>
+Use saved configs to quickly re-run tests with different scenarios. Enter a name in the config field and click Save Config to store your settings.
+</Tip>
+
+### Using the Send Call Page
+
+For more advanced testing or one-off outbound calls:
+
+1. Navigate to [Send Call](https://dashboard.revring.ai/app/calls/send)
+2. Select your **Agent** from the dropdown
+3. Enter the **From Number** (must be from your SIP trunk)
+4. Enter the **To Number** (recipient's phone number)
+5. Add **Variables** if your prompt uses dynamic content
+6. Click **Send Test Call**
+
+You can save frequently used configurations by naming them and clicking **Save Config**.
+
+## Sending Calls via API
+
+For production outbound calling at scale, use the RevRing API.
+
+### Basic Outbound Call
+
+```bash
+curl -X POST https://api.revring.ai/v1/calls \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentId": "agent_id_here",
+    "fromNumber": "+12025551234",
+    "toNumber": "+14155552671"
+  }'
+```
+
+### With Custom Variables
+
+```bash
+curl -X POST https://api.revring.ai/v1/calls \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentId": "agent_id_here",
+    "fromNumber": "+12025551234",
+    "toNumber": "+14155552671",
+    "variables": {
+      "customer_name": "John Smith",
+      "appointment_time": "2:00 PM today",
+      "confirmation_code": "ABC123"
+    }
+  }'
+```
+
+The API returns a call object with an `id` that you can use to track the call's status.
+
+See the [API Reference](/api-reference/calls/send) for complete documentation.
+
+## Configuring Outbound Agent Behavior
+
+### First Message
+
+For outbound calls, the first message is critical since you're initiating contact. Configure it in the **Overview** tab:
+
+```
+Hi {{customer_name}}, this is Alex calling from Acme Corp regarding your appointment scheduled for {{appointment_time}}. Is now a good time to talk?
+```
+
+<Note>
+Unlike inbound calls where leaving first message empty makes sense, outbound calls should almost always include a first message to properly introduce the purpose of the call.
+</Note>
+
+### Outbound-Specific Prompts
+
+Tailor your prompt for outbound scenarios:
+
+```
+You are making an outbound call to confirm a customer's appointment. Your goals:
+
+1. Verify the customer is available to talk (ask permission)
+2. Confirm their appointment for {{appointment_time}}
+3. Answer any questions about the appointment
+4. Offer to reschedule if needed
+5. Thank them and end the call politely
+
+If they ask to be removed from future calls, acknowledge and confirm you'll update their preferences.
+
+Keep the call brief (under 2 minutes) and respectful of their time.
+```
+
+### Using Variables for Personalization
+
+Variables allow you to customize each call without changing the agent configuration:
+
+1. Reference variables in your prompt and first message using `{{variable_name}}` syntax
+2. Pass variable values when sending the call via API or dashboard
+3. The agent will replace placeholders with the actual values during the conversation
+
+Common variable use cases:
+- Customer name, account number, order ID
+- Appointment dates and times
+- Custom messages or offers
+- Callback reasons or context
+
+## Voicemail Detection
+
+Voicemail detection is particularly useful for outbound calling to avoid wasting resources on unanswered calls.
+
+### Enable Voicemail Detection
+
+1. Navigate to the **Tools** tab
+2. Locate **Voicemail Detection** under System Tools
+3. Click **Configure**
+4. Choose your action:
+   - **Hangup**: End the call immediately when voicemail is detected (saves costs)
+   - **Leave Message**: Speak a pre-recorded message before hanging up
+5. If leaving a message, configure the voicemail message:
+   ```
+   Hi, this is Acme Corp calling to confirm your appointment. Please call us back at 1-800-555-0123 at your earliest convenience. Thank you.
+   ```
+6. Click **Save**
+
+<Tip>
+For high-volume outbound campaigns, choose "Hangup" to minimize costs and focus agent time on live conversations.
+</Tip>
+
+## Call Pacing and Concurrency
+
+### Understanding Concurrency Limits
+
+RevRing enforces concurrency limits to prevent abuse and ensure quality:
+
+- Maximum concurrent calls per organization
+- Rate limiting on outbound call initiation
+- Per-agent concurrency caps
+
+If you hit the concurrency limit, the API returns a `429` error. Implement retry logic with exponential backoff.
+
+### Best Practices for High Volume
+
+- **Batch calls**: Send calls in controlled batches rather than all at once
+- **Monitor active calls**: Track concurrent calls via the [Analytics API](/api-reference/analytics/overview)
+- **Implement queuing**: Use your own queue system to manage call pacing
+- **Handle errors gracefully**: Retry failed calls with appropriate delays
+- **Respect time zones**: Schedule calls during appropriate hours for the recipient's location
+
+## Monitoring Outbound Calls
+
+### Real-Time Monitoring
+
+View active outbound calls on the [Overview](https://dashboard.revring.ai/app) page:
+
+- **Active Calls**: See current ongoing outbound calls
+- Filter by agent to monitor specific campaigns
+
+### Call Logs
+
+Track all outbound calls in [Call Logs](https://dashboard.revring.ai/app/calls):
+
+1. Filter by **Direction**: Select "Outbound"
+2. Filter by **Status**: View completed, failed, ongoing, or canceled calls
+3. Filter by **Agent**: Focus on specific agents or campaigns
+4. Click any call to view:
+   - Complete transcript
+   - Call recording
+   - Duration and timestamps
+   - Variables used
+   - Hangup cause and error messages (if applicable)
+
+### Success Metrics
+
+Monitor key metrics to optimize your outbound campaigns:
+
+- **Connection rate**: Percentage of calls that connect vs. no answer/busy
+- **Average duration**: Typical call length for successful connections
+- **Completion rate**: Calls that reach the intended outcome
+- **Cost per call**: Track expenses across campaigns
+
+## Advanced Features
+
+### Post-Call Webhooks
+
+Receive call results immediately after each call ends:
+
+1. Configure **Post-call Webhook URL** in the **Overview** tab:
+   ```
+   https://api.yourcompany.com/webhooks/post-call
+   ```
+2. RevRing will POST complete call details including:
+   - Transcript
+   - Recording URL
+   - Call duration and timestamps
+   - Variables used
+   - AI-generated summary
+
+Use this to:
+- Update your CRM with call outcomes
+- Trigger follow-up actions
+- Track campaign performance
+- Schedule callbacks for unsuccessful attempts
+
+See the [Webhooks guide](/platform/webhooks) for implementation details.
+
+### Call Transfer
+
+Enable transfers to allow the agent to escalate to a human representative:
+
+1. Navigate to the **Tools** tab
+2. Click **Configure** on the **Transfer** tool
+3. Add transfer routes:
+   - **To number**: `+12025559999` (your sales team)
+   - **Condition**: `When the customer wants to speak with a human or has complex questions`
+4. Click **Save**
+
+The agent will offer to transfer when the condition is met.
+
+### End Call Control
+
+Configure when the agent should end calls:
+
+1. Navigate to the **Tools** tab
+2. Click **Configure** on the **End Call** tool
+3. Set custom end call rules:
+   ```
+   End the call when:
+   - The customer confirms their appointment
+   - The customer declines and asks not to be called again
+   - The customer is not available and asks to call back later
+   - You've been speaking for more than 3 minutes
+   ```
+4. Click **Save**
+
+## Compliance and Best Practices
+
+### Legal Requirements
+
+When making outbound calls, ensure compliance with:
+
+- **TCPA** (US): Obtain prior express written consent for marketing calls
+- **TSR** (US): Maintain do-not-call lists and honor opt-out requests
+- **GDPR** (EU): Respect data protection and privacy regulations
+- **Local regulations**: Follow country-specific telemarketing laws
+
+<Warning>
+You are responsible for ensuring compliance with all applicable laws and regulations. RevRing provides the technical platform but does not provide legal advice.
+</Warning>
+
+### Best Practices
+
+- **Respect time zones**: Call during appropriate hours (typically 9 AM - 9 PM local time)
+- **Honor opt-outs**: Immediately stop calling anyone who requests removal
+- **Clear identification**: Always identify your company and purpose clearly
+- **Keep it brief**: Respect the recipient's time with concise, focused calls
+- **Professional tone**: Use appropriate language and maintain a professional demeanor
+- **Quality over quantity**: Focus on successful conversations, not just call volume
+
+## Common Use Cases
+
+### Appointment Reminders
+
+```
+Hi {{customer_name}}, this is Acme Dental calling to remind you about your appointment tomorrow at {{appointment_time}} with Dr. {{doctor_name}}. 
+
+Please respond with "confirm" if you'll be able to make it, or let me know if you need to reschedule.
+```
+
+### Sales Follow-Up
+
+```
+Hi {{lead_name}}, this is {{agent_name}} from {{company_name}}. You recently expressed interest in {{product_name}} on our website. 
+
+I'm calling to see if you have any questions and to share how we can help {{solve_problem}}.
+```
+
+### Survey and Feedback
+
+```
+Hi {{customer_name}}, this is a brief call from Acme Corp. We recently helped you with {{service_type}} and would love to get your feedback. 
+
+On a scale of 1 to 10, how satisfied were you with our service?
+```
+
+### Payment Reminders
+
+```
+Hi {{customer_name}}, this is Acme Billing. We're calling about invoice {{invoice_number}} with a balance of {{amount}} due on {{due_date}}.
+
+Are you able to make a payment today, or would you like to discuss payment options?
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Calls fail to connect">
+    - Verify the from number is assigned to your SIP trunk
+    - Ensure the to number is in valid E.164 format
+    - Check your SIP trunk has sufficient capacity and balance
+    - Review your telephony provider's outbound restrictions
+    - Confirm the destination country is allowed by your provider
+  </Accordion>
+  
+  <Accordion title="Voicemail detection not working">
+    - Ensure voicemail detection is enabled in the Tools tab
+    - Verify the action (hangup or leave message) is configured
+    - Check the call recording to confirm voicemail was actually reached
+    - Some voicemail systems may not be detectable - this is a known limitation
+  </Accordion>
+  
+  <Accordion title="Variables not populating">
+    - Verify variable names match exactly between API call and prompt (case-sensitive)
+    - Check that variables are passed in the API request body
+    - Ensure variable syntax in prompt uses double curly braces: `{{variable}}`
+    - Review the call transcript to see what was actually spoken
+  </Accordion>
+  
+  <Accordion title="High failure rate">
+    - Check if you're calling valid, reachable numbers
+    - Verify caller ID (from number) is not flagged as spam
+    - Consider time of day - avoid early morning or late evening
+    - Review hangup causes in call logs to identify patterns
+    - Ensure your first message clearly identifies the caller
+  </Accordion>
+  
+  <Accordion title="Hit concurrency limit (429 error)">
+    - Implement exponential backoff and retry logic
+    - Reduce call pacing or batch size
+    - Contact support to discuss increasing your limits
+    - Monitor active calls before sending new batches
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Tools" icon="gear" href="/platform/tools">
+    Configure transfer, voicemail, and custom tools
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/platform/webhooks">
+    Implement post-call webhooks to capture results
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/calls/send">
+    View complete API documentation for sending calls
+  </Card>
+  <Card title="Call Logs" icon="list" href="/api-reference/calls/list">
+    Query and analyze call history via API
+  </Card>
+</CardGroup>

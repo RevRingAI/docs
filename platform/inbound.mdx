@@ -1,11 +1,299 @@
 ---
 title: 'Inbound Calls'
-description: 'Handling inbound phone calls with your agents'
+description: 'Configure agents to handle incoming phone calls'
 icon: 'arrow-left-to-line'
 ---
 
-Page showing how to configure agents for inbound phone calls with an example.
+Configure your AI agents to answer and handle inbound phone calls on your business phone numbers.
 
-## Heading
+## How Inbound Calls Work
 
-Something here.
+When someone dials one of your phone numbers:
+
+1. The call routes through your SIP trunk to RevRing
+2. RevRing matches the dialed number to an agent based on phone number assignments
+3. If a pre-call webhook is configured, RevRing calls it to get dynamic variables
+4. The agent answers and begins the conversation using its configured prompt and first message
+5. After the call ends, RevRing sends call details to your post-call webhook (if configured)
+
+## Assigning Phone Numbers to Agents
+
+Before an agent can receive inbound calls, you must assign at least one phone number to it.
+
+### Step 1: Open Agent Settings
+
+1. Navigate to [Agents](https://dashboard.revring.ai/app/agents)
+2. Click on the agent you want to configure
+3. Select the **Phone Numbers** tab
+
+### Step 2: Add an Inbound Number
+
+1. In the **Add an Inbound Number** card, enter the phone number in E.164 format:
+   ```
+   +12025551234
+   ```
+2. Click **Add Number**
+
+The number will appear in the **Assigned Inbound Numbers** list above.
+
+<Warning>
+The phone number must already be assigned to your SIP trunk in both your telephony provider (Twilio, Telnyx, etc.) and in your RevRing SIP trunk configuration.
+</Warning>
+
+### Step 3: Verify Assignment
+
+Call the phone number from your mobile device to verify the agent answers correctly. You should hear the agent's first message (if configured) or the agent will wait for you to speak first.
+
+## Configuring Agent Behavior
+
+### First Message
+
+The first message is what the agent says immediately upon answering the call. Configure it in the **Overview** tab:
+
+1. Navigate to the agent's **Overview** tab
+2. In the **First Message** field, enter your greeting:
+   ```
+   Thank you for calling Acme Support. How can I help you today?
+   ```
+3. Click **Save**
+
+<Tip>
+Leave the first message empty if you want the agent to wait for the caller to speak first. This is useful for support lines where callers typically explain their issue right away.
+</Tip>
+
+### Dynamic First Messages with Variables
+
+You can personalize the first message using variables from the pre-call webhook:
+
+```
+Hello {{customer_name}}, thanks for calling back about {{ticket_subject}}. How can I help?
+```
+
+See the [Webhooks guide](/platform/webhooks) for details on implementing pre-call webhooks.
+
+### Agent Prompt
+
+The prompt defines how your agent behaves throughout the entire conversation. Navigate to the **Overview** tab and configure the **Prompt** field:
+
+```
+You are a customer support agent for Acme Corp. Your responsibilities:
+
+- Listen carefully to the customer's issue
+- Ask clarifying questions if needed
+- Provide helpful solutions from our knowledge base
+- Offer to transfer to a specialist if you cannot resolve the issue
+- Always be professional, patient, and empathetic
+
+Keep responses concise (under 30 seconds). If the customer seems frustrated, acknowledge their feelings and focus on solutions.
+```
+
+<Note>
+The prompt is the most critical configuration. Be specific about tone, responsibilities, and constraints. Test thoroughly and iterate based on real call transcripts.
+</Note>
+
+## Advanced Inbound Features
+
+### Pre-Call Webhooks
+
+Pre-call webhooks allow you to customize each call based on caller information. Before answering, RevRing sends caller details to your webhook and uses the response to personalize the conversation.
+
+Configure in the **Advanced** tab:
+
+1. Set **Pre-call Webhook URL** to your endpoint:
+   ```
+   https://api.yourcompany.com/webhooks/pre-call
+   ```
+2. Click **Save**
+
+RevRing will POST the caller's number and other context. Your webhook should return variables:
+
+```json
+{
+  "customer_name": "John Smith",
+  "account_status": "premium",
+  "last_order": "Order #12345"
+}
+```
+
+These variables can then be used in your prompt and first message with `{{variable_name}}` syntax.
+
+See the [Webhooks guide](/platform/webhooks) for complete implementation details.
+
+### Default Variables
+
+You can set default variable values in the **Overview** tab that apply to all calls unless overridden by the pre-call webhook. This is useful for agent-wide settings.
+
+While editing your prompt, any variables you reference with `{{variable_name}}` syntax will be detected. You can set defaults in the **Default Variables** section (if visible in your dashboard configuration).
+
+### Voicemail Detection
+
+Enable voicemail detection to automatically handle scenarios where the agent reaches an answering machine or voicemail:
+
+1. Navigate to the **Tools** tab
+2. Locate **Voicemail Detection** under System Tools
+3. Click **Configure**
+4. Choose an action:
+   - **Hangup**: End the call immediately when voicemail is detected
+   - **Leave Message**: Speak a pre-recorded message and then hang up
+5. If you selected "Leave Message", enter the message:
+   ```
+   Hi, this is an automated message from Acme Corp. We'll try calling you back later. For immediate assistance, please call us at 1-800-555-0123.
+   ```
+6. Click **Save**
+
+<Note>
+Voicemail detection is most useful for outbound calling scenarios. For inbound calls, it's typically not needed since customers are calling you.
+</Note>
+
+### Call Timeouts
+
+Configure timeout behavior in the **Advanced** tab:
+
+- **Turn Timeout**: Maximum silence before the agent prompts the caller
+  ```
+  7 seconds (recommended for natural conversation flow)
+  ```
+  Set to `-1` to disable turn-level prompting.
+
+- **Silence End Call Timeout**: Maximum total silence before ending the call
+  ```
+  -1 (disabled - let caller hang up when done)
+  ```
+  Or set a value like `30` to end after 30 seconds of silence.
+
+- **Max Conversation Duration**: Hard limit on total call length
+  ```
+  600 seconds (10 minutes)
+  ```
+  When reached, the agent will politely end the call.
+
+## Testing Inbound Calls
+
+### Using the Test Tab
+
+1. Navigate to the **Test Agent** tab
+2. Review the **Test Inbound Calls** banner showing your assigned numbers
+3. Call one of the listed numbers from your phone
+4. Watch the **Live Transcript** update in real-time as you speak with the agent
+
+### Best Practices for Testing
+
+- **Test different scenarios**: Happy path, error cases, edge cases
+- **Review transcripts**: Check for misunderstandings or unexpected responses  
+- **Refine your prompt**: Adjust based on actual conversation flow
+- **Test interruptions**: See how the agent handles being interrupted mid-sentence
+- **Verify tools**: Test transfer, end call, and custom tool invocations
+
+## Monitoring Inbound Calls
+
+### Call Logs
+
+View all inbound calls in the [Call Logs](https://dashboard.revring.ai/app/calls) page:
+
+1. Filter by **Direction**: Select "Inbound"
+2. Filter by **Agent**: Select your agent
+3. Filter by **Status**: View completed, failed, or ongoing calls
+4. Click any call to view full details, transcript, and recording
+
+### Overview Dashboard
+
+Monitor real-time metrics on the [Overview](https://dashboard.revring.ai/app) page:
+
+- **Active Calls**: See how many inbound calls are currently ongoing
+- **Total Calls**: Track daily, weekly, and monthly inbound call volume
+- **Average Duration**: Monitor typical call length
+- **Total Cost**: Track usage and costs
+
+## Common Patterns
+
+### Business Hours Handling
+
+Use a pre-call webhook to check business hours and return different variables:
+
+```json
+{
+  "greeting": "Thank you for calling during business hours",
+  "transfer_available": "true"
+}
+```
+
+Or during off-hours:
+
+```json
+{
+  "greeting": "Thank you for calling. Our office is currently closed",
+  "transfer_available": "false"
+}
+```
+
+Reference these in your prompt to adjust behavior.
+
+### IVR-Style Routing
+
+Configure multiple agents for different departments, each with its own phone number:
+
+- Sales: `+12025551111` → Sales Agent
+- Support: `+12025552222` → Support Agent  
+- Billing: `+12025553333` → Billing Agent
+
+### Escalation to Human
+
+Enable the transfer tool to allow the agent to escalate to a human:
+
+1. Navigate to the **Tools** tab
+2. Click **Configure** on the **Transfer** tool
+3. Add transfer routes:
+   - **To number**: `+12025559999` (your support team)
+   - **Condition**: `When the customer requests to speak with a human or when the issue is complex`
+4. Click **Save**
+
+The agent will automatically offer to transfer when appropriate.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Calls ring but agent doesn't answer">
+    - Verify the phone number is assigned to the agent in the Phone Numbers tab
+    - Check that the agent status is set to Active in the Overview tab
+    - Confirm the number is properly configured in your SIP trunk
+    - Review your telephony provider's routing configuration
+  </Accordion>
+  
+  <Accordion title="Agent answers but immediately hangs up">
+    - Check for errors in your pre-call webhook (if configured)
+    - Review the call transcript in Call Logs for error messages
+    - Verify your prompt is not empty or malformed
+    - Check Advanced tab timeout settings
+  </Accordion>
+  
+  <Accordion title="First message doesn't play">
+    - Ensure the First Message field is filled in and saved
+    - Check that the message doesn't exceed 4000 characters
+    - Verify there are no syntax errors in variable references
+    - Review the call recording to confirm what the agent actually said
+  </Accordion>
+  
+  <Accordion title="Variables not working in prompt">
+    - Verify variable syntax uses double curly braces: `{{variable_name}}`
+    - Check that your pre-call webhook is returning the correct variable names
+    - Ensure the webhook response is valid JSON
+    - Review webhook logs for errors or timeouts
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Tools" icon="gear" href="/platform/tools">
+    Configure call transfer, end call, and custom tools
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/platform/webhooks">
+    Implement pre-call and post-call webhook integrations
+  </Card>
+  <Card title="Outbound Calls" icon="arrow-right-to-line" href="/platform/outbound">
+    Set up outbound calling capabilities
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/agents/list-phone-numbers">
+    Manage phone numbers programmatically via API
+  </Card>
+</CardGroup>

@@ -1,11 +1,472 @@
 ---
 title: 'Tools'
-description: 'Configuring and using tools in your agents'
+description: 'Configure system and custom tools for your agents'
 icon: 'gear'
 ---
 
-Page showing how to configure agent tools for each tool, with examples.
+Tools enable your AI agents to take actions during phone calls beyond just conversation. RevRing provides built-in system tools and supports custom tools via webhooks.
 
-## Heading
+## System Tools
 
-Something here.
+System tools are pre-built capabilities that agents can invoke during calls. These tools are configured in the **Tools** tab of your agent settings.
+
+### End Call
+
+The End Call tool allows agents to automatically terminate calls based on configurable rules.
+
+#### When to Use
+
+- Calls that have reached their natural conclusion
+- Customer explicitly ends the conversation
+- Maximum conversation time is reached
+- Call objective has been completed
+
+#### Configuration
+
+1. Navigate to the **Tools** tab
+2. Locate **End Call** under System Tools
+3. Toggle the switch to enable
+4. Click **Configure** to customize behavior
+5. Set **End Call Rules Override** to define when the agent should end calls:
+
+```
+End the call when:
+- The customer says goodbye or indicates they're done
+- The appointment has been confirmed
+- The customer explicitly asks to end the call
+- You've provided all requested information and there are no further questions
+- The conversation has exceeded 5 minutes
+```
+
+6. Click **Save**
+
+<Note>
+If you leave the rules override empty, RevRing uses sensible defaults. Custom rules give you more control over call termination behavior.
+</Note>
+
+#### How It Works
+
+When enabled, the agent has access to an `end_call` function. During the conversation, if the agent determines (based on the rules) that the call should end, it will:
+
+1. Invoke the `end_call` function
+2. Speak a brief closing message
+3. Terminate the call gracefully
+
+You can see end call invocations in the call transcript labeled as "Tool: end_call".
+
+### Transfer
+
+The Transfer tool enables agents to transfer calls to other phone numbers or departments based on conditions you define.
+
+#### When to Use
+
+- Customer requests to speak with a human representative
+- Issue requires specialized expertise beyond the agent's scope
+- Escalation to management or specific departments
+- Routing to on-call support staff
+
+#### Configuration
+
+1. Navigate to the **Tools** tab
+2. Locate **Transfer** under System Tools
+3. Toggle the switch to enable
+4. Click **Configure** to set up transfer routes
+5. Add transfer routes:
+
+**Transfer Description Override** (optional):
+```
+Offer to transfer when:
+- The customer requests to speak with a human
+- The issue is complex and beyond your capabilities
+- The customer is frustrated or dissatisfied
+- Billing or payment questions arise
+```
+
+**Transfer Routes**:
+- **To number**: `+12025559999` (destination phone number in E.164 format)
+- **Condition**: `Transfer to sales team for pricing questions or to close deals`
+
+Click **Add route** to add multiple destinations.
+
+6. Click **Save**
+
+<Tip>
+You can configure multiple transfer routes for different scenarios. The agent will choose the appropriate route based on the conversation context and conditions you define.
+</Tip>
+
+#### How It Works
+
+When enabled, the agent can invoke the `transfer_call` function with the destination number. The call will be transferred, and the agent's involvement ends. The transfer appears in the call transcript showing:
+
+- Tool invocation: "Tool: transfer_call"
+- Destination number
+- Transfer status (success or failure)
+
+### Voicemail Detection
+
+Voicemail Detection automatically identifies when an outbound call reaches an answering machine or voicemail system.
+
+#### When to Use
+
+- Outbound calling campaigns where live conversations are preferred
+- Appointment reminders or confirmations
+- Sales or follow-up calls
+- Any scenario where leaving a message is optional
+
+#### Configuration
+
+1. Navigate to the **Tools** tab
+2. Locate **Voicemail Detection** under System Tools
+3. Toggle the switch to enable
+4. Click **Configure** to set behavior
+5. Choose **Voicemail Action**:
+   - **Hangup**: Immediately end the call when voicemail is detected (saves costs)
+   - **Leave Message**: Speak a pre-recorded message before hanging up
+
+6. If you selected "Leave Message", configure **Voicemail Message**:
+```
+Hi, this is a message from Acme Corp. We tried reaching you regarding your appointment. Please call us back at 1-800-555-0123. Thank you.
+```
+
+7. Click **Save**
+
+<Note>
+Voicemail detection is most effective for outbound calls. For inbound calls, it's typically not needed since customers are calling you.
+</Note>
+
+#### How It Works
+
+When an outbound call connects, RevRing analyzes the audio to detect voicemail systems. If detected:
+
+- **Hangup action**: Call ends immediately, marked as "voicemail" in logs
+- **Leave message action**: Agent speaks the configured message, then hangs up
+
+Detection accuracy is typically very high but not perfect. Review call logs to monitor detection performance.
+
+## Custom Tools
+
+Custom tools allow you to extend agent capabilities by integrating with your own systems via webhooks. When the agent invokes a custom tool, RevRing calls your webhook with the tool's arguments and includes the response in the conversation.
+
+### Use Cases
+
+- **CRM lookups**: Fetch customer information during calls
+- **Order status**: Check order or shipment status
+- **Appointment booking**: Create or modify appointments in your calendar system
+- **Payment processing**: Initiate payments or check account balances
+- **Inventory checks**: Verify product availability
+- **Custom business logic**: Any operation specific to your workflow
+
+### Creating a Custom Tool
+
+1. Navigate to the **Tools** tab
+2. Scroll to the **Custom Tools** section
+3. Enter a **Tool name** (e.g., `check_order_status`)
+4. Enter your **Webhook URL** (e.g., `https://api.yourcompany.com/tools/check-order`)
+5. Click **Add Tool**
+
+The tool will appear in the table below. Click **Edit** to define the tool's schema.
+
+### Defining the Tool Schema
+
+The schema defines what parameters the tool accepts using OpenAI's function calling format:
+
+1. Click **Edit** on your custom tool
+2. In the **Schema JSON** field, enter your tool definition:
+
+```json
+{
+  "type": "function",
+  "function": {
+    "name": "check_order_status",
+    "description": "Check the status of a customer's order by order ID",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "The unique order ID (e.g., ORD-12345)"
+        }
+      },
+      "required": ["order_id"]
+    }
+  }
+}
+```
+
+3. Toggle **Enabled** to activate the tool
+4. Click **Save**
+
+<Tip>
+The `description` fields are critical - they tell the agent when and how to use the tool. Be clear and specific.
+</Tip>
+
+### Schema Format Reference
+
+Follow the [OpenAI function calling format](https://platform.openai.com/docs/guides/function-calling#defining-functions):
+
+- **name**: Unique identifier for the tool (lowercase, underscores allowed)
+- **description**: When the agent should use this tool
+- **parameters**: Object defining the tool's input parameters
+  - **type**: Always `"object"` for the parameters root
+  - **properties**: Each parameter with its type and description
+  - **required**: Array of required parameter names
+
+### Webhook Implementation
+
+When the agent invokes your custom tool, RevRing POSTs to your webhook URL:
+
+**Request:**
+```json
+{
+  "tool_name": "check_order_status",
+  "arguments": {
+    "order_id": "ORD-12345"
+  },
+  "call_id": "call_abc123",
+  "agent_id": "agent_xyz789"
+}
+```
+
+**Expected Response:**
+```json
+{
+  "result": "Order ORD-12345 is currently out for delivery. Expected delivery today by 5 PM."
+}
+```
+
+The agent will receive the `result` field and incorporate it into the conversation:
+
+> "I've checked your order status. Order ORD-12345 is currently out for delivery and should arrive today by 5 PM."
+
+### Response Format
+
+Your webhook should return:
+
+- **200 OK** status code
+- JSON body with a `result` field containing the information for the agent
+- Response within 10 seconds (recommended: under 3 seconds for best user experience)
+
+**Success Example:**
+```json
+{
+  "result": "Customer has 3 active appointments. Next appointment is tomorrow at 2 PM."
+}
+```
+
+**Error Example:**
+```json
+{
+  "result": "I'm sorry, I couldn't find that order number in our system. Can you verify the order number?"
+}
+```
+
+<Warning>
+Always return a `result` field with a human-readable message. The agent will speak this to the caller, so write responses as natural conversation.
+</Warning>
+
+### Best Practices for Custom Tools
+
+#### Clear Descriptions
+
+The agent uses descriptions to decide when to invoke tools. Be specific:
+
+**Good:**
+```
+Check the status of a customer's order by order ID. Use this when the customer asks about their order, shipment, or delivery status.
+```
+
+**Bad:**
+```
+Check order
+```
+
+#### Error Handling
+
+Handle errors gracefully in your webhook:
+
+```json
+{
+  "result": "I apologize, but I'm having trouble connecting to our order system right now. Could we try again in a moment, or would you like me to transfer you to our support team?"
+}
+```
+
+#### Performance
+
+- Keep webhook response times under 3 seconds
+- Implement timeouts and retries in your webhook code
+- Cache frequently accessed data when possible
+- Use async processing for complex operations (return immediately with a status message)
+
+#### Security
+
+- Validate requests are coming from RevRing (verify IP addresses or use signing)
+- Sanitize and validate all input parameters
+- Use HTTPS for all webhook URLs
+- Implement rate limiting to prevent abuse
+
+### Testing Custom Tools
+
+1. Create a simple test tool that returns static data
+2. Use the **Test Agent** tab to make a call
+3. During the call, prompt the agent to use the tool:
+   - "Can you check order ORD-12345 for me?"
+4. Review the transcript to see:
+   - Tool invocation with arguments
+   - Your webhook's response
+   - How the agent incorporated the result into conversation
+
+### Viewing Tool Invocations
+
+All tool invocations appear in call transcripts with detailed information:
+
+- **Tool name**: Which tool was invoked
+- **Arguments**: What parameters were passed
+- **Status**: Success (ok) or error
+- **Response**: What your webhook returned
+
+Navigate to [Call Logs](https://dashboard.revring.ai/app/calls), select a call, and review the transcript pane.
+
+## Tool Limitations
+
+### System Tool Constraints
+
+- **End Call**: Once invoked, the call ends immediately - the agent cannot continue conversation
+- **Transfer**: After transfer, the agent disconnects - the call continues with the transfer destination
+- **Voicemail Detection**: Only works on outbound calls, not inbound calls
+
+### Custom Tool Constraints
+
+- **Response time**: 10 second timeout - webhooks must respond within this window
+- **Concurrent invocations**: Agents invoke tools sequentially, not in parallel
+- **Rate limits**: Per-organization limits on custom tool invocations per minute
+- **Maximum tools**: Up to 10 custom tools per agent (contact support for higher limits)
+
+## Managing Tools
+
+### Editing Tools
+
+To modify a custom tool:
+
+1. Navigate to the **Tools** tab
+2. Click **Edit** on the tool in the table
+3. Update name, webhook URL, schema, or enabled status
+4. Click **Save**
+
+Changes take effect immediately for new calls.
+
+### Deleting Tools
+
+To remove a custom tool:
+
+1. Navigate to the **Tools** tab
+2. Click **Delete** on the tool in the table
+3. Confirm the deletion
+
+<Warning>
+Deleting a tool that's actively referenced in your agent's behavior may cause unexpected results. Update your prompt to remove references to deleted tools.
+</Warning>
+
+### Disabling Tools Temporarily
+
+Instead of deleting, you can disable tools:
+
+1. Click **Edit** on the tool
+2. Toggle **Enabled** to off
+3. Click **Save**
+
+The agent will not have access to disabled tools, but the configuration is preserved for future re-enabling.
+
+## Advanced Tool Patterns
+
+### Chaining Tools
+
+Agents can invoke multiple tools in sequence to accomplish complex tasks:
+
+1. Customer asks: "What's my balance and when is my next payment due?"
+2. Agent invokes `get_account_balance` → receives balance
+3. Agent invokes `get_next_payment_date` → receives date
+4. Agent combines both results in response
+
+Design tools to be focused and composable rather than monolithic.
+
+### Conditional Tool Usage
+
+Guide the agent to use tools conditionally based on conversation context:
+
+```
+Use the transfer_to_billing tool only when:
+- Customer has billing questions you cannot answer
+- Customer disputes a charge
+- Customer wants to discuss payment plans
+
+Do NOT transfer for simple balance inquiries - use the check_balance tool instead.
+```
+
+### Tool Results in Follow-Up
+
+Agents can reference previous tool results later in the conversation:
+
+> Agent: "I checked your order ORD-12345, and it's out for delivery today."
+>
+> Customer: "Great! And what about my other order?"
+>
+> Agent: "Let me check that for you..." *[invokes tool again with new order ID]*
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Custom tool not being invoked">
+    - Verify the tool is enabled (toggle is on)
+    - Check that the description clearly indicates when to use the tool
+    - Ensure your prompt doesn't contradict or override the tool's purpose
+    - Test by explicitly asking the agent to use the tool during a test call
+    - Review the schema - overly complex parameters may confuse the agent
+  </Accordion>
+  
+  <Accordion title="Webhook not receiving requests">
+    - Confirm the webhook URL is correct and publicly accessible
+    - Check that your server is running and responding to POST requests
+    - Verify there are no firewall rules blocking RevRing's IP addresses
+    - Test the endpoint independently with curl or Postman
+    - Review your server logs for incoming requests
+  </Accordion>
+  
+  <Accordion title="Tool returns error in transcript">
+    - Check webhook response format - must include `result` field
+    - Verify webhook responds within 10 seconds
+    - Ensure response is valid JSON
+    - Review your webhook logs for errors or exceptions
+    - Check HTTP status code (should be 200)
+  </Accordion>
+  
+  <Accordion title="Agent misuses the tool">
+    - Refine the tool's description to be more specific about usage
+    - Update your prompt to provide clearer guidance on when to use tools
+    - Adjust parameter descriptions to clarify expected formats
+    - Consider splitting complex tools into simpler, focused tools
+  </Accordion>
+  
+  <Accordion title="Transfer doesn't work">
+    - Verify the destination number is in valid E.164 format
+    - Ensure your SIP trunk supports call transfers
+    - Check that the destination number is reachable
+    - Review call logs for specific transfer error messages
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" icon="webhook" href="/platform/webhooks">
+    Learn about pre-call and post-call webhooks
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/agents/list-custom-tools">
+    Manage custom tools programmatically via API
+  </Card>
+  <Card title="Inbound Calls" icon="arrow-left-to-line" href="/platform/inbound">
+    Configure agents for handling inbound calls
+  </Card>
+  <Card title="Outbound Calls" icon="arrow-right-to-line" href="/platform/outbound">
+    Send outbound calls with your agents
+  </Card>
+</CardGroup>

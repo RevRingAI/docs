@@ -1,11 +1,622 @@
 ---
 title: 'Webhooks'
-description: 'Configuring and using webhooks in your agents'
+description: 'Integrate RevRing with your systems using webhooks'
 icon: 'webhook'
 ---
 
-Page showing how to configure agent tools for each tool, with examples.
+Webhooks allow RevRing to communicate with your systems before and after phone calls, enabling deep integration with your CRM, databases, and business logic.
 
-## Heading
+## Webhook Types
 
-Something here.
+RevRing supports two types of webhooks:
+
+- **Pre-Call Webhooks**: Called before an inbound call is answered, allowing you to personalize the agent's behavior
+- **Post-Call Webhooks**: Called after any call ends, providing complete call details including transcript and recording
+
+## Pre-Call Webhooks
+
+Pre-call webhooks enable dynamic customization of agent behavior based on caller information. Before answering an inbound call, RevRing sends caller details to your webhook and uses the response to personalize the conversation.
+
+### When to Use
+
+- Look up caller information in your CRM
+- Customize greetings based on customer status or history
+- Route calls differently based on caller context
+- Apply business hours logic or special handling
+- Personalize the agent's knowledge with customer-specific data
+
+### Configuration
+
+1. Navigate to your agent's **Advanced** tab
+2. Set the **Pre-call Webhook URL**:
+   ```
+   https://api.yourcompany.com/webhooks/pre-call
+   ```
+3. Click **Save**
+
+<Note>
+Pre-call webhooks only apply to inbound calls. Outbound calls receive variables directly via the API when the call is sent.
+</Note>
+
+### Request Format
+
+When an inbound call arrives, RevRing sends a POST request to your webhook:
+
+```json
+{
+  "call_id": "call_abc123xyz",
+  "agent_id": "agent_456def",
+  "from_number": "+14155551234",
+  "to_number": "+12025559999",
+  "direction": "INBOUND",
+  "timestamp": "2024-03-15T14:30:00Z"
+}
+```
+
+**Field Descriptions:**
+- `call_id`: Unique identifier for this call
+- `agent_id`: The agent that will handle the call
+- `from_number`: Caller's phone number (E.164 format)
+- `to_number`: The number that was dialed
+- `direction`: Always `"INBOUND"` for pre-call webhooks
+- `timestamp`: When the call was initiated (ISO 8601)
+
+### Response Format
+
+Your webhook should respond within 3 seconds with a JSON object containing variables:
+
+```json
+{
+  "customer_name": "John Smith",
+  "account_status": "premium",
+  "last_order_date": "March 10, 2024",
+  "outstanding_balance": "$0.00",
+  "preferred_language": "English"
+}
+```
+
+These variables will be available in the agent's prompt and first message using `{{variable_name}}` syntax.
+
+### Using Variables in Agent Configuration
+
+Reference webhook variables in your **First Message**:
+
+```
+Hello {{customer_name}}, thank you for calling. I see you're a {{account_status}} member. How can I help you today?
+```
+
+And in your **Prompt**:
+
+```
+You are a customer service agent. You're speaking with {{customer_name}}, who is a {{account_status}} customer.
+
+Their account information:
+- Last order: {{last_order_date}}
+- Balance: {{outstanding_balance}}
+- Preferred language: {{preferred_language}}
+
+Use this context to provide personalized assistance.
+```
+
+### Error Handling
+
+If your webhook fails, times out, or returns invalid JSON:
+
+- RevRing will proceed with the call using default variables (if configured)
+- The call will not be rejected - the agent will answer without personalization
+- Check the call's `preCallWebhookStatus` field to see webhook delivery status
+
+**Webhook Status Values:**
+- `success`: Webhook responded successfully
+- `failed`: Webhook returned an error (4xx/5xx status)
+- `timeout`: Webhook didn't respond within 3 seconds
+- `null`: No webhook configured
+
+### Example Implementation
+
+**Node.js / Express:**
+
+```javascript
+app.post('/webhooks/pre-call', async (req, res) => {
+  const { from_number, call_id } = req.body;
+  
+  try {
+    // Look up customer in your CRM
+    const customer = await crm.findByPhone(from_number);
+    
+    if (customer) {
+      res.json({
+        customer_name: customer.name,
+        account_status: customer.tier,
+        last_order_date: customer.lastOrderDate,
+        outstanding_balance: customer.balance,
+        vip: customer.isVIP ? "yes" : "no"
+      });
+    } else {
+      // Unknown caller
+      res.json({
+        customer_name: "valued customer",
+        account_status: "new",
+        vip: "no"
+      });
+    }
+  } catch (error) {
+    console.error('Pre-call webhook error:', error);
+    // Return minimal data rather than erroring
+    res.json({ customer_name: "caller" });
+  }
+});
+```
+
+**Python / Flask:**
+
+```python
+@app.route('/webhooks/pre-call', methods=['POST'])
+def pre_call_webhook():
+    data = request.json
+    from_number = data.get('from_number')
+    
+    try:
+        # Look up customer
+        customer = crm.find_by_phone(from_number)
+        
+        if customer:
+            return jsonify({
+                'customer_name': customer.name,
+                'account_status': customer.tier,
+                'last_order_date': customer.last_order_date,
+                'outstanding_balance': f"${customer.balance:.2f}"
+            })
+        else:
+            return jsonify({
+                'customer_name': 'valued customer',
+                'account_status': 'new'
+            })
+    except Exception as e:
+        logger.error(f'Pre-call webhook error: {e}')
+        return jsonify({'customer_name': 'caller'}), 200
+```
+
+## Post-Call Webhooks
+
+Post-call webhooks deliver complete call details immediately after a call ends, including the transcript, recording URL, summary, and metadata.
+
+### When to Use
+
+- Update your CRM with call outcomes
+- Log call details for compliance or auditing
+- Trigger follow-up workflows (emails, tasks, tickets)
+- Track agent performance metrics
+- Store transcripts and recordings in your system
+- Implement custom analytics or reporting
+
+### Configuration
+
+1. Navigate to your agent's **Overview** tab
+2. Set the **Post-call Webhook URL**:
+   ```
+   https://api.yourcompany.com/webhooks/post-call
+   ```
+3. Click **Save**
+
+<Note>
+Post-call webhooks fire for both inbound and outbound calls.
+</Note>
+
+### Request Format
+
+After a call ends, RevRing sends a POST request with complete call details:
+
+```json
+{
+  "call_id": "call_abc123xyz",
+  "agent_id": "agent_456def",
+  "agent_name": "Customer Support Agent",
+  "direction": "INBOUND",
+  "status": "COMPLETED",
+  "from_number": "+14155551234",
+  "to_number": "+12025559999",
+  "duration_seconds": 145,
+  "initiated_at": "2024-03-15T14:30:00Z",
+  "started_at": "2024-03-15T14:30:02Z",
+  "ended_at": "2024-03-15T14:32:27Z",
+  "hangup_cause": "normal_clearing",
+  "recording_url": "https://recordings.revring.ai/call_abc123xyz.mp3",
+  "variables": {
+    "customer_name": "John Smith",
+    "account_status": "premium"
+  },
+  "transcript": [
+    {
+      "role": "agent",
+      "content": "Hello John Smith, thank you for calling. How can I help you?",
+      "timestamp": "2024-03-15T14:30:02Z"
+    },
+    {
+      "role": "user",
+      "content": "I have a question about my recent order.",
+      "timestamp": "2024-03-15T14:30:08Z"
+    },
+    {
+      "role": "agent",
+      "content": "I'd be happy to help with that. What's your order number?",
+      "timestamp": "2024-03-15T14:30:10Z"
+    }
+  ],
+  "summary": "Customer called regarding order #12345. Confirmed shipment status and provided tracking number. Customer satisfied with resolution.",
+  "tool_calls": [
+    {
+      "tool_name": "check_order_status",
+      "arguments": { "order_id": "12345" },
+      "result": "Order shipped on March 13, tracking: 1Z999AA10123456784",
+      "timestamp": "2024-03-15T14:30:45Z"
+    }
+  ]
+}
+```
+
+**Key Fields:**
+- `call_id`: Unique call identifier
+- `status`: Final call status (`COMPLETED`, `FAILED`, `CANCELED`, etc.)
+- `duration_seconds`: Total call duration (null if never answered)
+- `recording_url`: URL to download the call recording (available for ~90 days)
+- `transcript`: Complete conversation with timestamps
+- `summary`: AI-generated summary of the call
+- `tool_calls`: Any tools that were invoked during the call
+- `hangup_cause`: SIP hangup reason (e.g., `normal_clearing`, `busy`, `no_answer`)
+
+### Response Expectations
+
+Your webhook should:
+- Respond with `200 OK` status code
+- Respond within 10 seconds
+- Handle the webhook asynchronously if processing takes time
+
+RevRing does not require any specific response body. Simply acknowledge receipt:
+
+```json
+{ "received": true }
+```
+
+### Error Handling and Retries
+
+If your webhook fails (4xx/5xx status) or times out:
+
+- RevRing will retry up to 3 times with exponential backoff
+- Retry delays: 1 minute, 5 minutes, 15 minutes
+- After 3 failures, the webhook is marked as `failed`
+- You can check `postCallWebhookStatus` in the call object to see delivery status
+
+**Webhook Status Values:**
+- `success`: Delivered successfully
+- `pending`: Currently retrying
+- `failed`: All retries exhausted
+- `null`: No webhook configured
+
+### Example Implementation
+
+**Node.js / Express:**
+
+```javascript
+app.post('/webhooks/post-call', async (req, res) => {
+  const call = req.body;
+  
+  // Acknowledge receipt immediately
+  res.status(200).json({ received: true });
+  
+  // Process asynchronously
+  try {
+    // Update CRM with call details
+    await crm.logCall({
+      phone: call.from_number,
+      duration: call.duration_seconds,
+      summary: call.summary,
+      recording: call.recording_url,
+      timestamp: call.ended_at
+    });
+    
+    // Create follow-up task if needed
+    if (call.summary.includes('callback')) {
+      await tasks.create({
+        title: `Follow up with ${call.variables.customer_name}`,
+        dueDate: tomorrow(),
+        notes: call.summary
+      });
+    }
+    
+    // Store transcript for compliance
+    await db.transcripts.insert({
+      callId: call.call_id,
+      transcript: call.transcript,
+      recordingUrl: call.recording_url
+    });
+    
+    console.log(`Processed call ${call.call_id}`);
+  } catch (error) {
+    console.error('Post-call processing error:', error);
+    // Don't throw - webhook already acknowledged
+  }
+});
+```
+
+**Python / Flask:**
+
+```python
+@app.route('/webhooks/post-call', methods=['POST'])
+def post_call_webhook():
+    call = request.json
+    
+    # Acknowledge immediately
+    response = jsonify({'received': True})
+    
+    # Process in background
+    Thread(target=process_call, args=(call,)).start()
+    
+    return response, 200
+
+def process_call(call):
+    try:
+        # Update CRM
+        crm.log_call(
+            phone=call['from_number'],
+            duration=call['duration_seconds'],
+            summary=call['summary'],
+            recording=call['recording_url']
+        )
+        
+        # Check for action items in summary
+        if 'refund' in call['summary'].lower():
+            tickets.create(
+                title=f"Refund request - {call['variables']['customer_name']}",
+                priority='high',
+                description=call['summary']
+            )
+        
+        logger.info(f"Processed call {call['call_id']}")
+    except Exception as e:
+        logger.error(f"Post-call processing error: {e}")
+```
+
+## Security Best Practices
+
+### Verify Webhook Sources
+
+**IP Whitelist:**
+Restrict webhook endpoints to accept requests only from RevRing's IP addresses (contact support for current IP ranges).
+
+**Signature Verification (Coming Soon):**
+RevRing will support HMAC signature verification to ensure requests are authentic.
+
+### Use HTTPS
+
+Always use HTTPS for webhook URLs to ensure data is encrypted in transit:
+
+```
+✓ https://api.yourcompany.com/webhooks/pre-call
+✗ http://api.yourcompany.com/webhooks/pre-call
+```
+
+### Validate Payload
+
+Validate incoming webhook data before processing:
+
+```javascript
+app.post('/webhooks/post-call', (req, res) => {
+  const call = req.body;
+  
+  // Validate required fields
+  if (!call.call_id || !call.agent_id || !call.status) {
+    return res.status(400).json({ error: 'Invalid payload' });
+  }
+  
+  // Validate call_id format
+  if (!/^call_[a-zA-Z0-9]+$/.test(call.call_id)) {
+    return res.status(400).json({ error: 'Invalid call_id' });
+  }
+  
+  // Process...
+});
+```
+
+### Rate Limiting
+
+Implement rate limiting to prevent abuse:
+
+```javascript
+const rateLimit = require('express-rate-limit');
+
+const webhookLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100 // max 100 requests per minute
+});
+
+app.post('/webhooks/post-call', webhookLimiter, (req, res) => {
+  // Process webhook
+});
+```
+
+## Testing Webhooks
+
+### Local Development with ngrok
+
+For local testing, use [ngrok](https://ngrok.com) to expose your local server:
+
+```bash
+# Start your local server on port 3000
+npm start
+
+# In another terminal, start ngrok
+ngrok http 3000
+```
+
+Use the ngrok HTTPS URL in your webhook configuration:
+```
+https://abc123.ngrok.io/webhooks/pre-call
+```
+
+### Testing Tools
+
+**Request Inspection:**
+Use [webhook.site](https://webhook.site) to inspect webhook payloads without writing code.
+
+**Manual Testing:**
+Use curl to simulate webhook responses:
+
+```bash
+curl -X POST http://localhost:3000/webhooks/pre-call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "call_id": "call_test123",
+    "from_number": "+14155551234",
+    "to_number": "+12025559999"
+  }'
+```
+
+### Test with Real Calls
+
+1. Configure your webhook URL
+2. Make a test call using the **Test Agent** tab
+3. Review your server logs to see the webhook requests
+4. Check call details in [Call Logs](https://dashboard.revring.ai/app/calls) to verify webhook status
+
+## Monitoring Webhooks
+
+### Check Webhook Status
+
+For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
+
+1. Click on the call to view details
+2. Check **Webhook Status** in the Overview card:
+   - Pre-call webhook status
+   - Post-call webhook status
+3. If failed, review your server logs for errors
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Webhook returns timeout">
+    - Ensure your webhook responds within 3 seconds (pre-call) or 10 seconds (post-call)
+    - Move slow operations (database writes, external API calls) to async background processing
+    - Return acknowledgment immediately, then process in background
+    - Check your server's response time and optimize slow queries
+  </Accordion>
+  
+  <Accordion title="Webhook marked as failed">
+    - Verify your endpoint is accessible from the internet
+    - Check that you're returning a 200 status code
+    - Ensure response is valid JSON (even if empty: `{}`)
+    - Review server logs for exceptions or errors
+    - Test endpoint with curl or Postman to verify it works
+  </Accordion>
+  
+  <Accordion title="Variables not appearing in agent responses">
+    - Verify your pre-call webhook returns valid JSON with variable keys
+    - Check variable names match exactly between webhook and prompt (case-sensitive)
+    - Ensure webhook responds within 3 seconds
+    - Test webhook independently to confirm it returns expected data
+    - Review the call's `variables` field to see what was actually received
+  </Accordion>
+  
+  <Accordion title="Not receiving post-call webhooks">
+    - Confirm the webhook URL is configured in the agent's Overview tab
+    - Verify the URL is correct and accessible
+    - Check your server logs - RevRing may be sending but your server isn't logging
+    - Test with webhook.site to confirm RevRing is sending requests
+    - Review firewall rules that might block incoming requests
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+### Performance
+
+- **Respond quickly**: Acknowledge webhooks within 1-2 seconds
+- **Process asynchronously**: Handle heavy processing in background jobs
+- **Cache frequently**: Cache CRM lookups or database queries when possible
+- **Use connection pooling**: Reuse database connections across requests
+- **Set timeouts**: Configure timeouts for external API calls to prevent hanging
+
+### Reliability
+
+- **Idempotency**: Design webhooks to handle duplicate calls (use `call_id` as idempotency key)
+- **Error handling**: Wrap processing in try/catch and return 200 even if internal processing fails
+- **Logging**: Log all webhook requests and responses for debugging
+- **Monitoring**: Set up alerts for webhook failures or high error rates
+- **Fallbacks**: Provide default values if lookups fail
+
+### Security
+
+- **HTTPS only**: Never use HTTP for webhook URLs
+- **Validate input**: Sanitize and validate all incoming data
+- **IP whitelist**: Restrict to RevRing's IP addresses
+- **Rate limiting**: Protect against potential abuse
+- **Audit logging**: Log all webhook activity for security review
+
+## Advanced Patterns
+
+### Conditional Agent Behavior
+
+Use pre-call webhooks to fundamentally change agent behavior:
+
+```json
+{
+  "mode": "support",
+  "transfer_enabled": "true",
+  "available_hours": "We're available Monday-Friday 9am-5pm"
+}
+```
+
+Reference in prompt:
+```
+You are in {{mode}} mode. {{#if transfer_enabled}}You can transfer calls to specialists.{{/if}}
+
+If asked about hours, say: {{available_hours}}
+```
+
+### Call Outcome Tracking
+
+Use post-call webhooks to track outcomes and trigger workflows:
+
+```javascript
+app.post('/webhooks/post-call', async (req, res) => {
+  const { summary, call_id, duration_seconds } = req.body;
+  
+  res.json({ received: true });
+  
+  // Categorize call outcome
+  let outcome = 'unknown';
+  if (summary.includes('appointment scheduled')) outcome = 'scheduled';
+  if (summary.includes('transferred')) outcome = 'escalated';
+  if (summary.includes('resolved')) outcome = 'resolved';
+  
+  // Update analytics
+  await analytics.track({
+    event: 'call_completed',
+    callId: call_id,
+    outcome: outcome,
+    duration: duration_seconds
+  });
+  
+  // Trigger workflows
+  if (outcome === 'scheduled') {
+    await sendConfirmationEmail(req.body.variables.customer_email);
+  }
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Tools" icon="gear" href="/platform/tools">
+    Configure system and custom tools
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/webhooks/pre-call">
+    View complete webhook API documentation
+  </Card>
+  <Card title="Inbound Calls" icon="arrow-left-to-line" href="/platform/inbound">
+    Set up inbound call handling
+  </Card>
+  <Card title="Outbound Calls" icon="arrow-right-to-line" href="/platform/outbound">
+    Configure outbound calling
+  </Card>
+</CardGroup>

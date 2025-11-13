@@ -1,11 +1,234 @@
 ---
 title: 'Telephony Setup'
-description: 'Handling inbound phone calls with your agents'
+description: 'Connect SIP trunks from Twilio, Telnyx, and other providers'
 icon: 'phone'
 ---
 
-Page showing how to configure agents for inbound phone calls with an example.
+SIP trunks are the foundation of your RevRing phone system. They connect your AI agents to the public telephone network, enabling both inbound and outbound calling.
 
-## Heading
+## Understanding SIP Trunks
 
-Something here.
+A SIP (Session Initiation Protocol) trunk is a virtual phone line that connects your RevRing agents to the phone network through a telephony provider like Twilio or Telnyx. Each trunk can handle multiple phone numbers and concurrent calls.
+
+### Key Concepts
+
+- **Proxy Address**: The SIP server endpoint provided by your telephony provider
+- **Authentication**: Optional username and password credentials for SIP registration
+- **Phone Numbers**: The phone numbers routed through this trunk (must be in E.164 format)
+- **Cloud vs. On-Premise**: RevRing supports cloud-based SIP trunks from providers like Twilio and Telnyx
+
+## Twilio Elastic SIP Trunking
+
+Twilio Elastic SIP Trunking is recommended for most users due to its reliability, global coverage, and pay-as-you-go pricing.
+
+### Prerequisites
+
+- Active Twilio account
+- At least one phone number purchased from Twilio
+- Elastic SIP Trunking enabled in your Twilio Console
+
+### Step 1: Configure Twilio
+
+1. Log into the [Twilio Console](https://console.twilio.com)
+2. Navigate to **Elastic SIP Trunking** → **Trunks**
+3. Click **Create new SIP Trunk** or select an existing trunk
+4. Note your **SIP Domain** (e.g., `yourtrunk.pstn.twilio.com`)
+
+### Step 2: Assign Phone Numbers in Twilio
+
+1. In your trunk settings, go to the **Numbers** tab
+2. Click **Add Existing Number**
+3. Select the phone numbers you want to use with RevRing
+4. Click **Add**
+
+<Note>
+Phone numbers must be assigned to the trunk in Twilio before they can be used in RevRing.
+</Note>
+
+### Step 3: Configure Origination (Inbound)
+
+For inbound calls to reach RevRing:
+
+1. In your trunk settings, go to **Origination**
+2. Add RevRing's SIP URI as an origination endpoint (contact support for the correct URI)
+3. Set **Priority** to `1` and **Weight** to `1`
+4. **Authentication**: None required (IP-based authentication)
+
+### Step 4: Configure Termination (Outbound)
+
+For outbound calls from RevRing:
+
+1. In your trunk settings, go to **Termination**
+2. Add RevRing's IP addresses to the **IP Access Control List** (contact support for current IPs)
+3. Enable **SIP Registration** if required (usually not needed)
+
+### Step 5: Add Trunk to RevRing
+
+1. Navigate to [SIP Trunks](https://dashboard.revring.ai/app/sip-trunks)
+2. Click **Add SIP Trunk**
+3. Fill in the configuration:
+   - **Name**: `Twilio Elastic` (or any descriptive name)
+   - **Proxy**: Your Twilio SIP domain (e.g., `yourtrunk.pstn.twilio.com`)
+   - **Username**: Leave empty (not required for Twilio)
+   - **Password**: Leave empty (not required for Twilio)
+   - **Phone Numbers**: Enter your phone numbers in E.164 format, comma-separated
+     ```
+     +12025551234, +14155552671, +13105558899
+     ```
+4. Click **Add Trunk**
+
+<Tip>
+You can paste a list of phone numbers separated by commas, spaces, or newlines - RevRing will automatically parse them.
+</Tip>
+
+## Telnyx SIP Trunking
+
+Telnyx offers competitive pricing and global coverage with a developer-friendly API.
+
+### Prerequisites
+
+- Active Telnyx account
+- At least one phone number purchased from Telnyx
+- SIP trunk created in Telnyx Portal
+
+### Step 1: Configure Telnyx
+
+1. Log into the [Telnyx Portal](https://portal.telnyx.com)
+2. Navigate to **Voice** → **SIP Trunks**
+3. Click **Create SIP Trunk** or select an existing trunk
+4. Note your **SIP Trunk URI** (e.g., `sip.telnyx.com`)
+
+### Step 2: Configure Outbound Settings
+
+1. In your trunk settings, go to **Outbound**
+2. Set **Tech Prefix**: Leave empty or as configured
+3. Enable **ANI Override** if you need to set custom caller ID
+
+### Step 3: Configure Inbound Settings
+
+1. In your trunk settings, go to **Inbound**
+2. Add a **Connection** pointing to RevRing (contact support for the correct endpoint)
+3. Set **Routing** to forward calls to the connection
+
+### Step 4: Assign Phone Numbers
+
+1. Navigate to **Phone Numbers** in Telnyx Portal
+2. Select the numbers you want to use
+3. Set **Connection** to your SIP trunk
+4. Save changes
+
+### Step 5: Add Trunk to RevRing
+
+1. Navigate to [SIP Trunks](https://dashboard.revring.ai/app/sip-trunks)
+2. Click **Add SIP Trunk**
+3. Fill in the configuration:
+   - **Name**: `Telnyx` (or any descriptive name)
+   - **Proxy**: `sip.telnyx.com` (or your custom domain)
+   - **Username**: Your Telnyx SIP username (if authentication is enabled)
+   - **Password**: Your Telnyx SIP password (if authentication is enabled)
+   - **Phone Numbers**: Enter your phone numbers in E.164 format
+4. Click **Add Trunk**
+
+## Managing SIP Trunks
+
+### Editing Phone Numbers
+
+To add or remove phone numbers from an existing trunk:
+
+1. Navigate to [SIP Trunks](https://dashboard.revring.ai/app/sip-trunks)
+2. Click the menu (three dots) on the trunk row
+3. Select **Edit Numbers**
+4. Add or remove phone numbers as needed
+5. Click **Save Numbers**
+
+<Warning>
+Phone numbers must exist and be properly configured in your telephony provider before adding them to RevRing.
+</Warning>
+
+### Deleting a Trunk
+
+To delete a SIP trunk:
+
+1. Navigate to [SIP Trunks](https://dashboard.revring.ai/app/sip-trunks)
+2. Click the menu (three dots) on the trunk row
+3. Select **Delete**
+4. Confirm the deletion
+
+<Warning>
+You cannot delete a SIP trunk that is assigned to active agents. Remove the trunk from all agents first.
+</Warning>
+
+## Phone Number Format
+
+All phone numbers in RevRing must use **E.164 format**:
+
+- Start with `+`
+- Include country code
+- Include area code and number
+- No spaces, dashes, or parentheses
+
+### Valid Examples
+
+```
++12025551234  (US number)
++442071234567 (UK number)
++61298765432  (Australia number)
+```
+
+### Invalid Examples
+
+```
+(202) 555-1234  (contains parentheses and dashes)
+2025551234      (missing + and country code)
++1-202-555-1234 (contains dashes)
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Calls not connecting">
+    - Verify the proxy address is correct and matches your provider's configuration
+    - Ensure phone numbers are assigned to the trunk in both your provider and RevRing
+    - Check that your provider has RevRing's IP addresses whitelisted for termination
+    - Confirm there are no firewall rules blocking SIP traffic
+  </Accordion>
+  
+  <Accordion title="Inbound calls not reaching agents">
+    - Verify the phone number is assigned to an agent in the Phone Numbers tab
+    - Check that the agent status is set to Active
+    - Ensure your provider is routing calls to RevRing's origination endpoint
+    - Review call logs in your provider's dashboard for routing errors
+  </Accordion>
+  
+  <Accordion title="Outbound calls failing">
+    - Confirm your trunk has sufficient balance/credit with your provider
+    - Verify the from number is assigned to your trunk
+    - Check that the to number is in valid E.164 format
+    - Review your provider's outbound calling restrictions and country permissions
+  </Accordion>
+  
+  <Accordion title="Authentication errors">
+    - If your trunk requires authentication, ensure username and password are correct
+    - For IP-based authentication, confirm RevRing's IPs are whitelisted
+    - Check your provider's authentication logs for specific error messages
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+- **Use descriptive names** for your trunks (e.g., "Twilio US Production", "Telnyx Canada")
+- **Keep phone numbers updated** in both your provider and RevRing when making changes
+- **Monitor trunk capacity** to ensure you have enough concurrent call capacity for your needs
+- **Set up redundancy** by configuring multiple trunks or providers for failover
+- **Review call logs** regularly to identify and resolve any routing issues
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Inbound Calls" icon="arrow-left-to-line" href="/platform/inbound">
+    Configure agents to handle inbound calls
+  </Card>
+  <Card title="Outbound Calls" icon="arrow-right-to-line" href="/platform/outbound">
+    Set up outbound calling through your agents
+  </Card>
+</CardGroup>

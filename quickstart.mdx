@@ -1,81 +1,167 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Get your first RevRing AI agent up and running in minutes"
 icon: 'rocket'
 ---
 
-## Get started in three steps
+This guide walks you through connecting a Twilio Elastic SIP trunk, creating your first AI voice agent, and making your first test call.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
+Before you begin, ensure you have:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+- A RevRing account with access to the [dashboard](https://dashboard.revring.ai)
+- A Twilio account with Elastic SIP Trunking enabled
+- At least one phone number provisioned in Twilio
 
-### Step 2: Deploy your changes
+## Step 1: Connect Your SIP Trunk
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+SIP trunks connect your AI agents to the phone network, enabling both inbound and outbound calling.
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+### Get Twilio Credentials
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+1. Log into your [Twilio Console](https://console.twilio.com)
+2. Navigate to **Elastic SIP Trunking** → **Trunks**
+3. Create or select an existing trunk
+4. Note your **SIP Domain** (e.g., `yourtrunk.pstn.twilio.com`)
+5. If authentication is required, note your **Username** and **Password**
 
-### Step 3: Go live
+### Add the Trunk to RevRing
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+1. Navigate to [SIP Trunks](https://dashboard.revring.ai/app/sip-trunks) in your RevRing dashboard
+2. Click **Add SIP Trunk**
+3. Fill in the form:
+   - **Name**: `Twilio Elastic` (or any descriptive name)
+   - **Proxy**: Your Twilio SIP domain (e.g., `yourtrunk.pstn.twilio.com`)
+   - **Username**: Leave empty unless required by your trunk configuration
+   - **Password**: Leave empty unless required by your trunk configuration
+   - **Phone Numbers**: Enter your phone numbers in E.164 format, separated by commas (e.g., `+12025551234, +14155552671`)
+4. Click **Add Trunk**
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Phone numbers must be in E.164 format starting with `+` followed by country code and number (no spaces or dashes).
 </Note>
+
+## Step 2: Create Your First Agent
+
+Agents are AI-powered voice assistants that handle phone conversations based on the instructions you provide.
+
+### Create the Agent
+
+1. Navigate to [Agents](https://dashboard.revring.ai/app/agents)
+2. Click **New Agent**
+3. Configure the basic settings:
+   - **Name**: `Sales Assistant` (or any descriptive name)
+   - **SIP Trunk**: Select the trunk you just created
+4. Click **Create**
+
+### Configure Agent Behavior
+
+After creation, you'll be taken to the agent detail page with several tabs. Configure the **Overview** tab:
+
+1. **Status**: Set to `Active` to enable the agent
+2. **First Message**: Enter an opening greeting (optional)
+   ```
+   Hello! Thanks for calling. How can I help you today?
+   ```
+3. **Prompt**: Define how the agent should behave during calls
+   ```
+   You are a helpful sales assistant for Acme Corp. Your role is to:
+   - Greet callers warmly
+   - Answer questions about our products and services
+   - Collect contact information if they want a callback
+   - Transfer to a human rep if needed
+   
+   Be professional, friendly, and concise. Keep responses under 30 seconds.
+   ```
+4. Click **Save**
+
+<Tip>
+The prompt is the most important field - it defines your agent's personality, knowledge, and behavior. You can use `{{variables}}` to personalize responses based on caller data.
+</Tip>
+
+### Configure Voice Settings
+
+Switch to the **Voice** tab to customize how your agent sounds:
+
+1. **Voice**: Select a voice that matches your brand (click play to preview)
+2. **Voice Temperature**: `1.0` (default balance between consistency and expressiveness)
+3. **Voice Speed**: `1.0` (normal speaking rate)
+4. Click **Save Voice Settings**
+
+## Step 3: Test Your Agent
+
+The Test tab provides an easy way to send outbound test calls to your agent.
+
+### Send a Test Call
+
+1. Navigate to the **Test Agent** tab
+2. In the **Test Configuration** card:
+   - **Agent**: Already selected (your current agent)
+   - **From Number**: Select one of your trunk's phone numbers
+   - **To Number**: Enter your mobile number in E.164 format (e.g., `+14155552671`)
+3. Click **Send Test Call**
+
+<Note>
+The call will be initiated within a few seconds. Answer your phone to talk with your AI agent.
+</Note>
+
+### Review the Transcript
+
+As the call progresses, the **Live Transcript** card will update every 3 seconds showing the conversation in real-time. After the call ends:
+
+- Review the full transcript
+- Check for any errors or unexpected behavior
+- Click **View full call details** to see recording, summary, and call metrics
+
+### Iterate and Improve
+
+Based on your test call:
+
+1. Return to the **Overview** tab
+2. Refine your **Prompt** to improve agent responses
+3. Adjust **First Message** if needed
+4. Send another test call to validate changes
+
+## Next Steps
+
+Now that you have a working agent, explore more advanced features:
+
+<CardGroup cols={2}>
+  <Card title="Telephony Setup" icon="phone" href="/platform/telephony">
+    Learn about configuring Twilio and Telnyx for production use
+  </Card>
+  <Card title="Inbound Calls" icon="arrow-left-to-line" href="/platform/inbound">
+    Set up phone numbers to receive inbound calls
+  </Card>
+  <Card title="Tools" icon="gear" href="/platform/tools">
+    Enable call transfer, voicemail detection, and custom tools
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/platform/webhooks">
+    Integrate with your systems using pre-call and post-call webhooks
+  </Card>
+</CardGroup>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="Test call fails to connect">
+    - Verify your SIP trunk proxy address is correct
+    - Ensure phone numbers are in valid E.164 format
+    - Check that your Twilio trunk has the phone number assigned
+    - Confirm your agent status is set to `Active`
+  </Accordion>
+  
+  <Accordion title="Agent doesn't respond as expected">
+    - Review and refine your prompt for clearer instructions
+    - Check the transcript for specific errors
+    - Ensure your prompt isn't too long or complex
+    - Try adjusting voice temperature for more natural responses
+  </Accordion>
+  
+  <Accordion title="Can't find my phone numbers">
+    - Phone numbers must be added to both your telephony provider AND your RevRing SIP trunk
+    - Use E.164 format: `+[country code][number]` with no spaces or special characters
+    - You can edit phone numbers by clicking the menu on any trunk in the SIP Trunks list
+  </Accordion>
+</AccordionGroup>
