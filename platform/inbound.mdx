@@ -105,19 +105,29 @@ Configure in the **Advanced** tab:
    ```
 2. Click **Save**
 
-RevRing will POST the caller's number and other context. Your webhook should return variables:
+RevRing will POST the caller's number and other context. Your webhook must respond within 3 seconds with variables:
 
 ```json
 {
-  "customer_name": "John Smith",
-  "account_status": "premium",
-  "last_order": "Order #12345"
+  "variables": {
+    "customer_name": "John Smith",
+    "account_status": "premium",
+    "last_order": "Order #12345"
+  }
 }
 ```
 
 These variables can then be used in your prompt and first message with `{{variable_name}}` syntax.
 
 See the [Webhooks guide](/platform/webhooks) for complete implementation details.
+
+### Error Handling
+
+If your webhook fails, times out, or returns invalid JSON:
+
+- RevRing will proceed with the call using default variables (if configured)
+- The call will not be rejected - the agent will answer without personalization
+- Check the call's `preCallWebhookStatus` field in call logs to see webhook delivery status
 
 ### Default Variables
 

@@ -52,14 +52,14 @@ For inbound calls to reach RevRing:
 1. In your trunk settings, go to **Origination**
 2. Add RevRing's SIP URI as an origination endpoint (contact support for the correct URI)
 3. Set **Priority** to `1` and **Weight** to `1`
-4. **Authentication**: None required (IP-based authentication)
+4. **Authentication**: None required
 
 ### Step 4: Configure Termination (Outbound)
 
 For outbound calls from RevRing:
 
 1. In your trunk settings, go to **Termination**
-2. Add RevRing's IP addresses to the **IP Access Control List** (contact support for current IPs)
+2. Contact support for RevRing's SIP endpoint to add to your termination settings
 3. Enable **SIP Registration** if required (usually not needed)
 
 ### Step 5: Add Trunk to RevRing
@@ -189,7 +189,7 @@ All phone numbers in RevRing must use **E.164 format**:
   <Accordion title="Calls not connecting">
     - Verify the proxy address is correct and matches your provider's configuration
     - Ensure phone numbers are assigned to the trunk in both your provider and RevRing
-    - Check that your provider has RevRing's IP addresses whitelisted for termination
+    - Check that your provider's termination settings include RevRing's SIP endpoint (contact support)
     - Confirm there are no firewall rules blocking SIP traffic
   </Accordion>
   
@@ -209,7 +209,7 @@ All phone numbers in RevRing must use **E.164 format**:
   
   <Accordion title="Authentication errors">
     - If your trunk requires authentication, ensure username and password are correct
-    - For IP-based authentication, confirm RevRing's IPs are whitelisted
+    - Verify your provider's authentication settings are configured correctly
     - Check your provider's authentication logs for specific error messages
   </Accordion>
 </AccordionGroup>

@@ -44,34 +44,32 @@ When an inbound call arrives, RevRing sends a POST request to your webhook:
 
 ```json
 {
-  "call_id": "call_abc123xyz",
-  "agent_id": "agent_456def",
-  "from_number": "+14155551234",
-  "to_number": "+12025559999",
-  "direction": "INBOUND",
-  "timestamp": "2024-03-15T14:30:00Z"
+  "event": "pre_call",
+  "agentId": "agent_456def",
+  "fromNumber": "+14155551234",
+  "toNumber": "+12025559999"
 }
 ```
 
 **Field Descriptions:**
-- `call_id`: Unique identifier for this call
-- `agent_id`: The agent that will handle the call
-- `from_number`: Caller's phone number (E.164 format)
-- `to_number`: The number that was dialed
-- `direction`: Always `"INBOUND"` for pre-call webhooks
-- `timestamp`: When the call was initiated (ISO 8601)
+- `event`: Always `"pre_call"` for pre-call webhooks
+- `agentId`: The agent that will handle the call
+- `fromNumber`: Caller's phone number (E.164 format)
+- `toNumber`: The number that was dialed
 
 ### Response Format
 
-Your webhook should respond within 3 seconds with a JSON object containing variables:
+Your webhook must respond within 3 seconds with a JSON object containing variables:
 
 ```json
 {
-  "customer_name": "John Smith",
-  "account_status": "premium",
-  "last_order_date": "March 10, 2024",
-  "outstanding_balance": "$0.00",
-  "preferred_language": "English"
+  "variables": {
+    "customer_name": "John Smith",
+    "account_status": "premium",
+    "last_order_date": "March 10, 2024",
+    "outstanding_balance": "$0.00",
+    "preferred_language": "English"
+  }
 }
 ```
 
@@ -118,32 +116,36 @@ If your webhook fails, times out, or returns invalid JSON:
 
 ```javascript
 app.post('/webhooks/pre-call', async (req, res) => {
-  const { from_number, call_id } = req.body;
+  const { fromNumber, agentId } = req.body;
   
   try {
     // Look up customer in your CRM
-    const customer = await crm.findByPhone(from_number);
+    const customer = await crm.findByPhone(fromNumber);
     
     if (customer) {
       res.json({
-        customer_name: customer.name,
-        account_status: customer.tier,
-        last_order_date: customer.lastOrderDate,
-        outstanding_balance: customer.balance,
-        vip: customer.isVIP ? "yes" : "no"
+        variables: {
+          customer_name: customer.name,
+          account_status: customer.tier,
+          last_order_date: customer.lastOrderDate,
+          outstanding_balance: customer.balance,
+          vip: customer.isVIP ? "yes" : "no"
+        }
       });
     } else {
       // Unknown caller
       res.json({
-        customer_name: "valued customer",
-        account_status: "new",
-        vip: "no"
+        variables: {
+          customer_name: "valued customer",
+          account_status: "new",
+          vip: "no"
+        }
       });
     }
   } catch (error) {
     console.error('Pre-call webhook error:', error);
     // Return minimal data rather than erroring
-    res.json({ customer_name: "caller" });
+    res.json({ variables: { customer_name: "caller" } });
   }
 });
 ```
@@ -154,7 +156,7 @@ app.post('/webhooks/pre-call', async (req, res) => {
 @app.route('/webhooks/pre-call', methods=['POST'])
 def pre_call_webhook():
     data = request.json
-    from_number = data.get('from_number')
+    from_number = data.get('fromNumber')
     
     try:
         # Look up customer
@@ -162,19 +164,23 @@ def pre_call_webhook():
         
         if customer:
             return jsonify({
-                'customer_name': customer.name,
-                'account_status': customer.tier,
-                'last_order_date': customer.last_order_date,
-                'outstanding_balance': f"${customer.balance:.2f}"
+                'variables': {
+                    'customer_name': customer.name,
+                    'account_status': customer.tier,
+                    'last_order_date': customer.last_order_date,
+                    'outstanding_balance': f"${customer.balance:.2f}"
+                }
             })
         else:
             return jsonify({
-                'customer_name': 'valued customer',
-                'account_status': 'new'
+                'variables': {
+                    'customer_name': 'valued customer',
+                    'account_status': 'new'
+                }
             })
     except Exception as e:
         logger.error(f'Pre-call webhook error: {e}')
-        return jsonify({'customer_name': 'caller'}), 200
+        return jsonify({'variables': {'customer_name': 'caller'}}), 200
 ```
 
 ## Post-Call Webhooks
@@ -259,7 +265,7 @@ After a call ends, RevRing sends a POST request with complete call details:
 - `call_id`: Unique call identifier
 - `status`: Final call status (`COMPLETED`, `FAILED`, `CANCELED`, etc.)
 - `duration_seconds`: Total call duration (null if never answered)
-- `recording_url`: URL to download the call recording (available for ~90 days)
+- `recording_url`: URL to download the call recording
 - `transcript`: Complete conversation with timestamps
 - `summary`: AI-generated summary of the call
 - `tool_calls`: Any tools that were invoked during the call
@@ -269,7 +275,7 @@ After a call ends, RevRing sends a POST request with complete call details:
 
 Your webhook should:
 - Respond with `200 OK` status code
-- Respond within 10 seconds
+- Respond within 5 seconds
 - Handle the webhook asynchronously if processing takes time
 
 RevRing does not require any specific response body. Simply acknowledge receipt:
@@ -278,19 +284,18 @@ RevRing does not require any specific response body. Simply acknowledge receipt:
 { "received": true }
 ```
 
-### Error Handling and Retries
+### Error Handling
 
 If your webhook fails (4xx/5xx status) or times out:
 
-- RevRing will retry up to 3 times with exponential backoff
-- Retry delays: 1 minute, 5 minutes, 15 minutes
-- After 3 failures, the webhook is marked as `failed`
+- The webhook is marked as `failed` in the call record
+- RevRing does not automatically retry failed webhooks
 - You can check `postCallWebhookStatus` in the call object to see delivery status
+- Implement your own retry logic by querying failed calls via the API if needed
 
 **Webhook Status Values:**
 - `success`: Delivered successfully
-- `pending`: Currently retrying
-- `failed`: All retries exhausted
+- `failed`: Webhook returned an error or timed out
 - `null`: No webhook configured
 
 ### Example Implementation
@@ -381,8 +386,8 @@ def process_call(call):
 
 ### Verify Webhook Sources
 
-**IP Whitelist:**
-Restrict webhook endpoints to accept requests only from RevRing's IP addresses (contact support for current IP ranges).
+**Request Validation:**
+Implement validation to ensure webhook requests contain expected fields and structure.
 
 **Signature Verification (Coming Soon):**
 RevRing will support HMAC signature verification to ensure requests are authentic.
@@ -495,7 +500,7 @@ For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
 
 <AccordionGroup>
   <Accordion title="Webhook returns timeout">
-    - Ensure your webhook responds within 3 seconds (pre-call) or 10 seconds (post-call)
+    - Ensure your webhook responds within 3 seconds (pre-call) or 5 seconds (post-call)
     - Move slow operations (database writes, external API calls) to async background processing
     - Return acknowledgment immediately, then process in background
     - Check your server's response time and optimize slow queries
@@ -514,7 +519,7 @@ For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
     - Check variable names match exactly between webhook and prompt (case-sensitive)
     - Ensure webhook responds within 3 seconds
     - Test webhook independently to confirm it returns expected data
-    - Review the call's `variables` field to see what was actually received
+    - Review the call's `variables` field in call logs to see what was actually received
   </Accordion>
   
   <Accordion title="Not receiving post-call webhooks">
@@ -548,7 +553,7 @@ For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
 
 - **HTTPS only**: Never use HTTP for webhook URLs
 - **Validate input**: Sanitize and validate all incoming data
-- **IP whitelist**: Restrict to RevRing's IP addresses
+- **Request validation**: Verify requests contain expected structure and fields
 - **Rate limiting**: Protect against potential abuse
 - **Audit logging**: Log all webhook activity for security review
 

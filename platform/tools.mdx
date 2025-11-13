@@ -244,7 +244,7 @@ Your webhook should return:
 
 - **200 OK** status code
 - JSON body with a `result` field containing the information for the agent
-- Response within 10 seconds (recommended: under 3 seconds for best user experience)
+- Response within 5 seconds (recommended: under 3 seconds for best user experience)
 
 **Success Example:**
 ```json
@@ -336,7 +336,7 @@ Navigate to [Call Logs](https://dashboard.revring.ai/app/calls), select a call, 
 
 ### Custom Tool Constraints
 
-- **Response time**: 10 second timeout - webhooks must respond within this window
+- **Response time**: 5 second timeout - webhooks must respond within this window
 - **Concurrent invocations**: Agents invoke tools sequentially, not in parallel
 - **Rate limits**: Per-organization limits on custom tool invocations per minute
 - **Maximum tools**: Up to 10 custom tools per agent (contact support for higher limits)
@@ -433,7 +433,7 @@ Agents can reference previous tool results later in the conversation:
   
   <Accordion title="Tool returns error in transcript">
     - Check webhook response format - must include `result` field
-    - Verify webhook responds within 10 seconds
+    - Verify webhook responds within 5 seconds
     - Ensure response is valid JSON
     - Review your webhook logs for errors or exceptions
     - Check HTTP status code (should be 200)
