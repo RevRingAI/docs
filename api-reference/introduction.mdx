@@ -20,8 +20,10 @@ API Keys are sensitive credentials, so ensure to store them securely and limit a
 
 ## Authentication
 
-All API endpoints are authenticated using the `x-api-key` header.
+All API endpoints are authenticated using the `x-api-key` header:
 
 ```bash
-curl https://api.revring.ai
+curl --request GET \
+  --url https://api.revring.ai/v1/agents \
+  --header 'x-api-key: <api-key>'
 ```
