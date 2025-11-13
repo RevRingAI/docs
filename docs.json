@@ -58,10 +58,20 @@
                             "api-reference/agents/create",
                             "api-reference/agents/get",
                             "api-reference/agents/update",
-                            "api-reference/agents/delete",
+                            "api-reference/agents/delete"
+                        ]
+                    },
+                    {
+                        "group": "Agent Phone Numbers",
+                        "pages": [
                             "api-reference/agents/list-phone-numbers",
                             "api-reference/agents/add-phone-number",
-                            "api-reference/agents/remove-phone-number",
+                            "api-reference/agents/remove-phone-number"
+                        ]
+                    },
+                    {
+                        "group": "Agent Custom Tools",
+                        "pages": [
                             "api-reference/agents/list-custom-tools",
                             "api-reference/agents/create-custom-tool",
                             "api-reference/agents/update-custom-tool",
