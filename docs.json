@@ -33,7 +33,7 @@
                 ]
             },
             {
-                "tab": "API reference",
+                "tab": "API Reference",
                 "groups": [
                     {
                         "group": "API documentation",
@@ -42,12 +42,12 @@
                         ]
                     },
                     {
-                        "group": "Endpoint examples",
+                        "group": "SIP Trunks",
                         "pages": [
-                            "api-reference/endpoint/get",
-                            "api-reference/endpoint/create",
-                            "api-reference/endpoint/delete",
-                            "api-reference/endpoint/webhook"
+                            "api-reference/sip-trunks/get",
+                            "api-reference/sip-trunks/create",
+                            "api-reference/sip-trunks/delete",
+                            "api-reference/sip-trunks/webhook"
                         ]
                     }
                 ]
