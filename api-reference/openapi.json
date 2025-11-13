@@ -2455,11 +2455,6 @@
                         "pattern": "^\\+[1-9]\\d{1,14}$",
                         "description": "Caller ID number (E.164)"
                     },
-                    "callerIdName": {
-                        "type": "string",
-                        "maxLength": 15,
-                        "description": "Caller ID name"
-                    },
                     "variables": {
                         "type": "object",
                         "description": "Template variables for this call"
