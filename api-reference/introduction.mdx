@@ -1,33 +1,27 @@
 ---
 title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+description: 'How to access and use the RevRing API'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+<Tip>You can use the RevRing API in automation tools such as N8N, Make, GoHighLevel, and more to automate any kind of call sequence or logic!</Tip>
 
-## Welcome
+## Creating an API Key
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+To begin using the RevRing API, you must first create an API Key from the dashboard.
+API Keys are sensitive credentials, so ensure to store them securely and limit access.
 
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
+  title="Create an API Key"
+  icon="key"
+  href="https://dashboard.revring.ai/app/api-keys"
 >
-  View the OpenAPI specification file
+  Create a new API Key from the RevRing Dashboard
 </Card>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints are authenticated using the `x-api-key` header.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+```bash
+curl https://api.revring.ai
 ```

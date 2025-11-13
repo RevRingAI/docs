@@ -17,32 +17,17 @@
                         "group": "Getting started",
                         "pages": [
                             "index",
-                            "quickstart",
-                            "development"
+                            "quickstart"
                         ]
                     },
                     {
-                        "group": "Customization",
+                        "group": "Platform",
                         "pages": [
-                            "essentials/settings",
-                            "essentials/navigation"
-                        ]
-                    },
-                    {
-                        "group": "Writing content",
-                        "pages": [
-                            "essentials/markdown",
-                            "essentials/code",
-                            "essentials/images",
-                            "essentials/reusable-snippets"
-                        ]
-                    },
-                    {
-                        "group": "AI tools",
-                        "pages": [
-                            "ai-tools/cursor",
-                            "ai-tools/claude-code",
-                            "ai-tools/windsurf"
+                            "platform/telephony",
+                            "platform/inbound",
+                            "platform/outbound",
+                            "platform/tools",
+                            "platform/webhooks"
                         ]
                     }
                 ]
