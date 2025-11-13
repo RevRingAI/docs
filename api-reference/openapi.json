@@ -1091,7 +1091,7 @@
                 }
             },
             "post": {
-                "summary": "Create Outbound Call",
+                "summary": "Send Call",
                 "description": "Initiate an outbound call with an agent",
                 "operationId": "createOutboundCall",
                 "tags": [
