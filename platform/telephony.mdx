@@ -17,6 +17,18 @@ A SIP (Session Initiation Protocol) trunk is a virtual phone line that connects 
 - **Phone Numbers**: The phone numbers routed through this trunk (must be in E.164 format)
 - **Cloud vs. On-Premise**: RevRing supports cloud-based SIP trunks from providers like Twilio and Telnyx
 
+## RevRing SIP Domain
+
+When configuring your telephony provider to send inbound calls to RevRing, use the following SIP URI:
+
+```
+sip:sip.revring.ai
+```
+
+**SIP Domain:** `sip.revring.ai`
+
+This URI must be configured as the Origination destination in your telephony provider's trunk settings.
+
 ## Twilio Elastic SIP Trunking
 
 Twilio Elastic SIP Trunking is recommended for most users due to its reliability, global coverage, and pay-as-you-go pricing.
@@ -58,7 +70,10 @@ Phone numbers must be assigned to the trunk in Twilio before they can be used in
 For inbound calls to reach RevRing:
 
 1. In your trunk settings, go to **Origination**
-2. Add an **Origination SIP URI**: `sip:sip.revring.ai`
+2. Add an **Origination SIP URI**:
+   ```
+   sip:sip.revring.ai
+   ```
 3. Set **Priority** to `1` and **Weight** to `1`
 
 ### Step 5: Configure Termination (Outbound)
