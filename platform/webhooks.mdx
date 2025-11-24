@@ -529,9 +529,10 @@ Use curl to simulate webhook responses:
 curl -X POST http://localhost:3000/webhooks/pre-call \
   -H "Content-Type: application/json" \
   -d '{
-    "call_id": "call_test123",
-    "from_number": "+14155551234",
-    "to_number": "+12025559999"
+    "event": "pre_call",
+    "agentId": "cmhckjdxw0001ik0hj4jnn49f",
+    "fromNumber": "+14155551234",
+    "toNumber": "+12025559999"
   }'
 ```
 
@@ -601,7 +602,7 @@ For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
 
 ### Reliability
 
-- **Idempotency**: Design webhooks to handle duplicate calls (use `call_id` as idempotency key)
+- **Idempotency**: Design webhooks to handle duplicate calls (use `id` as idempotency key)
 - **Error handling**: Wrap processing in try/catch and return 200 even if internal processing fails
 - **Logging**: Log all webhook requests and responses for debugging
 - **Monitoring**: Set up alerts for webhook failures or high error rates
