@@ -161,13 +161,20 @@ For high-volume outbound campaigns, choose "Hangup" to minimize costs and focus 
 
 ### Understanding Concurrency Limits
 
-RevRing enforces concurrency limits to prevent abuse and ensure quality:
+RevRing enforces a concurrency limit on the maximum number of simultaneous calls per organization. You can view your current limit and usage on the [Billing page](https://dashboard.revring.ai/app/billing).
 
-- Maximum concurrent calls per organization
-- Rate limiting on outbound call initiation
-- Per-agent concurrency caps
+If you exceed the concurrency limit, the API returns:
 
-If you hit the concurrency limit, the API returns a `429` error. Implement retry logic with exponential backoff.
+**Status Code**: `429 Too Many Requests`
+
+**Response Body**:
+```json
+{
+  "error": "concurrency_limit"
+}
+```
+
+Implement retry logic with exponential backoff to handle this gracefully.
 
 ### Best Practices for High Volume
 
@@ -357,8 +364,9 @@ Are you able to make a payment today, or would you like to discuss payment optio
   <Accordion title="Hit concurrency limit (429 error)">
     - Implement exponential backoff and retry logic
     - Reduce call pacing or batch size
-    - Contact support to discuss increasing your limits
+    - Check your current limit and usage at [Billing](https://dashboard.revring.ai/app/billing)
     - Monitor active calls before sending new batches
+    - Contact support to discuss increasing your organization's limit
   </Accordion>
 </AccordionGroup>
 
