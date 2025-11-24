@@ -18,13 +18,14 @@ Before you begin, ensure you have:
 
 SIP trunks connect your AI agents to the phone network, enabling both inbound and outbound calling.
 
-### Get Twilio Credentials
+### Configure Twilio
 
 1. Log into your [Twilio Console](https://console.twilio.com)
 2. Navigate to **Elastic SIP Trunking** → **Trunks**
 3. Create or select an existing trunk
-4. Note your **SIP Domain** (e.g., `yourtrunk.pstn.twilio.com`)
-5. If authentication is required, note your **Username** and **Password**
+4. In **Origination**, add an **Origination SIP URI**: `sip:sip.revring.ai`
+5. In **Termination**, note your **Termination SIP URI** (e.g., `yourtrunk.pstn.twilio.com`)
+6. Assign your phone numbers to the trunk in the **Numbers** tab
 
 ### Add the Trunk to RevRing
 
@@ -32,14 +33,14 @@ SIP trunks connect your AI agents to the phone network, enabling both inbound an
 2. Click **Add SIP Trunk**
 3. Fill in the form:
    - **Name**: `Twilio Elastic` (or any descriptive name)
-   - **Proxy**: Your Twilio SIP domain (e.g., `yourtrunk.pstn.twilio.com`)
+   - **Proxy**: Your Twilio Termination SIP URI from step 5 above (e.g., `yourtrunk.pstn.twilio.com`)
    - **Username**: Leave empty unless required by your trunk configuration
    - **Password**: Leave empty unless required by your trunk configuration
    - **Phone Numbers**: Enter your phone numbers in E.164 format, separated by commas (e.g., `+12025551234, +14155552671`)
 4. Click **Add Trunk**
 
 <Note>
-Phone numbers must be in E.164 format starting with `+` followed by country code and number (no spaces or dashes).
+Phone numbers must be in E.164 format starting with `+` followed by country code and number (no spaces or dashes). For detailed Twilio setup instructions, see the [Telephony Setup](/platform/telephony) guide.
 </Note>
 
 ## Step 2: Create Your First Agent

@@ -50,17 +50,19 @@ Phone numbers must be assigned to the trunk in Twilio before they can be used in
 For inbound calls to reach RevRing:
 
 1. In your trunk settings, go to **Origination**
-2. Add RevRing's SIP URI as an origination endpoint (contact support for the correct URI)
+2. Add an **Origination SIP URI**: `sip:sip.revring.ai`
 3. Set **Priority** to `1` and **Weight** to `1`
 4. **Authentication**: None required
 
 ### Step 4: Configure Termination (Outbound)
 
-For outbound calls from RevRing:
-
 1. In your trunk settings, go to **Termination**
-2. Contact support for RevRing's SIP endpoint to add to your termination settings
+2. Note your **Termination SIP URI** (e.g., `yourtrunk.pstn.twilio.com`) - you'll use this as the Proxy in RevRing
 3. Enable **SIP Registration** if required (usually not needed)
+
+<Note>
+Optionally enable **PSTN Transfer** if you want your agents to use the Transfer To Number tool to transfer calls to external phone numbers.
+</Note>
 
 ### Step 5: Add Trunk to RevRing
 
@@ -68,7 +70,7 @@ For outbound calls from RevRing:
 2. Click **Add SIP Trunk**
 3. Fill in the configuration:
    - **Name**: `Twilio Elastic` (or any descriptive name)
-   - **Proxy**: Your Twilio SIP domain (e.g., `yourtrunk.pstn.twilio.com`)
+   - **Proxy**: Your Twilio Termination SIP URI from Step 4 (e.g., `yourtrunk.pstn.twilio.com`) - enter just the domain without the `sip:` prefix
    - **Username**: Leave empty (not required for Twilio)
    - **Password**: Leave empty (not required for Twilio)
    - **Phone Numbers**: Enter your phone numbers in E.164 format, comma-separated
@@ -80,6 +82,20 @@ For outbound calls from RevRing:
 <Tip>
 You can paste a list of phone numbers separated by commas, spaces, or newlines - RevRing will automatically parse them.
 </Tip>
+
+<Note>
+**Important**: Phone numbers must be assigned in both places:
+- In your Twilio Console (assigned to the trunk)
+- In RevRing (entered in the Phone Numbers field above)
+
+For **inbound calls** to a specific agent, you must also assign the phone number to that agent in the RevRing dashboard under **Agent → Phone Numbers**. For **outbound calls**, agents can use any phone number from their assigned SIP trunk.
+</Note>
+
+<Warning>
+**Processing PHI?** If you're handling protected health information, you must:
+1. Enable **Secure Trunking** (TLS/SRTP) in your Twilio trunk settings
+2. Contact RevRing support to enable TLS and SRTP on your SIP connection
+</Warning>
 
 ## Telnyx SIP Trunking
 
@@ -107,8 +123,12 @@ Telnyx offers competitive pricing and global coverage with a developer-friendly 
 ### Step 3: Configure Inbound Settings
 
 1. In your trunk settings, go to **Inbound**
-2. Add a **Connection** pointing to RevRing (contact support for the correct endpoint)
+2. Add a **Connection** pointing to RevRing's SIP URI: `sip:sip.revring.ai`
 3. Set **Routing** to forward calls to the connection
+
+<Note>
+Optionally enable **PSTN Transfer** in your trunk settings if you want your agents to use the Transfer To Number tool to transfer calls to external phone numbers.
+</Note>
 
 ### Step 4: Assign Phone Numbers
 
@@ -123,11 +143,25 @@ Telnyx offers competitive pricing and global coverage with a developer-friendly 
 2. Click **Add SIP Trunk**
 3. Fill in the configuration:
    - **Name**: `Telnyx` (or any descriptive name)
-   - **Proxy**: `sip.telnyx.com` (or your custom domain)
+   - **Proxy**: `sip.telnyx.com` (or your custom domain) - enter just the domain without the `sip:` prefix
    - **Username**: Your Telnyx SIP username (if authentication is enabled)
    - **Password**: Your Telnyx SIP password (if authentication is enabled)
    - **Phone Numbers**: Enter your phone numbers in E.164 format
 4. Click **Add Trunk**
+
+<Note>
+**Important**: Phone numbers must be assigned in both places:
+- In your Telnyx Portal (assigned to the trunk)
+- In RevRing (entered in the Phone Numbers field above)
+
+For **inbound calls** to a specific agent, you must also assign the phone number to that agent in the RevRing dashboard under **Agent → Phone Numbers**. For **outbound calls**, agents can use any phone number from their assigned SIP trunk.
+</Note>
+
+<Warning>
+**Processing PHI?** If you're handling protected health information, you must:
+1. Enable **Secure Trunking** (TLS/SRTP) in your Telnyx trunk settings
+2. Contact RevRing support to enable TLS and SRTP on your SIP connection
+</Warning>
 
 ## Managing SIP Trunks
 
@@ -144,6 +178,10 @@ To add or remove phone numbers from an existing trunk:
 <Warning>
 Phone numbers must exist and be properly configured in your telephony provider before adding them to RevRing.
 </Warning>
+
+<Note>
+Remember: To enable inbound calls for a specific agent, assign the phone number to that agent under **Agent → Phone Numbers** in the RevRing dashboard.
+</Note>
 
 ### Deleting a Trunk
 
@@ -187,9 +225,9 @@ All phone numbers in RevRing must use **E.164 format**:
 
 <AccordionGroup>
   <Accordion title="Calls not connecting">
-    - Verify the proxy address is correct and matches your provider's configuration
+    - Verify the proxy address is correct and matches your provider's configuration (should be their Termination SIP URI without the `sip:` prefix)
     - Ensure phone numbers are assigned to the trunk in both your provider and RevRing
-    - Check that your provider's termination settings include RevRing's SIP endpoint (contact support)
+    - Check that your provider's Origination settings include RevRing's SIP URI: `sip:sip.revring.ai`
     - Confirm there are no firewall rules blocking SIP traffic
   </Accordion>
   
