@@ -215,61 +215,117 @@ After a call ends, RevRing sends a POST request with complete call details:
 
 ```json
 {
-  "call_id": "call_abc123xyz",
-  "agent_id": "agent_456def",
-  "agent_name": "Customer Support Agent",
+  "id": "a3c18021-192f-565e-87b5-5af428f29e81",
   "direction": "INBOUND",
   "status": "COMPLETED",
-  "from_number": "+14155551234",
-  "to_number": "+12025559999",
-  "duration_seconds": 145,
-  "initiated_at": "2024-03-15T14:30:00Z",
-  "started_at": "2024-03-15T14:30:02Z",
-  "ended_at": "2024-03-15T14:32:27Z",
-  "hangup_cause": "normal_clearing",
-  "recording_url": "https://recordings.revring.ai/call_abc123xyz.mp3",
-  "variables": {
-    "customer_name": "John Smith",
-    "account_status": "premium"
-  },
+  "fromNumber": "+14155551234",
+  "toNumber": "+12025559999",
+  "recordingUrl": "https://secure.revring.ai/recordings/a3c18021-192f-565e-87b5-5af428f29e81.ogg",
+  "hangupCause": "END_CALL_TOOL",
+  "errorMessage": null,
   "transcript": [
     {
-      "role": "agent",
-      "content": "Hello John Smith, thank you for calling. How can I help you?",
-      "timestamp": "2024-03-15T14:30:02Z"
+      "at": 0,
+      "seq": 0,
+      "role": "assistant",
+      "text": "Hello, how can I help you today?",
+      "type": "message",
+      "turnId": "item_1a1f40b6737f",
+      "isFinal": true
     },
     {
+      "at": 4.588,
+      "seq": 1,
       "role": "user",
-      "content": "I have a question about my recent order.",
-      "timestamp": "2024-03-15T14:30:08Z"
+      "text": "I have a question about my order.",
+      "type": "message",
+      "turnId": "user_71be2a_079a32",
+      "isFinal": true,
+      "language": "en-US"
     },
     {
-      "role": "agent",
-      "content": "I'd be happy to help with that. What's your order number?",
-      "timestamp": "2024-03-15T14:30:10Z"
+      "at": 18.242,
+      "seq": 2,
+      "role": "tool",
+      "tool": {
+        "args": "{\"order_id\": \"ORD-12345\"}",
+        "name": "check_order_status"
+      },
+      "type": "tool_call",
+      "result": {
+        "output": "{\"status\": \"shipped\", \"tracking\": \"1Z999AA10123456784\"}"
+      },
+      "turnId": "tool_10cde5_59dcaf"
+    },
+    {
+      "at": 20.5,
+      "seq": 3,
+      "role": "assistant",
+      "text": "Your order has been shipped. The tracking number is 1Z999AA10123456784.",
+      "type": "message",
+      "turnId": "item_2aba75c0b341",
+      "isFinal": true
+    },
+    {
+      "at": 28.5,
+      "seq": 4,
+      "role": "user",
+      "text": "Thanks, that's all I needed.",
+      "type": "message",
+      "turnId": "user_728ab3_4f2a1c",
+      "isFinal": true,
+      "language": "en-US"
+    },
+    {
+      "at": 30.2,
+      "seq": 5,
+      "role": "tool",
+      "tool": {
+        "args": "{}",
+        "name": "end_call"
+      },
+      "type": "tool_call",
+      "result": {
+        "output": "Ending call."
+      },
+      "turnId": "tool_7281cd_8717e4"
     }
   ],
-  "summary": "Customer called regarding order #12345. Confirmed shipment status and provided tracking number. Customer satisfied with resolution.",
-  "tool_calls": [
-    {
-      "tool_name": "check_order_status",
-      "arguments": { "order_id": "12345" },
-      "result": "Order shipped on March 13, tracking: 1Z999AA10123456784",
-      "timestamp": "2024-03-15T14:30:45Z"
-    }
-  ]
+  "summary": "Customer inquired about their order status. Agent checked the order and confirmed it has been shipped with tracking number provided.",
+  "metrics": {
+    "llm_prompt_tokens": 7585,
+    "stt_audio_duration": 58.65,
+    "tts_audio_duration": 27.14,
+    "tts_characters_count": 491,
+    "llm_completion_tokens": 114,
+    "llm_input_audio_tokens": 0,
+    "llm_output_audio_tokens": 0,
+    "llm_prompt_cached_tokens": 819
+  },
+  "initiatedAt": "2024-03-15T14:30:00.076Z",
+  "startedAt": "2024-03-15T14:30:02.529Z",
+  "endedAt": "2024-03-15T14:32:00.876Z",
+  "durationSeconds": 118
 }
 ```
 
 **Key Fields:**
-- `call_id`: Unique call identifier
+- `id`: Unique call identifier
 - `status`: Final call status (`COMPLETED`, `FAILED`, `CANCELED`, etc.)
-- `duration_seconds`: Total call duration (null if never answered)
-- `recording_url`: URL to download the call recording
-- `transcript`: Complete conversation with timestamps
+- `durationSeconds`: Total call duration (null if never answered)
+- `recordingUrl`: URL to download the call recording
+- `transcript`: Complete conversation with timestamps and tool invocations (both custom tools and system tools like `end_call`, `transfer_to_number`)
 - `summary`: AI-generated summary of the call
-- `tool_calls`: Any tools that were invoked during the call
-- `hangup_cause`: SIP hangup reason (e.g., `normal_clearing`, `busy`, `no_answer`)
+- `metrics`: Token usage and audio duration metrics
+- `hangupCause`: Reason call ended. Common values include `USER_ENDED`, `END_CALL_TOOL`, `SILENCE_TIMEOUT`, `MAX_DURATION`, `VOICEMAIL_DETECTED`, and `TRANSFER_INITIATED`
+
+<Note>
+The example above shows both a custom tool (`check_order_status`) and a system tool (`end_call`). When a call is transferred using `transfer_to_number`, the transcript will contain a similar tool entry with `name: "transfer_to_number"` and `args` containing `to_number`, and the `hangupCause` will be `TRANSFER_INITIATED`.
+</Note>
+
+<Note>
+For complete field descriptions and additional examples, see the [Post-Call Webhook API Reference](/api-reference/webhooks/post-call).
+</Note>
 
 ### Response Expectations
 
@@ -313,17 +369,18 @@ app.post('/webhooks/post-call', async (req, res) => {
   try {
     // Update CRM with call details
     await crm.logCall({
-      phone: call.from_number,
-      duration: call.duration_seconds,
+      callId: call.id,
+      phone: call.fromNumber,
+      duration: call.durationSeconds,
       summary: call.summary,
-      recording: call.recording_url,
-      timestamp: call.ended_at
+      recording: call.recordingUrl,
+      timestamp: call.endedAt
     });
     
     // Create follow-up task if needed
     if (call.summary.includes('callback')) {
       await tasks.create({
-        title: `Follow up with ${call.variables.customer_name}`,
+        title: `Follow up from call`,
         dueDate: tomorrow(),
         notes: call.summary
       });
@@ -331,12 +388,12 @@ app.post('/webhooks/post-call', async (req, res) => {
     
     // Store transcript for compliance
     await db.transcripts.insert({
-      callId: call.call_id,
+      callId: call.id,
       transcript: call.transcript,
-      recordingUrl: call.recording_url
+      recordingUrl: call.recordingUrl
     });
     
-    console.log(`Processed call ${call.call_id}`);
+    console.log(`Processed call ${call.id}`);
   } catch (error) {
     console.error('Post-call processing error:', error);
     // Don't throw - webhook already acknowledged
@@ -363,21 +420,22 @@ def process_call(call):
     try:
         # Update CRM
         crm.log_call(
-            phone=call['from_number'],
-            duration=call['duration_seconds'],
+            call_id=call['id'],
+            phone=call['fromNumber'],
+            duration=call['durationSeconds'],
             summary=call['summary'],
-            recording=call['recording_url']
+            recording=call['recordingUrl']
         )
         
         # Check for action items in summary
         if 'refund' in call['summary'].lower():
             tickets.create(
-                title=f"Refund request - {call['variables']['customer_name']}",
+                title=f"Refund request from call",
                 priority='high',
                 description=call['summary']
             )
         
-        logger.info(f"Processed call {call['call_id']}")
+        logger.info(f"Processed call {call['id']}")
     except Exception as e:
         logger.error(f"Post-call processing error: {e}")
 ```
@@ -386,11 +444,11 @@ def process_call(call):
 
 ### Verify Webhook Sources
 
+**HMAC Signature Verification:**
+Contact RevRing support to set up HMAC signature verification for your webhooks. This ensures requests are authentic and coming from RevRing.
+
 **Request Validation:**
 Implement validation to ensure webhook requests contain expected fields and structure.
-
-**Signature Verification (Coming Soon):**
-RevRing will support HMAC signature verification to ensure requests are authentic.
 
 ### Use HTTPS
 
@@ -410,13 +468,13 @@ app.post('/webhooks/post-call', (req, res) => {
   const call = req.body;
   
   // Validate required fields
-  if (!call.call_id || !call.agent_id || !call.status) {
+  if (!call.id || !call.status || !call.direction) {
     return res.status(400).json({ error: 'Invalid payload' });
   }
   
-  // Validate call_id format
-  if (!/^call_[a-zA-Z0-9]+$/.test(call.call_id)) {
-    return res.status(400).json({ error: 'Invalid call_id' });
+  // Validate id format (UUID)
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(call.id)) {
+    return res.status(400).json({ error: 'Invalid call id' });
   }
   
   // Process...
@@ -584,7 +642,7 @@ Use post-call webhooks to track outcomes and trigger workflows:
 
 ```javascript
 app.post('/webhooks/post-call', async (req, res) => {
-  const { summary, call_id, duration_seconds } = req.body;
+  const { summary, id, durationSeconds } = req.body;
   
   res.json({ received: true });
   
@@ -597,14 +655,14 @@ app.post('/webhooks/post-call', async (req, res) => {
   // Update analytics
   await analytics.track({
     event: 'call_completed',
-    callId: call_id,
+    callId: id,
     outcome: outcome,
-    duration: duration_seconds
+    duration: durationSeconds
   });
   
   // Trigger workflows
   if (outcome === 'scheduled') {
-    await sendConfirmationEmail(req.body.variables.customer_email);
+    await calendar.sendConfirmation(id);
   }
 });
 ```
