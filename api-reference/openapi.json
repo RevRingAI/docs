@@ -1820,7 +1820,7 @@
                     },
                     "voiceId": {
                         "type": "string",
-                        "description": "Voice model ID"
+                        "description": "Voice ID (copy from dashboard Voice Library)"
                     },
                     "voiceTemperature": {
                         "type": "number",
@@ -1988,7 +1988,7 @@
                     },
                     "voiceId": {
                         "type": "string",
-                        "description": "Voice model ID"
+                        "description": "Voice ID (copy from dashboard Voice Library)"
                     },
                     "voiceTemperature": {
                         "type": "number",
@@ -2136,7 +2136,7 @@
                     },
                     "voiceId": {
                         "type": "string",
-                        "description": "Voice model ID"
+                        "description": "Voice ID (copy from dashboard Voice Library)"
                     },
                     "voiceTemperature": {
                         "type": "number",
