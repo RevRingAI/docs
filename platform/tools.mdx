@@ -96,11 +96,21 @@ You can configure multiple transfer routes for different scenarios. The agent wi
 
 #### How It Works
 
-When enabled, the agent can invoke the `transfer_to_number` function with the destination number. The call will be transferred, and the agent's involvement ends. The transfer appears in the call transcript showing:
+When enabled, the agent can invoke the `transfer_to_number` function with the destination number. RevRing uses the SIP REFER method to transfer the call to the destination.
 
+Once the transfer is initiated:
+- The call is handed off to the destination number
+- RevRing's involvement ends (billing stops and recording ends)
+- The caller continues their conversation with the transfer destination
+
+The transfer appears in the call transcript showing:
 - Tool invocation: "Tool: transfer_to_number"
 - Destination number
 - Transfer status (success or failure)
+
+<Note>
+**Provider Setup Required**: Ensure your SIP trunk provider supports SIP REFER and has call transfers enabled. Some providers like Twilio require enabling **PSTN Transfer** in your trunk settings. See the [Telephony Setup](/platform/telephony) guide for details.
+</Note>
 
 ### Voicemail Detection
 
