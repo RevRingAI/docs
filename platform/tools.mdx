@@ -236,42 +236,54 @@ When the agent invokes your custom tool, RevRing POSTs to your webhook URL:
 }
 ```
 
-**Expected Response:**
+**Response Examples:**
+
+You can return either JSON or plain text:
+
 ```json
 {
-  "result": "Order ORD-12345 is currently out for delivery. Expected delivery today by 5 PM."
+  "status": "out_for_delivery",
+  "expected_delivery": "2025-11-24T17:00:00Z",
+  "tracking_number": "1Z999AA10123456784"
 }
 ```
 
-The agent will receive the `result` field and incorporate it into the conversation:
+Or:
 
-> "I've checked your order status. Order ORD-12345 is currently out for delivery and should arrive today by 5 PM."
+```
+Order ORD-12345 is currently out for delivery. Expected delivery today by 5 PM.
+```
+
+The agent will receive the response and incorporate it into the conversation naturally.
 
 ### Response Format
 
 Your webhook should return:
 
 - **200 OK** status code
-- JSON body with a `result` field containing the information for the agent
+- JSON object or plain text response body
 - Response within 8 seconds (recommended: under 3 seconds for best user experience)
 
-**Success Example:**
+**JSON Response Example:**
 ```json
 {
-  "result": "Customer has 3 active appointments. Next appointment is tomorrow at 2 PM."
+  "appointments": [
+    {
+      "date": "2025-11-25",
+      "time": "14:00",
+      "type": "checkup"
+    }
+  ],
+  "total_count": 3
 }
 ```
 
-**Error Example:**
-```json
-{
-  "result": "I'm sorry, I couldn't find that order number in our system. Can you verify the order number?"
-}
+**Plain Text Response Example:**
+```
+Customer has 3 active appointments. Next appointment is tomorrow at 2 PM.
 ```
 
-<Warning>
-Always return a `result` field with a human-readable message. The agent will speak this to the caller, so write responses as natural conversation.
-</Warning>
+The agent will interpret the response and communicate the information to the caller naturally.
 
 ### Best Practices for Custom Tools
 
@@ -291,13 +303,22 @@ Check order
 
 #### Error Handling
 
-Handle errors gracefully in your webhook:
+Handle errors gracefully in your webhook. You can return structured error data or error messages:
 
 ```json
 {
-  "result": "I apologize, but I'm having trouble connecting to our order system right now. Could we try again in a moment, or would you like me to transfer you to our support team?"
+  "error": "order_not_found",
+  "message": "Order number not found in system"
 }
 ```
+
+Or plain text:
+
+```
+I couldn't find that order number in our system. Could you verify the order number?
+```
+
+The agent will communicate the error to the caller appropriately.
 
 #### Performance
 
@@ -439,11 +460,11 @@ Agents can reference previous tool results later in the conversation:
   </Accordion>
   
   <Accordion title="Tool returns error in transcript">
-    - Check webhook response format - must include `result` field
     - Verify webhook responds within 8 seconds
-    - Ensure response is valid JSON
-    - Review your webhook logs for errors or exceptions
+    - Ensure response is valid JSON or plain text
     - Check HTTP status code (should be 200)
+    - Review your webhook logs for errors or exceptions
+    - Test the webhook endpoint independently with sample data
   </Accordion>
   
   <Accordion title="Agent misuses the tool">
