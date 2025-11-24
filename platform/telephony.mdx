@@ -34,7 +34,15 @@ Twilio Elastic SIP Trunking is recommended for most users due to its reliability
 3. Click **Create new SIP Trunk** or select an existing trunk
 4. Note your **SIP Domain** (e.g., `yourtrunk.pstn.twilio.com`)
 
-### Step 2: Assign Phone Numbers in Twilio
+### Step 2: Create Credential List
+
+1. In the Twilio Console, go to **Elastic SIP Trunking** → **Credential Lists**
+2. Click **Create new Credential List**
+3. Give it a name (e.g., `RevRing Credentials`)
+4. Add a credential with a **Username** and **Password** of your choice
+5. Save the Credential List
+
+### Step 3: Assign Phone Numbers in Twilio
 
 1. In your trunk settings, go to the **Numbers** tab
 2. Click **Add Existing Number**
@@ -45,7 +53,7 @@ Twilio Elastic SIP Trunking is recommended for most users due to its reliability
 Phone numbers must be assigned to the trunk in Twilio before they can be used in RevRing.
 </Note>
 
-### Step 3: Configure Origination (Inbound)
+### Step 4: Configure Origination (Inbound)
 
 For inbound calls to reach RevRing:
 
@@ -53,25 +61,22 @@ For inbound calls to reach RevRing:
 2. Add an **Origination SIP URI**: `sip:sip.revring.ai`
 3. Set **Priority** to `1` and **Weight** to `1`
 
-### Step 4: Configure Termination (Outbound)
+### Step 5: Configure Termination (Outbound)
 
 1. In your trunk settings, go to **Termination**
 2. Note your **Termination SIP URI** (e.g., `yourtrunk.pstn.twilio.com`) - you'll use this as the Proxy in RevRing
-3. Enable **SIP Registration** if required (usually not needed)
+3. Under **Authentication** → **Credential Lists**, select the Credential List you created in Step 2
+4. Optionally enable **PSTN Transfer** if you want your agents to use the Transfer To Number tool to transfer calls to external phone numbers
 
-<Note>
-Optionally enable **PSTN Transfer** if you want your agents to use the Transfer To Number tool to transfer calls to external phone numbers.
-</Note>
-
-### Step 5: Add Trunk to RevRing
+### Step 6: Add Trunk to RevRing
 
 1. Navigate to [SIP Trunks](https://dashboard.revring.ai/app/sip-trunks)
 2. Click **Add SIP Trunk**
 3. Fill in the configuration:
    - **Name**: `Twilio Elastic` (or any descriptive name)
-   - **Proxy**: Your Twilio Termination SIP URI from Step 4 (e.g., `yourtrunk.pstn.twilio.com`) - enter just the domain without the `sip:` prefix
-   - **Username**: Leave empty (not required for Twilio)
-   - **Password**: Leave empty (not required for Twilio)
+   - **Proxy**: Your Twilio Termination SIP URI from Step 5 (e.g., `yourtrunk.pstn.twilio.com`) - enter just the domain without the `sip:` prefix
+   - **Username**: Enter the username from your Credential List (created in Step 2)
+   - **Password**: Enter the password from your Credential List (created in Step 2)
    - **Phone Numbers**: Enter your phone numbers in E.164 format, comma-separated
      ```
      +12025551234, +14155552671, +13105558899

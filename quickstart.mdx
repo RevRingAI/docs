@@ -21,11 +21,12 @@ SIP trunks connect your AI agents to the phone network, enabling both inbound an
 ### Configure Twilio
 
 1. Log into your [Twilio Console](https://console.twilio.com)
-2. Navigate to **Elastic SIP Trunking** → **Trunks**
-3. Create or select an existing trunk
+2. Navigate to **Elastic SIP Trunking** → **Credential Lists** and create a new Credential List with a username and password
+3. Go to **Elastic SIP Trunking** → **Trunks** and create or select an existing trunk
 4. In **Origination**, add an **Origination SIP URI**: `sip:sip.revring.ai`
 5. In **Termination**, note your **Termination SIP URI** (e.g., `yourtrunk.pstn.twilio.com`)
-6. Assign your phone numbers to the trunk in the **Numbers** tab
+6. In **Termination** → **Authentication** → **Credential Lists**, select your Credential List
+7. Assign your phone numbers to the trunk in the **Numbers** tab
 
 ### Add the Trunk to RevRing
 
@@ -34,8 +35,8 @@ SIP trunks connect your AI agents to the phone network, enabling both inbound an
 3. Fill in the form:
    - **Name**: `Twilio Elastic` (or any descriptive name)
    - **Proxy**: Your Twilio Termination SIP URI from step 5 above (e.g., `yourtrunk.pstn.twilio.com`)
-   - **Username**: Leave empty unless required by your trunk configuration
-   - **Password**: Leave empty unless required by your trunk configuration
+   - **Username**: Enter the username from your Twilio Credential List
+   - **Password**: Enter the password from your Twilio Credential List
    - **Phone Numbers**: Enter your phone numbers in E.164 format, separated by commas (e.g., `+12025551234, +14155552671`)
 4. Click **Add Trunk**
 
