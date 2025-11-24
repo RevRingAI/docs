@@ -617,23 +617,33 @@ For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
 
 ## Advanced Patterns
 
-### Conditional Agent Behavior
+### Dynamic Agent Customization
 
-Use pre-call webhooks to fundamentally change agent behavior:
+Use pre-call webhooks to provide variables that customize agent behavior for each caller:
 
+**Webhook Response:**
 ```json
 {
-  "mode": "support",
-  "transfer_enabled": "true",
-  "available_hours": "We're available Monday-Friday 9am-5pm"
+  "variables": {
+    "firstName": "John",
+    "accountType": "premium",
+    "lastPurchase": "March 15, 2024",
+    "supportHours": "Monday-Friday 9am-5pm EST"
+  }
 }
 ```
 
-Reference in prompt:
+**Reference in First Message:**
 ```
-You are in {{mode}} mode. {{#if transfer_enabled}}You can transfer calls to specialists.{{/if}}
+Hi {{firstName}}, thanks for calling! How can I help you today?
+```
 
-If asked about hours, say: {{available_hours}}
+**Reference in Prompt:**
+```
+You are a customer service agent speaking with {{firstName}}, who is a {{accountType}} customer.
+Their last purchase was on {{lastPurchase}}.
+
+If asked about business hours, say: {{supportHours}}
 ```
 
 ### Call Outcome Tracking
