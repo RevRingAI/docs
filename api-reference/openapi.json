@@ -1215,7 +1215,7 @@
                 }
             }
         },
-        "/analytics": {
+        "/analytics/overview": {
             "get": {
                 "summary": "Get Analytics Overview",
                 "description": "Get analytics overview with time-series data and summary cards",
@@ -1284,13 +1284,60 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AnalyticsOverview"
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AnalyticsOverview"
+                                        }
+                                    },
+                                    "required": ["data"]
                                 }
                             }
                         }
                     },
                     "400": {
                         "$ref": "#/components/responses/BadRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    }
+                }
+            }
+        },
+        "/analytics/active": {
+            "get": {
+                "summary": "Get Active Calls Count",
+                "description": "Get the current number of active (ongoing) calls. Not affected by date filters.",
+                "operationId": "getActiveCalls",
+                "tags": [
+                    "Analytics"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Active calls count",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "activeCalls": {
+                                                    "type": "integer",
+                                                    "description": "Number of currently active calls"
+                                                }
+                                            },
+                                            "required": ["activeCalls"]
+                                        }
+                                    },
+                                    "required": ["data"]
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "$ref": "#/components/responses/UnauthorizedError"
@@ -1418,7 +1465,7 @@
                                     "hangupCause": {
                                         "type": "string",
                                         "nullable": true,
-                                        "description": "Reason for call termination"
+                                        "description": "Reason call ended. Common values: USER_ENDED, END_CALL_TOOL, SILENCE_TIMEOUT, MAX_DURATION, VOICEMAIL_DETECTED"
                                     },
                                     "errorMessage": {
                                         "type": "string",
@@ -2360,7 +2407,7 @@
                     "hangupCause": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Reason call ended (e.g., normal_clearing, busy, no_answer)"
+                        "description": "Reason call ended. Common values: USER_ENDED, END_CALL_TOOL, SILENCE_TIMEOUT, MAX_DURATION, VOICEMAIL_DETECTED"
                     },
                     "errorMessage": {
                         "type": "string",
