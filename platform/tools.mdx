@@ -228,12 +228,11 @@ When the agent invokes your custom tool, RevRing POSTs to your webhook URL:
 **Request:**
 ```json
 {
-  "tool_name": "check_order_status",
+  "callId": "dc582fd6-4e5c-4860-9ced-abc7390e62a9",
+  "tool": "check_order_status",
   "arguments": {
     "order_id": "ORD-12345"
-  },
-  "call_id": "call_abc123",
-  "agent_id": "agent_xyz789"
+  }
 }
 ```
 
