@@ -317,10 +317,10 @@ After a call ends, RevRing sends a POST request with complete call details:
 - `transcript`: Complete conversation with timestamps and tool invocations (both custom tools and system tools like `end_call`, `transfer_to_number`)
 - `summary`: AI-generated summary of the call
 - `metrics`: Token usage and audio duration metrics
-- `hangupCause`: Reason call ended. Common values include `USER_ENDED`, `END_CALL_TOOL`, `SILENCE_TIMEOUT`, `MAX_DURATION`, `VOICEMAIL_DETECTED`, and `TRANSFER_INITIATED`
+- `hangupCause`: Reason call ended. Common values include `USER_ENDED`, `END_CALL_TOOL`, `SILENCE_TIMEOUT`, `MAX_DURATION`, `VOICEMAIL_DETECTED`
 
 <Note>
-The example above shows both a custom tool (`check_order_status`) and a system tool (`end_call`). When a call is transferred using `transfer_to_number`, the transcript will contain a similar tool entry with `name: "transfer_to_number"` and `args` containing `to_number`, and the `hangupCause` will be `TRANSFER_INITIATED`.
+The example above shows both a custom tool (`check_order_status`) and a system tool (`end_call`). When a call is transferred using `transfer_to_number`, the transcript will contain a similar tool entry with `name: "transfer_to_number"` and `args` containing `to_number`.
 </Note>
 
 <Note>
