@@ -217,13 +217,28 @@ The `description` fields are critical - they tell the agent when and how to use 
 
 Follow the [OpenAI function calling format](https://platform.openai.com/docs/guides/function-calling#defining-functions):
 
-- **type**: Always `"function"` at the root level
-- **name**: Unique identifier for the tool (lowercase, underscores allowed)
-- **description**: When the agent should use this tool
-- **parameters**: Object defining the tool's input parameters
-  - **type**: Always `"object"` for the parameters root
-  - **properties**: Each parameter with its type and description
-  - **required**: Array of required parameter names
+- **type**: Always `"function"` at the root level (required)
+- **name**: Unique identifier for the tool (lowercase, underscores allowed) (required)
+- **description**: When the agent should use this tool (required)
+- **parameters**: Object defining the tool's input parameters (required)
+  - **type**: Always `"object"` for the parameters root (required)
+  - **properties**: Each parameter with its type and description (use `{}` for tools with no inputs)
+  - **required**: Array of required parameter names (optional)
+
+<Note>
+**For tools without inputs:** You must still include the `parameters` object with `type: "object"` and empty `properties`:
+```json
+{
+  "type": "function",
+  "name": "get_current_weather",
+  "description": "Get the current weather",
+  "parameters": {
+    "type": "object",
+    "properties": {}
+  }
+}
+```
+</Note>
 
 ### Webhook Implementation
 
