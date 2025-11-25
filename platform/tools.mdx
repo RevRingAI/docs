@@ -170,11 +170,15 @@ Custom tools allow you to extend agent capabilities by integrating with your own
 
 1. Navigate to the **Tools** tab
 2. Scroll to the **Custom Tools** section
-3. Enter a **Tool name** (e.g., `check_order_status`)
+3. Enter a **Friendly Name** for your tool (e.g., "Order Status Checker")
 4. Enter your **Webhook URL** (e.g., `https://api.yourcompany.com/tools/check-order`)
 5. Click **Add Tool**
 
 The tool will appear in the table below. Click **Edit** to define the tool's schema.
+
+<Note>
+The **Friendly Name** is just a label for the dashboard. The actual function name that the agent uses is defined in the `name` field of your JSON schema (e.g., `check_order_status`).
+</Note>
 
 ### Defining the Tool Schema
 
@@ -377,7 +381,7 @@ To modify a custom tool:
 
 1. Navigate to the **Tools** tab
 2. Click **Edit** on the tool in the table
-3. Update name, webhook URL, schema, or enabled status
+3. Update friendly name, webhook URL, schema, or enabled status
 4. Click **Save**
 
 Changes take effect immediately for new calls.
