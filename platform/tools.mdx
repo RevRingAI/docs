@@ -186,19 +186,18 @@ The schema defines what parameters the tool accepts using OpenAI's function call
 ```json
 {
   "type": "function",
-  "function": {
-    "name": "check_order_status",
-    "description": "Check the status of a customer's order by order ID",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "order_id": {
-          "type": "string",
-          "description": "The unique order ID (e.g., ORD-12345)"
-        }
-      },
-      "required": ["order_id"]
-    }
+  "name": "check_order_status",
+  "description": "Check the status of a customer's order by order ID",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "order_id": {
+        "type": "string",
+        "description": "The unique order ID (e.g., ORD-12345)"
+      }
+    },
+    "required": ["order_id"],
+    "additionalProperties": false
   }
 }
 ```
@@ -214,6 +213,7 @@ The `description` fields are critical - they tell the agent when and how to use 
 
 Follow the [OpenAI function calling format](https://platform.openai.com/docs/guides/function-calling#defining-functions):
 
+- **type**: Always `"function"` at the root level
 - **name**: Unique identifier for the tool (lowercase, underscores allowed)
 - **description**: When the agent should use this tool
 - **parameters**: Object defining the tool's input parameters
