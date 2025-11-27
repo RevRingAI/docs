@@ -14,7 +14,7 @@ RevRing supports three types of variables:
 - **Default Variables**: Static variables you configure on the agent that apply to all calls
 - **Dynamic Variables**: Call-specific variables set per outbound call or via pre-call webhook for inbound calls
 
-Variables merge with a priority order: system variables are always preserved, then default variables are applied, and finally dynamic variables override defaults.
+Variables merge with the following priority: system variables are set first, then default variables are applied, and finally dynamic variables can override both system and default variables.
 
 ## System Variables
 
@@ -25,7 +25,8 @@ System variables are automatically available in every call and provide contextua
 | `{{direction}}` | Whether the call is inbound or outbound | `inbound` or `outbound` |
 | `{{user_number}}` | The customer's phone number | `+14155551234` |
 | `{{agent_number}}` | Your agent's phone number (caller ID for outbound) | `+12025559999` |
-| `{{current_time}}` | Current timestamp when the call starts | `Mon, 25 Nov 2025 14:30:00 GMT (UTC timezone)` |
+| `{{current_time}}` | Current timestamp when the call starts, formatted in the agent's timezone | `Tuesday, November 26, 2025 at 2:30:00 PM EST` |
+| `{{timezone}}` | The agent's IANA timezone identifier | `America/New_York` |
 
 System variables are always available for you to use in your agent's prompt and first message.
 
@@ -198,72 +199,44 @@ curl -X POST https://api.revring.ai/v1/calls \
 
 ## Working with Timezones
 
-Timezone handling is critical for voice AI agents, especially for appointment booking, scheduling, and time-sensitive conversations. Since the `{{current_time}}` system variable is provided in UTC, you'll need to manage timezones explicitly to ensure your agent communicates in the customer's local time.
+RevRing automatically handles timezone conversion for you. The `{{current_time}}` system variable is formatted in your agent's configured timezone, and the `{{timezone}}` variable contains the IANA timezone identifier.
 
-### Why Timezones Matter
+### Setting Agent Timezone
 
-When discussing appointments or time-sensitive information, customers expect to hear times in their local timezone. Making customers convert from UTC or another timezone creates confusion and poor user experience. Your agent should handle all timezone conversions internally and always communicate in the customer's timezone.
-
-### Recommended Approach
-
-Include timezone information as a dynamic variable and instruct your agent to use it for all time-related conversations.
-
-**For outbound calls**, pass the customer's timezone when initiating the call:
+Configure your agent's timezone via the API when creating or updating an agent:
 
 ```bash
-curl -X POST https://api.revring.ai/v1/calls \
+curl -X PATCH https://api.revring.ai/v1/agents/agent_123abc \
   -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "agentId": "agent_123abc",
-    "fromNumber": "+12025559999",
-    "toNumber": "+14155551234",
-    "variables": {
-      "customer_name": "John Smith",
-      "customer_timezone": "America/New_York"
-    }
+    "timezone": "America/New_York"
   }'
 ```
 
-**For inbound calls**, return the timezone from your pre-call webhook based on the caller's phone number or CRM data:
+Or set it through the RevRing dashboard in your agent's configuration.
 
-```json
-{
-  "variables": {
-    "customer_name": "Sarah Johnson",
-    "customer_timezone": "America/Los_Angeles"
-  }
-}
-```
+### Using Timezone in Prompts
 
-### Prompt Instructions for Timezone Handling
-
-Include clear timezone instructions in your agent's prompt:
+Both `{{current_time}}` and `{{timezone}}` are automatically available as system variables:
 
 ```
-You are an appointment scheduling assistant.
+You are an appointment scheduling assistant for {{business_name}}.
 
-CURRENT TIME & TIMEZONE:
-- System time (UTC): {{current_time}}
-- Customer timezone: {{customer_timezone}}
+CURRENT TIME:
+{{current_time}}
 
-CRITICAL TIMEZONE RULES:
-1. ALWAYS communicate times in {{customer_timezone}}
-2. NEVER mention UTC or ask the customer to convert times
-3. When suggesting appointment times, use the customer's timezone
-4. When confirming appointments, state the timezone clearly (e.g., "2 PM Eastern Time")
-5. Calculate availability based on {{customer_timezone}}, not UTC
+Your timezone is {{timezone}}. All times you communicate should be in this timezone.
 
-Example: If it's 18:00 UTC and customer_timezone is "America/New_York" (EST, UTC-5), 
-tell the customer it's 1:00 PM, not 6:00 PM.
-
-TASK:
-Help {{customer_name}} schedule an appointment. All times should be in {{customer_timezone}}.
+When booking appointments:
+1. Use the current time above as your reference
+2. Suggest available slots in {{timezone}}
+3. Always mention the timezone when confirming (e.g., "2 PM Eastern Time")
 ```
 
 ### Timezone Format
 
-Use IANA timezone identifiers (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`) rather than abbreviations like "EST" or "PST", as they handle daylight saving time automatically.
+Use IANA timezone identifiers (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`) as they handle daylight saving time automatically.
 
 Common timezone identifiers:
 - **US Eastern**: `America/New_York`
@@ -275,34 +248,34 @@ Common timezone identifiers:
 - **India**: `Asia/Kolkata`
 - **Australia (Sydney)**: `Australia/Sydney`
 
-### Complete Scheduling Example
+### Complete Example
 
 ```
 You are scheduling appointments for {{business_name}}.
 
-TIME CONTEXT:
-- Current time (UTC): {{current_time}}
-- Customer's timezone: {{customer_timezone}}
-- Business timezone: {{business_timezone}}
-- Business hours: {{business_hours}} (in {{business_timezone}})
+CURRENT TIME & TIMEZONE:
+The current time is: {{current_time}}
+Your timezone: {{timezone}}
+Business hours: {{business_hours}}
 
-TIMEZONE HANDLING:
-- Speak all times in {{customer_timezone}}
-- Convert business hours from {{business_timezone}} to {{customer_timezone}} when suggesting slots
-- Always confirm the timezone when finalizing appointments
+INSTRUCTIONS:
+1. Reference {{current_time}} when discussing availability
+2. All appointment times should be stated in {{timezone}}
+3. When confirming appointments, explicitly mention the timezone
+4. If the customer mentions a different timezone, acknowledge it but confirm appointments in {{timezone}}
 
-Example conversation:
-Agent: "I have availability tomorrow at 2 PM, 3:30 PM, and 5 PM Pacific Time. Which works best for you?"
+Example:
+Agent: "I have availability tomorrow at 2 PM, 3:30 PM, and 5 PM Eastern Time. Which works best for you?"
 Customer: "2 PM works"
-Agent: "Perfect! I've scheduled you for 2 PM Pacific Time on [date]. You'll receive a confirmation."
+Agent: "Perfect! I've scheduled you for 2 PM Eastern Time on [date]. You'll receive a confirmation."
 ```
 
 <Tip>
-Store timezone information in your CRM or database linked to phone numbers. This allows your pre-call webhook to automatically provide the correct timezone for inbound calls without manual lookup.
+Set your agent's timezone to match your business location or primary customer base. For businesses serving multiple timezones, you can create separate agents for different regions, or override the system variables on a per-call basis when sending or receiving a call.
 </Tip>
 
 <Note>
-For international businesses, always include the timezone name when confirming appointments (e.g., "3 PM Eastern Time") to avoid any confusion, even if you're already speaking in the customer's timezone.
+The `{{current_time}}` variable is formatted in a human-readable format like "Wednesday, November 26, 2025 at 8:30:00 PM EST" to make it easy for the AI to understand and communicate naturally.
 </Note>
 
 ## Best Practices

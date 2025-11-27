@@ -1805,6 +1805,10 @@
                         "maximum": 2,
                         "description": "LLM temperature for response randomness (0 = deterministic, 2 = very creative)"
                     },
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA timezone identifier (e.g., America/New_York, Europe/London)"
+                    },
                     "preCallWebhookUrl": {
                         "type": "string",
                         "format": "uri",
@@ -1981,6 +1985,10 @@
                         "maximum": 2,
                         "description": "LLM temperature for response randomness (0-2)"
                     },
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA timezone identifier (e.g., America/New_York)"
+                    },
                     "preCallWebhookUrl": {
                         "type": "string",
                         "format": "uri",
@@ -2128,6 +2136,10 @@
                         "minimum": 0,
                         "maximum": 2,
                         "description": "LLM temperature for response randomness (0-2)"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA timezone identifier (e.g., America/New_York)"
                     },
                     "preCallWebhookUrl": {
                         "type": "string",
