@@ -76,7 +76,7 @@ Your webhook must respond within 3 seconds with a JSON object containing variabl
 These variables will be available in the agent's prompt and first message using `{{variable_name}}` syntax.
 
 <Note>
-Variables you return can override system variables like `{{current_time}}` and `{{timezone}}` if needed. However, system variables (`{{direction}}`, `{{user_number}}`, `{{agent_number}}`, `{{current_time}}`, `{{timezone}}`) are automatically provided and don't need to be set via webhook.
+Variables you return can override system variables like `{{current_time}}` and `{{timezone}}` if needed. However, system variables (`{{direction}}`, `{{user_number}}`, `{{agent_number}}`, `{{current_time}}`, `{{timezone}}`, `{{language}}`) are automatically provided and don't need to be set via webhook.
 </Note>
 
 ### Using Variables in Agent Configuration
