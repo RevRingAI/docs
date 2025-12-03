@@ -4,25 +4,35 @@ description: 'Build AI voice agents that speak multiple languages'
 icon: 'globe'
 ---
 
-RevRing supports AI voice agents in 13 languages, enabling you to serve customers globally with natural-sounding voices in their native language.
+RevRing supports AI voice agents in 20+ languages, enabling you to serve customers globally with natural-sounding voices in their native language.
 
 ## Supported Languages
 
-RevRing offers voices in the following languages:
+RevRing offers 300+ voices across the following languages:
 
-- **English** (en) - 27 voices including Ultra-Realistic and Stable options
-- **Spanish** (es) - 4 voices
-- **Chinese** (zh) - 4 voices
-- **French** (fr) - 4 voices
-- **German** (de) - 2 voices
-- **Portuguese** (pt) - 2 voices
-- **Italian** (it) - 2 voices
-- **Japanese** (ja) - 2 voices
-- **Korean** (ko) - 4 voices
-- **Russian** (ru) - 4 voices
-- **Hindi** (hi) - 1 voice
-- **Polish** (pl) - 2 voices
-- **Dutch** (nl) - 4 voices
+- **English** (en)
+- **Spanish** (es)
+- **Italian** (it)
+- **German** (de)
+- **Portuguese** (pt)
+- **Turkish** (tr)
+- **Japanese** (ja)
+- **Hindi** (hi)
+- **Dutch** (nl)
+- **Chinese** (zh)
+- **Greek** (el)
+- **Ukrainian** (uk)
+- **Arabic** (ar)
+- **Danish** (da)
+- **Estonian** (et)
+- **Finnish** (fi)
+- **Norwegian** (nb, no)
+- **Swedish** (sv)
+- **Vietnamese** (vi)
+
+<Note>
+**Voice Flexibility:** Any voice can be used with any language setting. For example, you can use a Spanish-labeled voice on an English-language agent to achieve a Spanish accent, or mix and match voices and languages to create the exact speaking style you need.
+</Note>
 
 ## Setting Agent Language
 
@@ -33,7 +43,7 @@ RevRing offers voices in the following languages:
 3. Select your desired **Language** from the dropdown and click **Save**
 4. Go to the **Voice** tab
 5. Choose a **Voice** that matches your selected language
-6. Click **Save Voice Settings**
+6. Click **Save Voice**
 
 You can preview all available voices in the [Voice Library](https://dashboard.revring.ai/app/agents/voices).
 
@@ -47,7 +57,7 @@ curl -X PATCH https://api.revring.ai/v1/agents/agent_123abc \
   -H "Content-Type: application/json" \
   -d '{
     "language": "es",
-    "voiceId": "revring-pablo"
+    "voiceId": "revring-rafael"
   }'
 ```
 
@@ -55,16 +65,23 @@ curl -X PATCH https://api.revring.ai/v1/agents/agent_123abc \
 - `en` (English)
 - `es` (Spanish)
 - `pt` (Portuguese)
-- `fr` (French)
 - `de` (German)
 - `it` (Italian)
 - `nl` (Dutch)
-- `pl` (Polish)
-- `ru` (Russian)
 - `zh` (Chinese)
 - `ja` (Japanese)
-- `ko` (Korean)
 - `hi` (Hindi)
+- `tr` (Turkish)
+- `el` (Greek)
+- `uk` (Ukrainian)
+- `ar` (Arabic)
+- `da` (Danish)
+- `et` (Estonian)
+- `fi` (Finnish)
+- `nb` (Norwegian Bokmål)
+- `no` (Norwegian)
+- `sv` (Swedish)
+- `vi` (Vietnamese)
 
 ## Writing Prompts for Multilingual Agents
 
@@ -127,9 +144,7 @@ English offers two categories of voices:
 - **English Ultra-Realistic (Beta)**: Cutting-edge voices with exceptional naturalness and expressiveness
 - **English Stable**: Reliable, production-ready voices with consistent performance
 
-If you experience instability with Ultra-Realistic voices, try:
-1. Adjusting the **Voice Temperature** setting (lower values = more consistent)
-2. Switching to an **English Stable** voice for better reliability
+If you experience instability with Ultra-Realistic voices, try switching to an **English Stable** voice for better reliability.
 
 ## Troubleshooting
 
@@ -137,9 +152,8 @@ If you experience instability with Ultra-Realistic voices, try:
 
 If you notice inconsistent voice quality or unexpected behavior:
 
-1. **Adjust Voice Temperature**: Lower the temperature setting (e.g., from 0.8 to 0.5) for more consistent output
-2. **Switch Voice Category**: For English agents, try switching from Ultra-Realistic to Stable voices
-3. **Verify Language Match**: Ensure the selected voice matches your agent's language setting
+1. **Switch Voice Category**: For English agents, try switching from Ultra-Realistic to Stable voices
+2. **Verify Language Match**: Ensure the selected voice matches your agent's language setting
 
 ### Need Help?
 
@@ -164,7 +178,7 @@ curl -X POST https://api.revring.ai/v1/agents \
     "sipTrunkId": "trunk_abc123",
     "name": "Asistente en Español",
     "language": "es",
-    "voiceId": "revring-pablo",
+    "voiceId": "revring-rafael",
     "promptTemplate": "Eres un asistente de servicio al cliente. Ayuda al cliente con sus preguntas.",
     "firstMessage": "Hola, bienvenido. ¿Cómo puedo ayudarte hoy?"
   }'
@@ -177,7 +191,7 @@ curl -X POST https://api.revring.ai/v1/agents \
    - First Message: "Hola, bienvenido. ¿Cómo puedo ayudarte hoy?"
    - Prompt: "Eres un asistente de servicio al cliente. Ayuda al cliente con sus preguntas."
 3. In **Voice** tab:
-   - Voice: Pablo
+   - Voice: Rafael
 
 <Tip>
 For businesses serving multiple language markets, create separate agents for each language rather than trying to make a single agent multilingual. This ensures the best voice quality and conversation experience.
