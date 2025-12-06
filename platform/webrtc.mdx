@@ -375,6 +375,24 @@ Test your WebRTC implementation thoroughly:
 If you are facing call connection issues, use `twilioLogLevel: "debug"` during development to see detailed connection logs. Set it to `"error"` or `"silent"` in production.
 </Tip>
 
+### Embedding on Your Website
+
+To add a call widget to your website, build your widget as a standalone page and embed it using an iframe. Host your widget on platforms like Cloudflare Pages, Vercel, or AWS S3/CloudFront, then embed it in your main website:
+
+```html
+<iframe 
+  src="https://your-widget.pages.dev" 
+  width="400" 
+  height="600"
+  allow="microphone"
+  style="border: none;"
+></iframe>
+```
+
+<Note>
+The `allow="microphone"` attribute is required for WebRTC calls to work inside an iframe.
+</Note>
+
 ## Monitoring Calls
 
 WebRTC calls appear in your [Call Logs](https://dashboard.revring.ai/app/calls) with a "WebRTC" badge in the "From" column. All standard call features are available:
