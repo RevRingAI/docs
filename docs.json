@@ -29,7 +29,8 @@
                             "platform/prompting-variables",
                             "platform/multilingual",
                             "platform/tools",
-                            "platform/webhooks"
+                            "platform/webhooks",
+                            "platform/webrtc"
                         ]
                     }
                 ]

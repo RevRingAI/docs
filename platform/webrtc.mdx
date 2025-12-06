@@ -1,0 +1,445 @@
+---
+title: 'WebRTC'
+description: 'Add voice AI agents to web browsers and mobile apps'
+icon: 'browser'
+---
+
+Enable voice calling directly from web browsers, iOS apps, and Android apps using the RevRing WebRTC SDK. End users can talk to your AI agents without leaving your website or application.
+
+## How WebRTC Works
+
+WebRTC enables real-time voice communication in browsers and mobile apps:
+
+1. End user clicks a call button in your web or mobile app
+2. Your app uses the RevRing SDK to connect them to one of your AI agents
+3. The call bridges through your connected Twilio account
+4. End user speaks directly with your agent through their device microphone and speakers
+5. After the call ends, you receive full transcript, recording, and analytics just like phone calls
+
+<Note>
+WebRTC calls appear in your call logs with a "WebRTC" badge for easy identification. All features like transcripts, recordings, webhooks, and custom tools work exactly the same as regular phone calls.
+</Note>
+
+## Prerequisites
+
+Before you begin:
+
+- Active RevRing account with at least one configured agent
+- Your own Twilio account (can be the same account used for your SIP trunk)
+- At least one phone number assigned to your agent for inbound routing
+
+## Twilio Rates
+
+RevRing WebRTC uses your own Twilio account - Twilio might charge you the following:
+
+- **User call leg**: $0.004/minute
+- **Agent call leg**: $0.004/minute
+- **Total**: around $0.008/minute (check Twilio's website to calculate your cost)
+
+<Note>
+RevRing does not charge any additional fees for WebRTC. You only pay Twilio voice rates on your own Twilio account. Your existing RevRing plan covers WebRTC calls just like regular phone calls.
+</Note>
+
+## Setup
+
+### Step 1: Connect Your Twilio Account
+
+1. Navigate to [WebRTC](https://dashboard.revring.ai/app/webrtc) in your RevRing dashboard
+2. Click **Set Up WebRTC**
+3. You'll need two values from your Twilio Console:
+
+#### Get Your Twilio Account SID
+
+1. Log into [Twilio Console](https://console.twilio.com)
+2. From the dashboard homepage, copy your **Account SID**
+3. Paste it into the **Twilio Account SID** field in RevRing
+
+#### Get Your Twilio Auth Token
+
+1. In the Twilio Console dashboard, click **Show** next to Auth Token
+2. Copy the **Auth Token**
+3. Paste it into the **Twilio Auth Token** field in RevRing
+
+<Warning>
+Your Auth Token is used only during initial setup to create voice credentials and configure your Twilio account. It is not stored by RevRing.
+</Warning>
+
+4. Click **Set Up WebRTC**
+
+RevRing will automatically create and configure the necessary Twilio resources (credentials for voice calls and TwiML application) for WebRTC calling.
+
+### Step 2: Assign a Phone Number to Your Agent
+
+Your agent needs at least one assigned phone number for WebRTC routing:
+
+1. Navigate to [Agents](https://dashboard.revring.ai/app/agents) and select your agent
+2. Go to the **Phone Numbers** tab
+3. Add an inbound number in E.164 format:
+   ```
+   +12025551234
+   ```
+4. Click **Add Number**
+
+This number is used internally to route WebRTC calls to the correct agent. End users never see or dial this number - you'll specify it in your SDK code.
+
+<Tip>
+You can use any valid E.164 number for WebRTC routing. It doesn't need to be a Twilio number - it just needs to be assigned to your agent in RevRing.
+</Tip>
+
+## JavaScript SDK
+
+The RevRing JavaScript SDK works in any modern browser and supports TypeScript out of the box.
+
+### Installation
+
+Install the SDK via npm:
+
+```bash
+npm install @revring/webrtc-sdk
+```
+
+Or using yarn:
+
+```bash
+yarn add @revring/webrtc-sdk
+```
+
+### Basic Usage
+
+Here's a minimal example of a call button:
+
+```typescript
+import { RevRingWebRtcClient } from "@revring/webrtc-sdk";
+
+// Initialize the SDK client
+const client = new RevRingWebRtcClient();
+
+// Phone number assigned to your agent (end users never see this)
+const AGENT_NUMBER = "+12025551234";
+
+// Start a call when end user clicks your button
+async function startCall() {
+  try {
+    const call = await client.startCall({
+      to: AGENT_NUMBER
+    });
+
+    // Listen for call events
+    call.on("accept", () => {
+      console.log("Call connected");
+    });
+
+    call.on("disconnect", () => {
+      console.log("Call ended");
+    });
+
+    call.on("error", (error) => {
+      console.error("Call error:", error);
+    });
+
+  } catch (error) {
+    console.error("Failed to start call:", error);
+  }
+}
+
+// Hang up the call
+function hangUp() {
+  client.hangupAll();
+}
+
+// Clean up when done
+function cleanup() {
+  client.destroy();
+}
+```
+
+### Configuration Options
+
+#### Initialize Client
+
+```typescript
+const client = new RevRingWebRtcClient({
+  // Optional: custom API base URL (defaults to production)
+  apiBaseUrl: "https://api.revring.ai"
+});
+```
+
+#### Start Call Options
+
+```typescript
+const call = await client.startCall({
+  // Required: phone number assigned to your agent (E.164 format)
+  to: "+12025551234",
+  
+  // Optional: Twilio SDK log level
+  twilioLogLevel: "error" // "trace" | "debug" | "info" | "warn" | "error" | "silent"
+});
+```
+
+### Call Events
+
+The call object returned by `startCall()` emits several events:
+
+```typescript
+call.on("accept", () => {
+  // Call successfully connected
+});
+
+call.on("disconnect", () => {
+  // Call ended (by either party)
+});
+
+call.on("cancel", () => {
+  // Call was cancelled before connecting
+});
+
+call.on("reject", () => {
+  // Call was rejected (agent busy, offline, etc.)
+});
+
+call.on("error", (error) => {
+  // Error occurred during call
+  console.error(error);
+});
+```
+
+### Methods
+
+#### `startCall(options)`
+
+Initiates a WebRTC call to connect the end user with one of your agents.
+
+**Parameters:**
+- `to` (string, required): Phone number assigned to your agent (E.164 format)
+- `twilioLogLevel` (string, optional): Log level for debugging
+- `apiBaseUrl` (string, optional): Override API base URL
+
+**Returns:** Promise that resolves to a Twilio Call object
+
+#### `hangupAll()`
+
+Disconnects all active calls.
+
+#### `destroy()`
+
+Cleans up the SDK and releases resources. Call this when unmounting your component or page.
+
+## Complete Example
+
+Here's a full implementation with UI state management:
+
+```typescript
+import { RevRingWebRtcClient } from "@revring/webrtc-sdk";
+
+const AGENT_NUMBER = "+12025551234";
+
+class CallWidget {
+  private client: RevRingWebRtcClient;
+  private activeCall: any = null;
+  private isConnected = false;
+
+  constructor() {
+    this.client = new RevRingWebRtcClient();
+  }
+
+  async startCall() {
+    try {
+      const call = await this.client.startCall({
+        to: AGENT_NUMBER
+      });
+
+      this.activeCall = call;
+
+      call.on("accept", () => {
+        this.isConnected = true;
+        this.updateUI("Connected");
+      });
+
+      call.on("disconnect", () => {
+        this.isConnected = false;
+        this.activeCall = null;
+        this.updateUI("Call ended");
+      });
+
+      call.on("error", (error) => {
+        console.error("Call error:", error);
+        this.updateUI("Call failed");
+      });
+
+      this.updateUI("Connecting...");
+
+    } catch (error) {
+      console.error("Failed to start call:", error);
+      this.updateUI("Failed to connect");
+    }
+  }
+
+  hangup() {
+    if (this.activeCall) {
+      this.activeCall.disconnect();
+      this.activeCall = null;
+      this.isConnected = false;
+    }
+  }
+
+  destroy() {
+    this.hangup();
+    this.client.destroy();
+  }
+
+  private updateUI(status: string) {
+    // Update your UI elements here
+    console.log(status);
+  }
+}
+
+// Initialize
+const widget = new CallWidget();
+
+// Clean up on page unload
+window.addEventListener("beforeunload", () => {
+  widget.destroy();
+});
+```
+
+## Mobile SDKs
+
+WebRTC support extends beyond the browser. Build native mobile experiences with our platform SDKs:
+
+- **iOS SDK**: Native Swift implementation for iPhone and iPad apps
+- **Android SDK**: Native Kotlin/Java implementation for Android devices  
+- **React Native SDK**: Cross-platform support for React Native apps
+
+Contact [support](mailto:contact@revring.ai) for access to mobile SDKs and documentation.
+
+## Best Practices
+
+### Microphone Permissions
+
+Modern browsers require user interaction (like a button click) before accessing the microphone. Always initiate calls from an end user action:
+
+```typescript
+// ✅ Good - triggered by end user click
+button.addEventListener("click", async () => {
+  await client.startCall({ to: AGENT_NUMBER });
+});
+
+// ❌ Bad - automatic call on page load
+window.addEventListener("load", async () => {
+  await client.startCall({ to: AGENT_NUMBER });
+});
+```
+
+### Error Handling
+
+Handle permission denials gracefully:
+
+```typescript
+try {
+  const call = await client.startCall({ to: AGENT_NUMBER });
+} catch (error) {
+  if (error.message.includes("Permission")) {
+    alert("Please allow microphone access to make calls");
+  } else {
+    alert("Failed to start call. Please try again.");
+  }
+}
+```
+
+### Resource Cleanup
+
+Always clean up when your component unmounts or page unloads:
+
+```typescript
+// React example
+useEffect(() => {
+  const client = new RevRingWebRtcClient();
+  
+  return () => {
+    client.destroy();
+  };
+}, []);
+```
+
+### Testing
+
+Test your WebRTC implementation thoroughly:
+
+1. Test with microphone permissions granted and denied
+2. Test hang up during connecting state
+3. Test hang up during active call
+4. Test network interruptions
+5. Test on different browsers (Chrome, Safari, Firefox, Edge)
+6. Test on mobile browsers (iOS Safari, Android Chrome)
+
+<Tip>
+If you are facing call connection issues, use `twilioLogLevel: "debug"` during development to see detailed connection logs. Set it to `"error"` or `"silent"` in production.
+</Tip>
+
+## Monitoring Calls
+
+WebRTC calls appear in your [Call Logs](https://dashboard.revring.ai/app/calls) with a "WebRTC" badge in the "From" column. All standard call features are available:
+
+- Full conversation transcript
+- Call recording playback
+- Call duration and status
+- Pre-call and post-call webhook data
+- Custom tool invocations
+
+<Tip>
+To filter for only WebRTC calls via the API, use the `fromNumber` parameter with `+19999999999` in the [List Calls](/api-reference/calls/list) endpoint.
+</Tip>
+
+## Troubleshooting
+
+### "Failed to get WebRTC token"
+
+**Cause:** Twilio account not configured or phone number not assigned to an agent.
+
+**Solution:**
+1. Verify WebRTC is configured in [Developer → WebRTC](https://dashboard.revring.ai/app/webrtc)
+2. Verify the phone number is assigned to an agent in the agent's Phone Numbers tab
+
+### "Permission denied" errors
+
+**Cause:** End user denied microphone access or browser doesn't support microphone API.
+
+**Solution:**
+1. Ensure calls are triggered from end user interactions (button clicks)
+2. Check browser permissions and prompt end user to allow microphone access
+3. Test in a supported browser (Chrome, Safari, Firefox, Edge)
+
+### Calls not connecting
+
+**Cause:** Invalid phone number or agent offline.
+
+**Solution:**
+1. Verify the phone number is in E.164 format (`+12025551234`)
+2. Verify the agent status is "Active"
+3. Check [Call Logs](https://dashboard.revring.ai/app/calls) for error details
+
+### No audio in call
+
+**Cause:** Browser audio permissions or speaker issues.
+
+**Solution:**
+1. Check browser permissions for microphone and speaker
+2. Verify device audio output is working
+3. Test with headphones to rule out speaker issues
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="View Documentation" icon="book" href="https://www.npmjs.com/package/@revring/webrtc-sdk">
+    Full SDK reference on NPM
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/platform/webhooks">
+    Integrate with your systems
+  </Card>
+  <Card title="Agent Configuration" icon="robot" href="/platform/inbound">
+    Customize agent behavior
+  </Card>
+  <Card title="Call Logs" icon="list" href="https://dashboard.revring.ai/app/calls">
+    Monitor WebRTC calls
+  </Card>
+</CardGroup>
