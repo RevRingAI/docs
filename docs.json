@@ -27,11 +27,11 @@
                             "platform/inbound",
                             "platform/outbound",
                             "platform/prompting-variables",
+                            "platform/conversation-flows",
                             "platform/multilingual",
                             "platform/tools",
                             "platform/webhooks",
-                            "platform/webrtc",
-                            "platform/conversation-flows"
+                            "platform/webrtc"
                         ]
                     }
                 ]
