@@ -1,0 +1,697 @@
+---
+title: 'Conversation Flows'
+description: 'Build structured conversation flows with the RevRing flow JSON format'
+icon: 'diagram-project'
+---
+
+Conversation flows let you define structured, multi-step call scripts for your AI agents. Instead of relying on a single prompt, you can build a directed graph of nodes (steps) and edges (transitions) that guide the conversation through a precise sequence.
+
+Flows are defined as a JSON format that we call the **flow definition**. You can build flows visually in the RevRing dashboard, or generate them programmatically — including with AI tools like ChatGPT — and import them via the API.
+
+## Overview
+
+A flow consists of:
+
+- **Begin** — which node starts the conversation and who speaks first
+- **Nodes** — individual steps (conversation, tool call, logic branch, transfer, etc.)
+- **Edges** — connections between nodes that define transitions and conditions
+
+```json
+{
+  "schemaVersion": 1,
+  "begin": { "startNodeId": "node_1", "whoSpeaksFirst": "agent" },
+  "nodes": [ ... ],
+  "edges": [ ... ]
+}
+```
+
+## Flow Definition Reference
+
+### Top-Level Structure
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `schemaVersion` | `1` | Yes | Must be `1` |
+| `begin` | object | Yes | Flow entry point configuration |
+| `nodes` | array | Yes | List of flow nodes (at least one) |
+| `edges` | array | Yes | List of edges connecting nodes |
+| `ui` | object | No | Visual editor state (viewport position/zoom) |
+
+### Begin
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `startNodeId` | string | Yes | ID of the first node to execute. Must match a node in `nodes`. |
+| `whoSpeaksFirst` | `"agent"` or `"user"` | Yes | Whether the agent speaks first or waits for the caller |
+
+## Node Types
+
+Every node has the following base fields:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique identifier for the node |
+| `type` | string | Yes | One of the node types below |
+| `name` | string | Yes | Human-readable label |
+| `isGlobal` | boolean | No | If `true`, this node can be triggered from any point in the flow via a global edge |
+| `position` | `{ x, y }` | Yes | Visual position in the editor (use any values when generating programmatically) |
+| `data` | object | Yes | Type-specific configuration (see below) |
+
+### Conversation
+
+The core node type. The agent speaks and/or listens based on an instruction.
+
+**Type**: `"conversation"`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `instructionType` | `"prompt"` or `"static"` | Yes | `"prompt"` = LLM interprets the instruction as context. `"static"` = agent speaks the text verbatim. |
+| `instruction` | string | Yes | The instruction text or static message. Supports `{{variables}}`. |
+| `skipResponse` | boolean | No | If `true`, the agent speaks the instruction and immediately moves to the next node without waiting for a user reply. Requires a `skip` edge. |
+| `blockInterruptions` | boolean | No | If `true`, the agent cannot be interrupted while speaking |
+
+**Example:**
+```json
+{
+  "id": "greeting",
+  "type": "conversation",
+  "name": "Greeting",
+  "position": { "x": 300, "y": 200 },
+  "data": {
+    "instructionType": "prompt",
+    "instruction": "Greet the caller warmly. Introduce yourself as {{agent_name}} from {{company_name}}. Ask how you can help them today."
+  }
+}
+```
+
+### Function (Tool Call)
+
+Invokes one of your agent's custom tools during the flow.
+
+**Type**: `"function"`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `toolName` | string | Yes | Name of the custom tool to invoke (must be configured on the agent) |
+| `speakDuringExecution` | boolean | No | If `true`, agent speaks while the tool runs |
+| `speakInstruction` | string | No | What to say while the tool executes |
+| `speakInstructionType` | `"prompt"` or `"static"` | No | How to interpret the speak instruction |
+| `blockInterruptions` | boolean | No | Block interruptions during execution |
+| `waitForResult` | boolean | No | Default `true`. Set `false` for fire-and-forget calls. |
+| `outputVariables` | array | No | Map tool output keys to flow variables for use in downstream conditions |
+
+Each entry in `outputVariables`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `outputKey` | string | Key in the tool's JSON response |
+| `variableName` | string | Flow variable name to store the value as |
+
+**Example:**
+```json
+{
+  "id": "lookup_order",
+  "type": "function",
+  "name": "Look Up Order",
+  "position": { "x": 300, "y": 400 },
+  "data": {
+    "toolName": "lookup_order",
+    "speakDuringExecution": true,
+    "speakInstruction": "Let me look that up for you, one moment.",
+    "speakInstructionType": "static",
+    "outputVariables": [
+      { "outputKey": "status", "variableName": "order_status" },
+      { "outputKey": "eta", "variableName": "delivery_eta" }
+    ]
+  }
+}
+```
+
+### Logic Split
+
+A branching node with no data of its own — all logic is defined by its outgoing edges (conditions and an else fallback).
+
+**Type**: `"logic_split"`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| (none) | — | — | Data is an empty object `{}` |
+
+The logic split node must have:
+- One or more `condition` edges (evaluated in order)
+- Exactly one `else` edge (fallback if no conditions match)
+
+**Example:**
+```json
+{
+  "id": "check_status",
+  "type": "logic_split",
+  "name": "Check Order Status",
+  "position": { "x": 300, "y": 600 },
+  "data": {}
+}
+```
+
+### Call Transfer
+
+Transfers the call to another phone number.
+
+**Type**: `"call_transfer"`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `transferTo` | string | Yes | Destination phone number in E.164 format (e.g. `"+14155551234"`) or a `{{variable}}` |
+| `transferMode` | `"cold"` or `"warm"` | No | Cold = immediate transfer. Warm = agent briefs the recipient first. |
+| `speakDuringExecution` | boolean | No | Speak while the transfer is being set up |
+| `speakInstruction` | string | No | What to say during transfer |
+| `holdMessage` | string | No | Message spoken to the caller while on hold (warm transfer, max 500 chars) |
+| `holdMusicEnabled` | boolean | No | Play hold music (warm transfer) |
+| `summaryPrompt` | string | No | Prompt used to generate a brief for the recipient (warm transfer, max 2000 chars) |
+| `introMessage` | string | No | Message spoken to the recipient before connecting (warm transfer, max 500 chars) |
+
+**Example:**
+```json
+{
+  "id": "transfer_support",
+  "type": "call_transfer",
+  "name": "Transfer to Support",
+  "position": { "x": 600, "y": 800 },
+  "data": {
+    "transferTo": "+12025559999",
+    "transferMode": "warm",
+    "speakDuringExecution": true,
+    "speakInstruction": "Let me connect you with our support team.",
+    "holdMessage": "Please hold while I connect you.",
+    "holdMusicEnabled": true
+  }
+}
+```
+
+### End Call
+
+Terminates the call, optionally speaking a closing message.
+
+**Type**: `"end"`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `message` | string | No | Closing message to speak before hanging up |
+
+**Example:**
+```json
+{
+  "id": "goodbye",
+  "type": "end",
+  "name": "End Call",
+  "position": { "x": 300, "y": 1000 },
+  "data": {
+    "message": "Thank you for calling. Have a great day!"
+  }
+}
+```
+
+### Press Digit (DTMF)
+
+Waits for the caller to press a phone keypad digit. Useful for IVR-style menus or entering account numbers.
+
+**Type**: `"press_digit"`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `instruction` | string | Yes | What to say before listening for a digit |
+| `detectionDelaySeconds` | number | No | How long to wait for input (0–10 seconds, default 1) |
+
+**Example:**
+```json
+{
+  "id": "menu",
+  "type": "press_digit",
+  "name": "Main Menu",
+  "position": { "x": 300, "y": 200 },
+  "data": {
+    "instruction": "Press 1 for sales, press 2 for support, or press 3 for billing.",
+    "detectionDelaySeconds": 3
+  }
+}
+```
+
+### Extract Variable
+
+Uses the LLM to extract structured data from the conversation and store it in flow variables for downstream use.
+
+**Type**: `"extract_variable"`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `variables` | array | Yes | List of variables to extract (at least one) |
+
+Each entry in `variables`:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `variableName` | string | Yes | Name of the flow variable to store the extracted value |
+| `description` | string | Yes | Description of what to extract (used as context for the LLM) |
+| `variableType` | `"text"`, `"number"`, `"enum"`, `"boolean"` | Yes | Data type of the variable |
+| `enumOptions` | string[] | No | Required when `variableType` is `"enum"` — the allowed values |
+
+**Example:**
+```json
+{
+  "id": "get_intent",
+  "type": "extract_variable",
+  "name": "Detect Intent",
+  "position": { "x": 300, "y": 400 },
+  "data": {
+    "variables": [
+      {
+        "variableName": "caller_intent",
+        "description": "The primary reason the caller is calling",
+        "variableType": "enum",
+        "enumOptions": ["billing", "support", "sales", "other"]
+      },
+      {
+        "variableName": "caller_name",
+        "description": "The caller's first name if mentioned",
+        "variableType": "text"
+      }
+    ]
+  }
+}
+```
+
+## Edges
+
+Edges connect nodes and define how the flow transitions between steps.
+
+<Note>
+Condition edges can be attached to **any node type**, not just logic split nodes. For example, you can put condition edges directly on a conversation node to branch based on the caller's response — no logic split needed.
+</Note>
+
+### Edge Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique identifier for the edge |
+| `source` | string | Yes | ID of the source node, or `"__global__"` for global edges |
+| `target` | string | Yes | ID of the target node |
+| `kind` | string | Yes | One of: `"default"`, `"condition"`, `"else"`, `"skip"` |
+| `order` | integer | Condition edges only | Evaluation order (0-based). Lower numbers are evaluated first. |
+| `condition` | object | Condition edges only | The condition to evaluate |
+
+### Edge Kinds
+
+| Kind | Description |
+|------|-------------|
+| `default` | Unconditional transition — used when a node completes normally |
+| `condition` | Evaluated in order; first matching condition wins |
+| `else` | Fallback when no condition edges match (required on `logic_split` nodes) |
+| `skip` | Used with `skipResponse` conversation nodes — immediate transition without waiting for user input |
+
+### Conditions on Any Node
+
+You can attach condition edges to any node type. This is particularly useful on conversation nodes — branch directly based on the caller's response without needing a separate logic split node.
+
+For example, a greeting node that routes callers to different paths:
+
+```json
+[
+  {
+    "id": "e1",
+    "source": "greeting",
+    "target": "collect_info",
+    "kind": "condition",
+    "order": 0,
+    "condition": {
+      "type": "prompt",
+      "promptText": "The caller wants help and didn't mention billing or tech support"
+    }
+  },
+  {
+    "id": "e2",
+    "source": "greeting",
+    "target": "billing_confirm",
+    "kind": "condition",
+    "order": 1,
+    "condition": {
+      "type": "prompt",
+      "promptText": "The caller needs billing help"
+    }
+  },
+  {
+    "id": "e3",
+    "source": "greeting",
+    "target": "tech_confirm",
+    "kind": "condition",
+    "order": 2,
+    "condition": {
+      "type": "prompt",
+      "promptText": "The caller needs technical help"
+    }
+  }
+]
+```
+
+If no condition matches, the agent stays at the greeting node and continues the conversation until a condition is met.
+
+### Conditions
+
+Conditions determine whether a `condition` edge is followed. There are two types:
+
+#### Prompt Conditions
+
+The LLM evaluates a natural language question against the conversation context.
+
+```json
+{
+  "type": "prompt",
+  "promptText": "Did the caller agree to schedule an appointment?"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | `"prompt"` | Prompt-based condition |
+| `promptText` | string | A yes/no question the LLM evaluates against the conversation |
+
+#### Equation Conditions
+
+Variable-based conditions that compare flow variables against values. No LLM call required.
+
+```json
+{
+  "type": "equation",
+  "match": "all",
+  "equations": [
+    { "variable": "order_status", "operator": "==", "value": "shipped" },
+    { "variable": "delivery_eta", "operator": "exists" }
+  ]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | `"equation"` | Equation-based condition |
+| `match` | `"any"` or `"all"` | Whether any or all equations must be true. Optional — defaults to `"all"`. |
+| `equations` | array | List of equations to evaluate |
+
+Each equation:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `variable` | string | Flow variable name to compare |
+| `operator` | string | Comparison operator |
+| `value` | string | Value to compare against (not required for `exists`/`not_exists`) |
+
+**Available operators:** `==`, `!=`, `contains`, `not_contains`, `contained_in`, `not_contained_in`, `>`, `<`, `>=`, `<=`, `exists`, `not_exists`
+
+## Global Nodes and Edges
+
+Global nodes can be triggered from **any point** in the conversation, not just from a specific predecessor node. This is useful for handling requests that can happen at any time, such as "transfer me to a human" or "I want to cancel."
+
+To make a node global:
+1. Set `isGlobal: true` on the node
+2. Add one or more edges with `source: "__global__"` targeting that node
+3. Global edges must have a `condition` — typically a prompt condition
+
+```json
+{
+  "id": "global_transfer_edge",
+  "source": "__global__",
+  "target": "transfer_human",
+  "kind": "condition",
+  "order": 0,
+  "condition": {
+    "type": "prompt",
+    "promptText": "Is the caller asking to speak with a human or a real person?"
+  }
+}
+```
+
+## Transition Behavior
+
+After each user reply, the agent evaluates edges in this priority order:
+
+1. **Global edges** — checked first, across all global nodes. If a global condition matches, the flow jumps to that global node regardless of where the conversation currently is.
+2. **Condition edges** on the current node — evaluated in `order`, first match wins
+3. **Else edge** — taken if no condition edges matched
+4. **Default edge** — unconditional, taken if present
+5. **No match** — the agent stays in the current node and continues the conversation
+
+This means a conversation node doesn't need a fallback edge. If no conditions match, the agent simply keeps talking at the current step — useful for nodes that need to collect information before moving on (e.g. "keep asking until the caller provides their phone number").
+
+## Validation Rules
+
+When submitting a flow via the API, the following rules are enforced:
+
+1. `schemaVersion` must be `1`
+2. Every node must have a unique `id`
+3. `begin.startNodeId` must reference an existing node
+4. All edge `source` and `target` values must reference existing nodes (except `"__global__"` as source)
+5. `logic_split` nodes must have exactly one `else` edge
+6. `skipResponse` conversation nodes must have exactly one `skip` edge and no other outgoing edges
+7. Global nodes (`isGlobal: true`) must have at least one `__global__` edge targeting them
+8. `__global__` edges must target nodes with `isGlobal: true`
+9. `condition` edges must have an `order` value, unique per source node
+10. Prompt conditions must have non-empty `promptText`; equation conditions must have at least one equation
+11. Total flow size must not exceed 48 KB
+
+## Complete Example
+
+Here is a complete flow for an order status hotline:
+
+```json
+{
+  "schemaVersion": 1,
+  "begin": {
+    "startNodeId": "greeting",
+    "whoSpeaksFirst": "agent"
+  },
+  "nodes": [
+    {
+      "id": "greeting",
+      "type": "conversation",
+      "name": "Greeting",
+      "position": { "x": 300, "y": 100 },
+      "data": {
+        "instructionType": "prompt",
+        "instruction": "Greet the caller warmly. Ask for their order number so you can look up the status."
+      }
+    },
+    {
+      "id": "extract_order",
+      "type": "extract_variable",
+      "name": "Get Order Number",
+      "position": { "x": 300, "y": 300 },
+      "data": {
+        "variables": [
+          {
+            "variableName": "order_number",
+            "description": "The customer's order number",
+            "variableType": "text"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lookup",
+      "type": "function",
+      "name": "Look Up Order",
+      "position": { "x": 300, "y": 500 },
+      "data": {
+        "toolName": "lookup_order",
+        "speakDuringExecution": true,
+        "speakInstruction": "One moment while I look that up.",
+        "speakInstructionType": "static",
+        "outputVariables": [
+          { "outputKey": "status", "variableName": "order_status" }
+        ]
+      }
+    },
+    {
+      "id": "check_status",
+      "type": "logic_split",
+      "name": "Check Status",
+      "position": { "x": 300, "y": 700 },
+      "data": {}
+    },
+    {
+      "id": "shipped_response",
+      "type": "conversation",
+      "name": "Order Shipped",
+      "position": { "x": 100, "y": 900 },
+      "data": {
+        "instructionType": "prompt",
+        "instruction": "Tell the customer their order has been shipped and ask if there's anything else you can help with."
+      }
+    },
+    {
+      "id": "pending_response",
+      "type": "conversation",
+      "name": "Order Pending",
+      "position": { "x": 500, "y": 900 },
+      "data": {
+        "instructionType": "prompt",
+        "instruction": "Let the customer know their order is still being processed and should ship within 1-2 business days. Ask if they have any other questions."
+      }
+    },
+    {
+      "id": "transfer_support",
+      "type": "call_transfer",
+      "name": "Transfer to Support",
+      "isGlobal": true,
+      "position": { "x": 700, "y": 500 },
+      "data": {
+        "transferTo": "+12025559999",
+        "transferMode": "cold",
+        "speakDuringExecution": true,
+        "speakInstruction": "Let me connect you with our support team right away."
+      }
+    },
+    {
+      "id": "goodbye",
+      "type": "end",
+      "name": "End Call",
+      "position": { "x": 300, "y": 1100 },
+      "data": {
+        "message": "Thank you for calling! Goodbye."
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "greeting",
+      "target": "extract_order",
+      "kind": "default"
+    },
+    {
+      "id": "e2",
+      "source": "extract_order",
+      "target": "lookup",
+      "kind": "default"
+    },
+    {
+      "id": "e3",
+      "source": "lookup",
+      "target": "check_status",
+      "kind": "default"
+    },
+    {
+      "id": "e4",
+      "source": "check_status",
+      "target": "shipped_response",
+      "kind": "condition",
+      "order": 0,
+      "condition": {
+        "type": "equation",
+        "match": "all",
+        "equations": [
+          { "variable": "order_status", "operator": "==", "value": "shipped" }
+        ]
+      }
+    },
+    {
+      "id": "e5",
+      "source": "check_status",
+      "target": "pending_response",
+      "kind": "else"
+    },
+    {
+      "id": "e6",
+      "source": "shipped_response",
+      "target": "goodbye",
+      "kind": "default"
+    },
+    {
+      "id": "e7",
+      "source": "pending_response",
+      "target": "goodbye",
+      "kind": "default"
+    },
+    {
+      "id": "e8",
+      "source": "__global__",
+      "target": "transfer_support",
+      "kind": "condition",
+      "order": 0,
+      "condition": {
+        "type": "prompt",
+        "promptText": "Is the caller asking to speak with a human representative?"
+      }
+    }
+  ]
+}
+```
+
+This flow:
+
+1. **Greets** the caller and asks for their order number
+2. **Extracts** the order number from the conversation
+3. **Calls a tool** to look up the order status
+4. **Branches** based on whether the status is `"shipped"` or anything else
+5. **Responds** with the appropriate message
+6. **Ends** the call
+7. At **any point**, if the caller asks for a human, the call is transferred (global node)
+
+## Importing Flows via API
+
+Agent `mode` is set at creation time and cannot be changed afterwards. To use conversation flows, create an agent with `mode: "conversation_flow"`.
+
+### Creating a flow agent
+
+Use the [Create Agent](/api-reference/agents/create) endpoint with `mode` set to `"conversation_flow"` and the `flowDefinition` field set to your flow JSON:
+
+```bash
+curl -X POST https://api.revring.ai/v1/agents \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Order Status Agent",
+    "mode": "conversation_flow",
+    "promptTemplate": "You are a helpful order status assistant.",
+    "flowDefinition": {
+      "schemaVersion": 1,
+      "begin": { ... },
+      "nodes": [ ... ],
+      "edges": [ ... ]
+    }
+  }'
+```
+
+### Updating a flow
+
+To update the flow on an existing `conversation_flow` agent, use the [Update Agent](/api-reference/agents/update) endpoint with just the `flowDefinition` field:
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "flowDefinition": {
+      "schemaVersion": 1,
+      "begin": { ... },
+      "nodes": [ ... ],
+      "edges": [ ... ]
+    }
+  }'
+```
+
+<Note>
+`mode` is immutable after creation. You cannot convert a `single_prompt` agent to `conversation_flow` — create a new agent instead.
+</Note>
+
+<Tip>
+You can generate flow definition JSON with AI tools like ChatGPT. Share this reference page as context, describe the conversation flow you want, and paste the generated JSON into the API call or the dashboard's import feature.
+</Tip>
+
+## Using Variables in Flows
+
+Flow nodes support `{{variable}}` syntax in instruction text. Variables can come from:
+
+- **System variables** (`{{current_time}}`, `{{user_number}}`, etc.) — see [Prompting & Variables](/platform/prompting-variables)
+- **Default variables** configured on your agent
+- **Dynamic variables** passed via the API or pre-call webhook
+- **Extracted variables** from `extract_variable` nodes
+- **Tool output variables** mapped via `outputVariables` in function nodes
+
+All variables are available to every node in the flow once set.

@@ -30,7 +30,8 @@
                             "platform/multilingual",
                             "platform/tools",
                             "platform/webhooks",
-                            "platform/webrtc"
+                            "platform/webrtc",
+                            "platform/conversation-flows"
                         ]
                     }
                 ]
