@@ -380,7 +380,8 @@ If your webhook fails (4xx/5xx status) or times out:
 **Webhook Status Values:**
 - `sent`: Delivered successfully
 - `failed`: Webhook returned an error or timed out
-- `null`: No webhook configured
+- `skipped`: No webhook URL configured
+- `null`: Call has not yet reached the webhook stage
 
 ### Example Implementation
 
