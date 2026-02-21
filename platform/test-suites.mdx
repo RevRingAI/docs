@@ -11,7 +11,7 @@ Test suites let you automatically validate your agents by running scripted test 
 A test suite consists of:
 
 - **Target agent** — the agent being tested
-- **Tester agent** — an optional second agent that plays the role of the caller (if omitted, RevRing uses a built-in tester)
+- **Tester** — either the built-in **system tester** (simpler, requires no setup) or a **custom agent** you've created that role-plays as the caller
 - **Test cases** — individual scenarios, each with a script and scoring rubric
 - **Test runs** — executions of the full suite, producing pass/fail results for each case
 
@@ -22,13 +22,18 @@ When you start a test run, RevRing places calls between the tester and target ag
 ### From the Dashboard
 
 1. Navigate to **Testing** in the sidebar
-2. Click **Create Test Suite**
+2. Click **New Test Suite**
 3. Enter a **Name**
 4. Select the **Target Agent** to test
-5. Optionally select a **Tester Agent** (a separate agent that role-plays as the caller)
-6. Optionally set **Max Concurrency** to control how many test calls run in parallel (default 2, max 100)
-7. Optionally set **Default Variables** to pass to the target agent for all test calls
-8. Click **Create**
+5. Choose a tester mode:
+   - **Use system tester** — simpler, no setup required. RevRing's built-in tester follows each test script automatically.
+   - **Use custom agent as tester** — select one of your own agents to play the caller role. Useful when you need the tester to have specific voice, language, or behavioral settings.
+6. Set **Max Concurrency** to control how many test calls run in parallel (min 2, max 100, default 2). The minimum is 2 because each test requires two concurrent calls — one outbound from the tester and one inbound to the target.
+7. Click **Create**
+
+<Note>
+**Default Variables** can be added after creation by editing the test suite. Open the suite and click **Edit** to set variables that apply to all test calls.
+</Note>
 
 ### Via API
 
@@ -92,7 +97,7 @@ FAIL if ANY of the following are true:
 
 ### Creating Test Cases
 
-**Dashboard:** Open your test suite, click **Add Test Case**, fill in the name, script, and scoring rubric.
+**Dashboard:** Open your test suite, go to the **Configure Tests** tab, click **Add Test**, and fill in the name, script, and scoring rubric.
 
 **API:**
 ```bash
@@ -113,7 +118,9 @@ The `attemptsPerRun` field (1–10, default 1) controls how many times each test
 
 You can also generate test cases automatically using AI. Provide a prompt describing the scenarios you want to test, and RevRing generates test cases based on your target agent's configuration:
 
-**Dashboard:** Click **Generate Tests** in your test suite, enter a prompt, and review the generated cases.
+**Dashboard:** Click **Generate Tests** in your test suite and enter a prompt describing the scenarios you want. RevRing generates test cases based on your target agent's configuration. You can refine the results with follow-up messages — the generator keeps the conversation context so you can ask for adjustments or additional scenarios.
+
+Each generated test can be individually **added** to your suite or **dismissed**. Review each one before adding to make sure the script and rubric match your expectations.
 
 **API:**
 ```bash
@@ -131,7 +138,7 @@ The response includes generated test cases with `name`, `script`, and `scoringRu
 
 ### Starting a Test Run
 
-**Dashboard:** Click **Run Tests** in your test suite. The run starts immediately and you can monitor progress in real time.
+**Dashboard:** Go to the **Runs** tab and click **Run Tests**. Enter a run name (or accept the auto-generated timestamp name) and click **Start**. You can monitor progress in real time.
 
 **API:**
 ```bash
@@ -161,7 +168,7 @@ Each test run tracks summary statistics:
 - **Passed** — number of attempts that passed
 - **Failed** — number of attempts that failed
 
-**Dashboard:** The test run detail page shows real-time progress with results for each attempt.
+**Dashboard:** The test run detail page shows real-time progress with results for each attempt. Click **View Call Details** on any attempt to see the full call record.
 
 **API:**
 ```bash
@@ -181,9 +188,13 @@ Each test attempt produces:
 | `callId` | Link to the outbound call record |
 | `inboundCallId` | Link to the inbound call record (on the target agent) |
 
+### Exporting Results
+
+After a run completes, you can export the results as JSON. Filter by **pass**, **fail**, or **error** before exporting to narrow down the data. Results can be copied to clipboard or downloaded as a file.
+
 ### Cancelling a Run
 
-**Dashboard:** Click **Cancel** on a running test run.
+**Dashboard:** Click **Stop** on a running test run.
 
 **API:**
 ```bash
@@ -239,7 +250,7 @@ This is useful for testing different caller scenarios:
 
 ### Concurrency
 
-The `maxConcurrency` setting controls how many test calls run simultaneously. Higher concurrency completes runs faster but counts against your organization's call concurrency limit. Start with a low value (2–5) and increase as needed.
+The `maxConcurrency` setting controls how many test calls run simultaneously (minimum 2, maximum 100). Higher concurrency completes runs faster but counts against your organization's call concurrency limit. Start with a low value (2–5) and increase as needed.
 
 ## Troubleshooting
 
@@ -257,7 +268,11 @@ The `maxConcurrency` setting controls how many test calls run simultaneously. Hi
   </Accordion>
 
   <Accordion title="Tester agent not following the script">
-    If using a custom tester agent, ensure its prompt instructs it to follow the test script closely. The script is injected into the tester agent's context, but a conflicting system prompt may override it.
+    If using a custom tester agent, ensure its prompt instructs it to follow the test script closely. The script is injected into the tester agent's context, but a conflicting system prompt may override it. If you don't need special tester behavior, consider switching to the **system tester** instead.
+  </Accordion>
+
+  <Accordion title="'No available from number' error">
+    This means the tester and target agent are sharing the same SIP trunk phone numbers. Each test call requires two participants on separate lines — the tester calls the target. Add another phone number to your SIP trunk so the tester can call from a different number than the target receives on.
   </Accordion>
 </AccordionGroup>
 

@@ -99,7 +99,12 @@
                             "api-reference/knowledge-bases/get",
                             "api-reference/knowledge-bases/create",
                             "api-reference/knowledge-bases/update",
-                            "api-reference/knowledge-bases/delete",
+                            "api-reference/knowledge-bases/delete"
+                        ]
+                    },
+                    {
+                        "group": "Knowledge Base Sources",
+                        "pages": [
                             "api-reference/knowledge-bases/add-source",
                             "api-reference/knowledge-bases/get-source",
                             "api-reference/knowledge-bases/delete-source"

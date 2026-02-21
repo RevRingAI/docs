@@ -54,7 +54,7 @@ Each knowledge base can contain up to **10 sources**. Sources are processed asyn
 
 Add text content directly. Useful for FAQ lists, policy excerpts, or any structured text.
 
-**Dashboard:** Click **Add Source** → **Text**, enter a name and content, then click **Add**.
+**Dashboard:** Click **Add Source** → **Text**, enter a name and content, then click **Add Text Source**.
 
 **API:**
 ```bash
@@ -74,7 +74,7 @@ Text sources can be up to 100,000 characters.
 
 Add a web page URL. RevRing fetches and indexes the page content automatically.
 
-**Dashboard:** Click **Add Source** → **URL**, enter the URL and an optional display name, then click **Add**.
+**Dashboard:** Click **Add Source** → **URL**, enter a **Name** and the **URL**, then click **Add URL Source**.
 
 **API:**
 ```bash
@@ -94,7 +94,7 @@ Only `http://` and `https://` URLs are supported. The page content is fetched an
 
 ### File Sources
 
-Upload documents directly. Supported formats include PDF, TXT, DOCX, CSV, and other common document types.
+Upload documents directly. Supported formats: **PDF, TXT, DOCX, MD, CSV, JSON**.
 
 **Dashboard:** Click **Add Source** → **File**, then select a file from your computer.
 
@@ -116,7 +116,7 @@ curl https://api.revring.ai/v1/knowledge-bases/{id}/sources/{sourceId} \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
-The response includes a `status` field (`processing`, `ready`, or `failed`) and an `errorMessage` if processing failed.
+The response includes a `status` field (`queued`, `processing`, `ready`, or `failed`) and an `errorMessage` if processing failed.
 
 ## Linking Knowledge Bases to Agents
 
@@ -126,9 +126,8 @@ Once your knowledge base has sources in the `ready` state, link it to one or mor
 
 1. Open your agent's settings
 2. Go to the **Knowledge** tab
-3. Click **Add Knowledge Base**
-4. Select the knowledge base to link
-5. Click **Save**
+3. Click **Link Knowledge Base**
+4. Select the knowledge base you want to link — it's linked immediately
 
 ### Via API
 
@@ -155,16 +154,16 @@ When a knowledge base is linked to an agent, you can configure how the agent use
 
 | Mode | Description |
 |------|-------------|
-| `automatic` | The agent automatically searches the knowledge base whenever it might be helpful. This is the default and recommended mode. |
-| `query_tool` | The agent uses a dedicated tool to search the knowledge base. This gives you more control over when retrieval happens — useful if you want the agent to only search when explicitly asked. |
+| `automatic` | Labeled **Automatic (RAG)** in the dashboard. The agent automatically searches the knowledge base before every response. This is the default and recommended mode. |
+| `query_tool` | Labeled **Query Tool** in the dashboard. The agent uses a dedicated tool to search the knowledge base. This gives you more control over when retrieval happens — useful if you want the agent to only search when explicitly asked. |
 
-### Chunks
+### Chunks to Retrieve
 
 The number of text passages to retrieve per query (1–20, default 3). Higher values provide more context but use more tokens. Start with the default and increase if the agent is missing relevant information.
 
 ### Similarity Threshold
 
-Minimum relevance score for retrieved passages (0–1, default 0). Set this higher (e.g., 0.3–0.5) to filter out loosely related content. A value of 0 returns the top results regardless of relevance score.
+Minimum relevance score for retrieved passages (0.0–1.0, default 0). Set this higher (e.g., 0.3–0.5) to filter out loosely related content. A value of 0 returns the top results regardless of relevance score.
 
 ### Configuring via API
 
@@ -185,7 +184,7 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 
 To remove a source from a knowledge base:
 
-**Dashboard:** Click the **Delete** button next to the source.
+**Dashboard:** Hover over the source row and click the **trash icon**, then confirm deletion.
 
 **API:**
 ```bash
@@ -197,7 +196,7 @@ curl -X DELETE https://api.revring.ai/v1/knowledge-bases/{id}/sources/{sourceId}
 
 Deleting a knowledge base removes all its sources and unlinks it from any agents.
 
-**Dashboard:** Open the knowledge base and click **Delete**.
+**Dashboard:** Open the knowledge base, click the **⋮ menu**, then select **Delete Knowledge Base**.
 
 **API:**
 ```bash
