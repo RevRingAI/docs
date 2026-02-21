@@ -1,0 +1,117 @@
+---
+title: "MCP Server"
+description: "Connect RevRing documentation to AI coding tools like Cursor, VS Code, Claude, and more"
+icon: 'plug'
+---
+
+RevRing hosts an MCP (Model Context Protocol) server that lets AI tools search our documentation directly. This means tools like Cursor, VS Code Copilot, Claude, and Claude Code can pull accurate, up-to-date information from RevRing docs while helping you build integrations.
+
+```
+https://docs.revring.ai/mcp
+```
+
+Whether you're writing API integration code, configuring agents programmatically, or building custom workflows — connecting this MCP server gives your AI assistant direct access to every guide, API reference, and code example in our documentation.
+
+## Connect to Cursor
+
+<a href="cursor://anysphere.cursor-deeplink/mcp/install?name=RevRing&config=eyJ1cmwiOiJodHRwczovL2RvY3MucmV2cmluZy5haS9tY3AifQ==">
+  <img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Install RevRing MCP server in Cursor" noZoom />
+</a>
+
+Click the button above to install the RevRing MCP server in Cursor. Or configure it manually:
+
+Add the following to `.cursor/mcp.json` in your project directory (or `~/.cursor/mcp.json` for global access):
+
+```json
+{
+  "mcpServers": {
+    "RevRing": {
+      "url": "https://docs.revring.ai/mcp"
+    }
+  }
+}
+```
+
+To verify it's working, ask Cursor a question about RevRing — for example, *"How do I send an outbound call with the RevRing API?"*
+
+## Connect to VS Code
+
+[Install in VS Code](https://vscode.dev/redirect/mcp/install?name=RevRing&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fdocs.revring.ai%2Fmcp%22%7D) — click to add the RevRing MCP server automatically. Or configure it manually:
+
+Create a `.vscode/mcp.json` file in your project root:
+
+```json
+{
+  "servers": {
+    "RevRing": {
+      "type": "http",
+      "url": "https://docs.revring.ai/mcp"
+    }
+  }
+}
+```
+
+Open GitHub Copilot chat and ask a question about RevRing. VS Code may prompt you to trust the MCP server on first use — select **Allow** to enable it.
+
+## Connect to Claude
+
+<Steps>
+  <Step title="Open Claude settings">
+    Navigate to the [Connectors](https://claude.ai/settings/connectors) page in your Claude settings.
+  </Step>
+  <Step title="Add the RevRing MCP server">
+    Select **Add custom connector** and enter:
+
+    - **Name**: `RevRing`
+    - **URL**: `https://docs.revring.ai/mcp`
+  </Step>
+  <Step title="Use in conversations">
+    When chatting with Claude, select the attachments button (the **+** icon) and choose the RevRing connector. Claude can now search RevRing docs to answer your questions.
+  </Step>
+</Steps>
+
+## Connect to Claude Code
+
+Run the following command in your terminal:
+
+```bash
+claude mcp add --transport http RevRing https://docs.revring.ai/mcp
+```
+
+Verify the connection:
+
+```bash
+claude mcp list
+```
+
+## Connect to ChatGPT
+
+<Steps>
+  <Step title="Create a connector">
+    In ChatGPT, navigate to your Connectors settings and create a new connector with the URL:
+
+    ```
+    https://docs.revring.ai/mcp
+    ```
+  </Step>
+  <Step title="Use in conversations">
+    Start a new chat, select the **+** menu, choose **More**, and select the RevRing connector.
+  </Step>
+</Steps>
+
+## What's available
+
+The MCP server exposes a **search tool** that AI applications use to query all indexed RevRing documentation. This covers:
+
+- **Platform guides** — telephony setup, inbound/outbound calls, agent tools, knowledge bases, webhooks, and more
+- **API reference** — every endpoint, request/response schema, and error code
+- **Code examples** — integration patterns and configuration samples
+
+Most AI clients will call the search tool automatically when your question is relevant to RevRing. You can also explicitly ask your AI tool to search RevRing docs.
+
+## Use cases
+
+- **Building API integrations** — ask your AI tool to write code that sends calls, manages agents, or processes webhooks, and it will pull the correct endpoints and schemas from RevRing docs
+- **Configuring agents** — get accurate instructions for setting up tools, knowledge bases, conversation flows, and advanced settings
+- **Debugging** — describe an issue and your AI tool can search for relevant error codes, troubleshooting steps, and configuration requirements
+- **Learning the platform** — explore RevRing capabilities through natural conversation with any connected AI tool
