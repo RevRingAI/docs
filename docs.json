@@ -30,6 +30,8 @@
                             "platform/conversation-flows",
                             "platform/multilingual",
                             "platform/tools",
+                            "platform/knowledge-bases",
+                            "platform/test-suites",
                             "platform/webhooks",
                             "platform/webrtc"
                         ]
@@ -83,11 +85,33 @@
                         ]
                     },
                     {
+                        "group": "Agent Knowledge Bases",
+                        "pages": [
+                            "api-reference/agents/list-knowledge-bases",
+                            "api-reference/agents/link-knowledge-base",
+                            "api-reference/agents/unlink-knowledge-base"
+                        ]
+                    },
+                    {
+                        "group": "Knowledge Bases",
+                        "pages": [
+                            "api-reference/knowledge-bases/list",
+                            "api-reference/knowledge-bases/get",
+                            "api-reference/knowledge-bases/create",
+                            "api-reference/knowledge-bases/update",
+                            "api-reference/knowledge-bases/delete",
+                            "api-reference/knowledge-bases/add-source",
+                            "api-reference/knowledge-bases/get-source",
+                            "api-reference/knowledge-bases/delete-source"
+                        ]
+                    },
+                    {
                         "group": "Calls",
                         "pages": [
                             "api-reference/calls/list",
                             "api-reference/calls/get",
-                            "api-reference/calls/send"
+                            "api-reference/calls/send",
+                            "api-reference/calls/cancel"
                         ]
                     },
                     {
@@ -95,6 +119,36 @@
                         "pages": [
                             "api-reference/analytics/overview",
                             "api-reference/analytics/active"
+                        ]
+                    },
+                    {
+                        "group": "Test Suites",
+                        "pages": [
+                            "api-reference/test-suites/list",
+                            "api-reference/test-suites/get",
+                            "api-reference/test-suites/create",
+                            "api-reference/test-suites/update",
+                            "api-reference/test-suites/delete"
+                        ]
+                    },
+                    {
+                        "group": "Test Cases",
+                        "pages": [
+                            "api-reference/test-suites/list-tests",
+                            "api-reference/test-suites/get-test",
+                            "api-reference/test-suites/create-test",
+                            "api-reference/test-suites/update-test",
+                            "api-reference/test-suites/delete-test",
+                            "api-reference/test-suites/generate-tests"
+                        ]
+                    },
+                    {
+                        "group": "Test Runs",
+                        "pages": [
+                            "api-reference/test-suites/list-runs",
+                            "api-reference/test-suites/get-run",
+                            "api-reference/test-suites/start-run",
+                            "api-reference/test-suites/cancel-run"
                         ]
                     },
                     {

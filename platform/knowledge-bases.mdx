@@ -1,0 +1,284 @@
+---
+title: 'Knowledge Bases'
+description: 'Give your agents access to your documents, URLs, and text content for grounded, accurate answers'
+icon: 'book'
+---
+
+Knowledge bases allow your AI agents to retrieve information from your own documents during phone calls. Instead of relying solely on the system prompt, agents can search through uploaded files, web pages, and text content to provide accurate, grounded answers.
+
+## Overview
+
+A knowledge base is a collection of **sources** — files, URLs, or text snippets — that your agent can search during a conversation. When a caller asks a question, the agent retrieves the most relevant passages from the knowledge base and uses them to formulate a response.
+
+This is especially useful for:
+
+- **Product catalogs** — answer questions about pricing, features, and availability
+- **FAQ documents** — handle common customer inquiries accurately
+- **Policy documents** — reference specific terms, conditions, or procedures
+- **Internal wikis** — provide support agents with up-to-date information
+- **Training materials** — ensure consistent, accurate responses across all calls
+
+## Creating a Knowledge Base
+
+### From the Dashboard
+
+1. Navigate to **Knowledge Bases** in the sidebar
+2. Click **Create Knowledge Base**
+3. Enter a **Name** and optional **Description**
+4. Click **Create**
+
+### Via API
+
+```bash
+curl -X POST https://api.revring.ai/v1/knowledge-bases \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Product FAQ",
+    "description": "Frequently asked questions about our products"
+  }'
+```
+
+## Adding Sources
+
+Each knowledge base can contain up to **10 sources**. Sources are processed asynchronously — after adding a source, it moves through the following statuses:
+
+| Status | Description |
+|--------|-------------|
+| `queued` | Source is queued for processing |
+| `processing` | Source is being indexed and will be available shortly |
+| `ready` | Source is indexed and available for retrieval |
+| `failed` | Processing failed (check `errorMessage` for details) |
+
+### Text Sources
+
+Add text content directly. Useful for FAQ lists, policy excerpts, or any structured text.
+
+**Dashboard:** Click **Add Source** → **Text**, enter a name and content, then click **Add**.
+
+**API:**
+```bash
+curl -X POST https://api.revring.ai/v1/knowledge-bases/{id}/sources \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sourceType": "text",
+    "displayName": "Return Policy",
+    "content": "Our return policy allows returns within 30 days of purchase. Items must be in original condition with receipt. Refunds are processed within 5-7 business days."
+  }'
+```
+
+Text sources can be up to 100,000 characters.
+
+### URL Sources
+
+Add a web page URL. RevRing fetches and indexes the page content automatically.
+
+**Dashboard:** Click **Add Source** → **URL**, enter the URL and an optional display name, then click **Add**.
+
+**API:**
+```bash
+curl -X POST https://api.revring.ai/v1/knowledge-bases/{id}/sources \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sourceType": "url",
+    "originalUrl": "https://www.example.com/faq",
+    "displayName": "FAQ Page"
+  }'
+```
+
+<Note>
+Only `http://` and `https://` URLs are supported. The page content is fetched and indexed at the time the source is added. To update the content, delete and re-add the source.
+</Note>
+
+### File Sources
+
+Upload documents directly. Supported formats include PDF, TXT, DOCX, CSV, and other common document types.
+
+**Dashboard:** Click **Add Source** → **File**, then select a file from your computer.
+
+**API:**
+```bash
+curl -X POST https://api.revring.ai/v1/knowledge-bases/{id}/sources \
+  -H "x-api-key: YOUR_API_KEY" \
+  -F "file=@/path/to/document.pdf"
+```
+
+Maximum file size is **20 MB**.
+
+### Checking Source Status
+
+After adding a source, you can check its processing status:
+
+```bash
+curl https://api.revring.ai/v1/knowledge-bases/{id}/sources/{sourceId} \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+The response includes a `status` field (`processing`, `ready`, or `failed`) and an `errorMessage` if processing failed.
+
+## Linking Knowledge Bases to Agents
+
+Once your knowledge base has sources in the `ready` state, link it to one or more agents.
+
+### From the Dashboard
+
+1. Open your agent's settings
+2. Go to the **Knowledge** tab
+3. Click **Add Knowledge Base**
+4. Select the knowledge base to link
+5. Click **Save**
+
+### Via API
+
+```bash
+curl -X POST https://api.revring.ai/v1/agents/{agentId}/knowledge-bases \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "knowledgeBaseId": "kb_abc123"
+  }'
+```
+
+To unlink:
+```bash
+curl -X DELETE https://api.revring.ai/v1/agents/{agentId}/knowledge-bases/{knowledgeBaseId} \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## Retrieval Settings
+
+When a knowledge base is linked to an agent, you can configure how the agent uses it. These settings are on the agent, not the knowledge base — so different agents can use the same knowledge base with different retrieval behaviors.
+
+### Retrieval Mode
+
+| Mode | Description |
+|------|-------------|
+| `automatic` | The agent automatically searches the knowledge base whenever it might be helpful. This is the default and recommended mode. |
+| `query_tool` | The agent uses a dedicated tool to search the knowledge base. This gives you more control over when retrieval happens — useful if you want the agent to only search when explicitly asked. |
+
+### Chunks
+
+The number of text passages to retrieve per query (1–20, default 3). Higher values provide more context but use more tokens. Start with the default and increase if the agent is missing relevant information.
+
+### Similarity Threshold
+
+Minimum relevance score for retrieved passages (0–1, default 0). Set this higher (e.g., 0.3–0.5) to filter out loosely related content. A value of 0 returns the top results regardless of relevance score.
+
+### Configuring via API
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "knowledgeBaseRetrievalMode": "automatic",
+    "knowledgeBaseChunks": 5,
+    "knowledgeBaseSimilarityThreshold": 0.3
+  }'
+```
+
+## Managing Sources
+
+### Deleting a Source
+
+To remove a source from a knowledge base:
+
+**Dashboard:** Click the **Delete** button next to the source.
+
+**API:**
+```bash
+curl -X DELETE https://api.revring.ai/v1/knowledge-bases/{id}/sources/{sourceId} \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+### Deleting a Knowledge Base
+
+Deleting a knowledge base removes all its sources and unlinks it from any agents.
+
+**Dashboard:** Open the knowledge base and click **Delete**.
+
+**API:**
+```bash
+curl -X DELETE https://api.revring.ai/v1/knowledge-bases/{id} \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## Best Practices
+
+### Content Quality
+
+- **Be specific**: Focused, well-structured content retrieves better than long, rambling documents
+- **Use clear headings**: Documents with clear sections help the retrieval system find relevant passages
+- **Keep content current**: Delete and re-add sources when the underlying content changes
+- **Avoid duplication**: Don't add the same content multiple times across different sources
+
+### Prompt Integration
+
+Reference the knowledge base in your agent's prompt to guide how it uses retrieved information:
+
+```
+You are a customer support agent for Acme Corp.
+
+When customers ask about our products, policies, or procedures,
+use the information from your knowledge base to provide accurate answers.
+If you can't find the answer in your knowledge base, let the customer know
+and offer to transfer them to a specialist.
+
+Do not make up information — only share what you can verify from your knowledge base.
+```
+
+### Source Organization
+
+- Create separate knowledge bases for different topics (e.g., "Product Catalog", "Support Policies", "Pricing")
+- Link only the relevant knowledge bases to each agent
+- Keep source count manageable — a few high-quality sources outperform many low-quality ones
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Source stuck in processing">
+    Most sources process within a few seconds to a minute. If a source stays in `processing` for more than 5 minutes, it may have encountered an issue. Try deleting and re-adding the source. For file sources, ensure the file is not corrupted and is in a supported format.
+  </Accordion>
+
+  <Accordion title="Source failed to process">
+    Check the `errorMessage` field on the source for specifics. Common causes include:
+    - URL is unreachable or returns an error
+    - File format is not supported
+    - File is corrupted or empty
+    - Text content is empty
+  </Accordion>
+
+  <Accordion title="Agent not using knowledge base">
+    - Verify the knowledge base is linked to the agent (check the Knowledge tab)
+    - Ensure at least one source is in `ready` status
+    - Check that retrieval mode is set to `automatic` (or `query_tool` if you prefer manual control)
+    - Add guidance in your prompt telling the agent to use its knowledge base
+    - Try increasing the `knowledgeBaseChunks` value if relevant content is being missed
+  </Accordion>
+
+  <Accordion title="Agent returning inaccurate information">
+    - Review the source content for accuracy
+    - Increase `knowledgeBaseSimilarityThreshold` to filter out loosely related passages
+    - Decrease `knowledgeBaseChunks` to reduce noise from less relevant results
+    - Add instructions in your prompt to only use verified knowledge base content
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Agent Tools" icon="gear" href="/platform/tools">
+    Configure system and custom tools
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/knowledge-bases/list">
+    Manage knowledge bases programmatically
+  </Card>
+  <Card title="Prompting & Variables" icon="pen" href="/platform/prompting-variables">
+    Customize agent behavior with variables
+  </Card>
+  <Card title="Conversation Flows" icon="diagram-project" href="/platform/conversation-flows">
+    Build structured conversation flows
+  </Card>
+</CardGroup>

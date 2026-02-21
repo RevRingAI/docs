@@ -1,0 +1,279 @@
+---
+title: 'Test Suites'
+description: 'Automatically test your AI agents with scripted conversations and AI-powered scoring'
+icon: 'flask-vial'
+---
+
+Test suites let you automatically validate your agents by running scripted test conversations and scoring the results. Define test cases with a script (what the tester should say) and a scoring rubric (what counts as a pass), then run them at scale to catch regressions and verify agent behavior.
+
+## Overview
+
+A test suite consists of:
+
+- **Target agent** — the agent being tested
+- **Tester agent** — an optional second agent that plays the role of the caller (if omitted, RevRing uses a built-in tester)
+- **Test cases** — individual scenarios, each with a script and scoring rubric
+- **Test runs** — executions of the full suite, producing pass/fail results for each case
+
+When you start a test run, RevRing places calls between the tester and target agents. After each call, the transcript is evaluated against the scoring rubric to produce a pass, fail, or error result with reasoning.
+
+## Creating a Test Suite
+
+### From the Dashboard
+
+1. Navigate to **Testing** in the sidebar
+2. Click **Create Test Suite**
+3. Enter a **Name**
+4. Select the **Target Agent** to test
+5. Optionally select a **Tester Agent** (a separate agent that role-plays as the caller)
+6. Optionally set **Max Concurrency** to control how many test calls run in parallel (default 2, max 100)
+7. Optionally set **Default Variables** to pass to the target agent for all test calls
+8. Click **Create**
+
+### Via API
+
+```bash
+curl -X POST https://api.revring.ai/v1/test-suites \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Customer Support Regression Tests",
+    "targetAgentId": "agent_target_id",
+    "testerAgentId": "agent_tester_id",
+    "maxConcurrency": 5,
+    "defaultVariables": {
+      "customer_name": "Test Customer",
+      "account_id": "TEST-001"
+    }
+  }'
+```
+
+## Writing Test Cases
+
+Each test case has three key fields:
+
+| Field | Description |
+|-------|-------------|
+| **Name** | A descriptive name for the test (e.g., "Handles refund request correctly") |
+| **Script** | Instructions for the tester agent — what to say, what scenario to simulate |
+| **Scoring Rubric** | Criteria for evaluating the target agent's performance — what constitutes a pass or fail |
+
+### Script
+
+The script tells the tester agent how to behave during the call. Write it as natural language instructions:
+
+```
+You are calling a customer support line to request a refund for order #12345.
+
+1. When the agent greets you, say you'd like a refund for your recent order.
+2. Provide the order number #12345 when asked.
+3. Say the reason is that the product arrived damaged.
+4. If the agent offers a replacement instead, insist on a refund.
+5. Accept the refund if offered and say thank you.
+```
+
+### Scoring Rubric
+
+The scoring rubric defines what a successful interaction looks like. After the call, the transcript is evaluated against these criteria:
+
+```
+PASS if ALL of the following are true:
+- The agent acknowledged the refund request
+- The agent asked for the order number
+- The agent processed or offered to process the refund
+- The agent was polite and professional throughout
+
+FAIL if ANY of the following are true:
+- The agent refused the refund without explanation
+- The agent provided incorrect information
+- The agent was rude or dismissive
+- The agent failed to ask for the order number
+```
+
+### Creating Test Cases
+
+**Dashboard:** Open your test suite, click **Add Test Case**, fill in the name, script, and scoring rubric.
+
+**API:**
+```bash
+curl -X POST https://api.revring.ai/v1/test-suites/{suiteId}/tests \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Refund request - damaged item",
+    "script": "You are calling to request a refund for order #12345 because the product arrived damaged...",
+    "scoringRubric": "PASS if the agent acknowledges the request and processes the refund. FAIL if the agent refuses without reason.",
+    "attemptsPerRun": 1
+  }'
+```
+
+The `attemptsPerRun` field (1–10, default 1) controls how many times each test case is executed per run. Use multiple attempts to test for consistency.
+
+### AI-Generated Test Cases
+
+You can also generate test cases automatically using AI. Provide a prompt describing the scenarios you want to test, and RevRing generates test cases based on your target agent's configuration:
+
+**Dashboard:** Click **Generate Tests** in your test suite, enter a prompt, and review the generated cases.
+
+**API:**
+```bash
+curl -X POST https://api.revring.ai/v1/test-suites/{suiteId}/generate-tests \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Generate test cases for edge cases like the caller being angry, asking to speak to a manager, or providing an invalid order number."
+  }'
+```
+
+The response includes generated test cases with `name`, `script`, and `scoringRubric` fields that you can review, edit, and save.
+
+## Running Tests
+
+### Starting a Test Run
+
+**Dashboard:** Click **Run Tests** in your test suite. The run starts immediately and you can monitor progress in real time.
+
+**API:**
+```bash
+curl -X POST https://api.revring.ai/v1/test-suites/{suiteId}/runs \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "v2.1 regression check"
+  }'
+```
+
+### Test Run Lifecycle
+
+| Status | Description |
+|--------|-------------|
+| `queued` | Run is queued and waiting to start |
+| `running` | Test calls are being placed and scored |
+| `completed` | All test cases have been evaluated |
+| `failed` | The run encountered an error |
+| `cancelled` | The run was manually cancelled |
+
+### Monitoring Progress
+
+Each test run tracks summary statistics:
+
+- **Total Tests** — total number of test attempts
+- **Passed** — number of attempts that passed
+- **Failed** — number of attempts that failed
+
+**Dashboard:** The test run detail page shows real-time progress with results for each attempt.
+
+**API:**
+```bash
+curl https://api.revring.ai/v1/test-suites/{suiteId}/runs/{runId} \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+### Test Attempt Results
+
+Each test attempt produces:
+
+| Field | Description |
+|-------|-------------|
+| `result` | `pass`, `fail`, or `error` |
+| `reasoning` | AI-generated explanation of why the test passed or failed |
+| `transcript` | The full conversation transcript |
+| `callId` | Link to the outbound call record |
+| `inboundCallId` | Link to the inbound call record (on the target agent) |
+
+### Cancelling a Run
+
+**Dashboard:** Click **Cancel** on a running test run.
+
+**API:**
+```bash
+curl -X POST https://api.revring.ai/v1/test-suites/{suiteId}/runs/{runId}/cancel \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+Only `queued` or `running` test runs can be cancelled.
+
+## Test Variables
+
+Variables can be set at multiple levels. More specific values override broader ones:
+
+1. **Default variables** on the test suite — apply to all test calls
+2. **Per-test-case variables** — override suite defaults for a specific test
+
+This is useful for testing different caller scenarios:
+
+```json
+{
+  "name": "VIP customer refund",
+  "script": "Call and ask for a refund...",
+  "scoringRubric": "PASS if the agent offers expedited refund for VIP...",
+  "variables": {
+    "customer_name": "VIP Customer",
+    "account_status": "premium"
+  }
+}
+```
+
+## Best Practices
+
+### Writing Effective Scripts
+
+- Be specific about what the tester should say and do
+- Include numbered steps for multi-turn conversations
+- Specify how the tester should respond to common agent behaviors
+- Keep scripts focused on one scenario per test case
+
+### Writing Effective Rubrics
+
+- Use clear PASS/FAIL criteria
+- Be specific about what constitutes success vs. failure
+- Include both positive (must happen) and negative (must not happen) criteria
+- Account for acceptable variations in agent responses
+
+### Test Organization
+
+- Group related tests in the same suite (e.g., "Refund Scenarios", "Appointment Booking")
+- Use descriptive names so test results are easy to understand at a glance
+- Start with key happy-path scenarios, then add edge cases
+- Run tests after every agent prompt change to catch regressions
+
+### Concurrency
+
+The `maxConcurrency` setting controls how many test calls run simultaneously. Higher concurrency completes runs faster but counts against your organization's call concurrency limit. Start with a low value (2–5) and increase as needed.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Test attempt shows 'error' result">
+    An `error` result means the test call itself failed (e.g., connection issue, agent not reachable). This is different from a `fail`, which means the call completed but didn't meet the rubric criteria. Check the call logs for the specific error message.
+  </Accordion>
+
+  <Accordion title="Tests are running slowly">
+    Increase `maxConcurrency` on the test suite to run more calls in parallel. Note that concurrent test calls count against your organization's overall concurrency limit.
+  </Accordion>
+
+  <Accordion title="Scoring seems incorrect">
+    Review the scoring rubric for ambiguous criteria. The AI evaluator takes the rubric literally — vague rubrics produce inconsistent results. Use multiple attempts per run (`attemptsPerRun`) to identify inconsistency.
+  </Accordion>
+
+  <Accordion title="Tester agent not following the script">
+    If using a custom tester agent, ensure its prompt instructs it to follow the test script closely. The script is injected into the tester agent's context, but a conflicting system prompt may override it.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Outbound Calls" icon="arrow-right-to-line" href="/platform/outbound">
+    Learn about outbound calling and concurrency
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/test-suites/list">
+    Manage test suites programmatically
+  </Card>
+  <Card title="Conversation Flows" icon="diagram-project" href="/platform/conversation-flows">
+    Build structured conversation flows to test
+  </Card>
+  <Card title="Agent Tools" icon="gear" href="/platform/tools">
+    Configure agent tools and capabilities
+  </Card>
+</CardGroup>

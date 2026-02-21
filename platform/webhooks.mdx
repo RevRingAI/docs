@@ -47,7 +47,8 @@ When an inbound call arrives, RevRing sends a POST request to your webhook:
   "event": "pre_call",
   "agentId": "agent_456def",
   "fromNumber": "+14155551234",
-  "toNumber": "+12025559999"
+  "toNumber": "+12025559999",
+  "dialedAgentId": null
 }
 ```
 
@@ -56,6 +57,7 @@ When an inbound call arrives, RevRing sends a POST request to your webhook:
 - `agentId`: The agent that will handle the call
 - `fromNumber`: Caller's phone number (E.164 format)
 - `toNumber`: The number that was dialed
+- `dialedAgentId`: The agent ID when the call was routed directly to an agent (null if routed via phone number)
 
 ### Response Format
 
@@ -220,13 +222,25 @@ After a call ends, RevRing sends a POST request with complete call details:
 ```json
 {
   "id": "a3c18021-192f-565e-87b5-5af428f29e81",
+  "organizationId": "org_abc123",
+  "agentId": "agent_456def",
+  "agentName": "Customer Support",
+  "sipTrunkId": "trunk_789ghi",
   "direction": "INBOUND",
   "status": "COMPLETED",
   "fromNumber": "+14155551234",
   "toNumber": "+12025559999",
+  "agentCallerIdName": "Acme Support",
   "recordingUrl": "https://secure.revring.ai/recordings/a3c18021-192f-565e-87b5-5af428f29e81.ogg",
   "hangupCause": "END_CALL_TOOL",
   "errorMessage": null,
+  "variables": {
+    "customer_name": "John Smith",
+    "account_status": "premium",
+    "direction": "INBOUND",
+    "current_time": "2:30 PM",
+    "timezone": "America/New_York"
+  },
   "transcript": [
     {
       "at": 0,
@@ -309,19 +323,29 @@ After a call ends, RevRing sends a POST request with complete call details:
   "initiatedAt": "2024-03-15T14:30:00.076Z",
   "startedAt": "2024-03-15T14:30:02.529Z",
   "endedAt": "2024-03-15T14:32:00.876Z",
-  "durationSeconds": 118
+  "durationSeconds": 118,
+  "createdAt": "2024-03-15T14:29:58.000Z",
+  "updatedAt": "2024-03-15T14:32:01.000Z"
 }
 ```
 
 **Key Fields:**
 - `id`: Unique call identifier
-- `status`: Final call status (`COMPLETED`, `FAILED`, `CANCELED`, etc.)
-- `durationSeconds`: Total call duration (null if never answered)
-- `recordingUrl`: URL to download the call recording
+- `organizationId`: Your organization ID
+- `agentId`: The agent that handled the call
+- `agentName`: The agent's display name
+- `sipTrunkId`: SIP trunk used for the call (null if not applicable)
+- `direction`: `INBOUND` or `OUTBOUND`
+- `status`: Final call status (`COMPLETED`, `TRANSFERRED`, `FAILED`, `CANCELED`)
+- `fromNumber` / `toNumber`: Caller and recipient numbers (E.164)
+- `agentCallerIdName`: Caller ID name configured on the agent (null if not set)
+- `variables`: All template variables used during the call — includes variables from pre-call webhooks, API call variables, and system variables (`direction`, `current_time`, `timezone`, etc.)
+- `recordingUrl`: URL to download the call recording (null if recording disabled or call not answered)
+- `hangupCause`: Reason call ended. Common values include `USER_ENDED`, `END_CALL_TOOL`, `SILENCE_TIMEOUT`, `MAX_DURATION`, `VOICEMAIL_DETECTED`
 - `transcript`: Complete conversation with timestamps and tool invocations (both custom tools and system tools like `end_call`, `transfer_to_number`)
 - `summary`: AI-generated summary of the call
 - `metrics`: Token usage and audio duration metrics
-- `hangupCause`: Reason call ended. Common values include `USER_ENDED`, `END_CALL_TOOL`, `SILENCE_TIMEOUT`, `MAX_DURATION`, `VOICEMAIL_DETECTED`
+- `durationSeconds`: Total call duration (null if never answered)
 
 <Note>
 The example above shows both a custom tool (`check_order_status`) and a system tool (`end_call`). When a call is transferred using `transfer_to_number`, the transcript will contain a similar tool entry with `name: "transfer_to_number"` and `args` containing `to_number`.

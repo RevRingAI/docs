@@ -67,6 +67,26 @@ curl -X POST https://api.revring.ai/v1/calls \
   }'
 ```
 
+### With Caller ID Name
+
+You can set a custom caller ID name (up to 15 characters) that is displayed to the recipient when the call arrives:
+
+```bash
+curl -X POST https://api.revring.ai/v1/calls \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentId": "agent_id_here",
+    "fromNumber": "+12025551234",
+    "toNumber": "+14155552671",
+    "callerIdName": "Acme Support"
+  }'
+```
+
+<Note>
+Caller ID name support depends on your SIP trunk provider and the recipient's carrier. Not all carriers display the caller ID name.
+</Note>
+
 ### With Custom Variables
 
 ```bash
@@ -163,25 +183,59 @@ For high-volume outbound campaigns, choose "Hangup" to minimize costs and focus 
 
 RevRing enforces a concurrency limit on the maximum number of simultaneous calls per organization. You can view your current limit and usage on the [Billing page](https://dashboard.revring.ai/app/billing).
 
-If you exceed the concurrency limit, the API returns:
+### Call Queuing
 
-**Status Code**: `429 Too Many Requests`
+When you send an outbound call and all concurrent call slots are in use, RevRing automatically **queues** the call. Queued calls are dispatched in order as slots become available.
 
-**Response Body**:
+While a call is waiting, its status is `QUEUED`. Once a slot opens and the call is dispatched, the status transitions to `INITIATED` and then `ONGOING` when the recipient answers.
+
+You can check a call's status at any time:
+
+```bash
+curl https://api.revring.ai/v1/calls/{callId} \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+To cancel a queued call before it is dispatched:
+
+```bash
+curl -X POST https://api.revring.ai/v1/calls/{callId}/cancel \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+<Note>
+Only calls with status `QUEUED` can be cancelled. Once a call moves to `INITIATED` or `ONGOING`, it cannot be cancelled through this endpoint.
+</Note>
+
+### Opting Out of Queuing
+
+If you prefer to handle queuing in your own system, pass `skipQueue: true` when creating the call. This tells RevRing to return an immediate `429` error instead of queuing when the concurrency limit is reached:
+
+```bash
+curl -X POST https://api.revring.ai/v1/calls \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentId": "agent_id_here",
+    "fromNumber": "+12025551234",
+    "toNumber": "+14155552671",
+    "skipQueue": true
+  }'
+```
+
+**Response when at capacity (429)**:
 ```json
 {
   "error": "concurrency_limit"
 }
 ```
 
-Implement retry logic with exponential backoff to handle this gracefully.
-
 ### Best Practices for High Volume
 
-- **Batch calls**: Send calls in controlled batches rather than all at once
+- **Leverage built-in queuing**: Let RevRing queue calls automatically rather than managing pacing yourself
 - **Monitor active calls**: Track concurrent calls via the [Analytics API](/api-reference/analytics/overview)
-- **Implement queuing**: Use your own queue system to manage call pacing
-- **Handle errors gracefully**: Retry failed calls with appropriate delays
+- **Cancel unnecessary queued calls**: If priorities change, cancel queued calls that are no longer needed
+- **Handle errors gracefully**: Implement retry logic with exponential backoff for non-queued calls
 - **Respect time zones**: Schedule calls during appropriate hours for the recipient's location
 
 ## Monitoring Outbound Calls

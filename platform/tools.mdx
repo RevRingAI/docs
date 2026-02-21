@@ -56,7 +56,7 @@ You can see end call invocations in the call transcript labeled as "Tool: end_ca
 
 ### Transfer
 
-The Transfer tool enables agents to transfer calls to other phone numbers or departments based on conditions you define.
+The Transfer tool enables agents to transfer calls to other phone numbers or departments based on conditions you define. RevRing supports two transfer modes: **cold** and **warm**.
 
 #### When to Use
 
@@ -71,16 +71,11 @@ The Transfer tool enables agents to transfer calls to other phone numbers or dep
 2. Locate **Transfer** under System Tools
 3. Toggle the switch to enable
 4. Click **Configure** to set up transfer routes
-5. Add transfer routes:
+5. Select **Transfer Mode**:
+   - **Cold Transfer** — the agent transfers the call immediately and disconnects
+   - **Warm Transfer** — the agent places the caller on hold, calls the recipient to brief them, then connects the parties
 
-**Transfer Description Override** (optional):
-```
-Offer to transfer when:
-- The customer requests to speak with a human
-- The issue is complex and beyond your capabilities
-- The customer is frustrated or dissatisfied
-- Billing or payment questions arise
-```
+6. Add transfer routes:
 
 **Transfer Routes**:
 - **To number**: `+12025559999` (destination phone number in E.164 format)
@@ -88,28 +83,70 @@ Offer to transfer when:
 
 Click **Add route** to add multiple destinations.
 
-6. Click **Save**
+**Transfer Description Override** (optional): Custom instructions for when the agent should offer a transfer.
+
+7. Click **Save**
 
 <Tip>
 You can configure multiple transfer routes for different scenarios. The agent will choose the appropriate route based on the conversation context and conditions you define.
 </Tip>
 
-#### How It Works
+#### Cold Transfer
 
-When enabled, the agent can invoke the `transfer_to_number` function with the destination number. RevRing uses the SIP REFER method to transfer the call to the destination.
+In cold transfer mode, the agent invokes the `transfer_to_number` function and the call is immediately handed off to the destination number. RevRing's involvement ends — billing stops and recording stops once the transfer is initiated.
 
-Once the transfer is initiated:
-- The call is handed off to the destination number
-- RevRing's involvement ends (billing stops and recording ends)
-- The caller continues their conversation with the transfer destination
-
-The transfer appears in the call transcript showing:
-- Tool invocation: "Tool: transfer_to_number"
-- Destination number
-- Transfer status (success or failure)
+The transfer appears in the call transcript as a `transfer_to_number` tool invocation.
 
 <Note>
 **Provider Setup Required**: Ensure your SIP trunk provider supports SIP REFER and has call transfers enabled. Some providers like Twilio require enabling **PSTN Transfer** in your trunk settings. See the [Telephony Setup](/platform/telephony) guide for details.
+</Note>
+
+#### Warm Transfer
+
+Warm transfer provides a more seamless handoff. When the agent decides to transfer:
+
+1. The **caller is placed on hold** — they hear a hold message and optional hold music
+2. The **agent calls the recipient** at the transfer destination number
+3. The agent **briefs the recipient** with a summary of the conversation so far
+4. The **caller is connected** to the recipient
+
+Warm transfer is configured with the following settings:
+
+| Setting | Description |
+|---------|-------------|
+| **Hold Message** | Message spoken to the caller while on hold (e.g., "Please hold while I transfer you.") Max 500 characters. |
+| **Hold Music** | Enable or disable hold music while the caller waits |
+| **Summary Prompt** | Custom prompt used to generate the brief for the recipient. Max 2,000 characters. If omitted, a default summary is generated. |
+| **Intro Message** | Message spoken to the recipient before connecting (e.g., "I'm transferring a customer who needs help with a refund.") Max 500 characters. |
+
+#### Configuring via API
+
+Set `transferMode` and `warmTransferConfig` when creating or updating an agent:
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "transferEnabled": true,
+    "transferMode": "warm",
+    "transferRoutes": [
+      {
+        "to_number": "+12025559999",
+        "condition": "Transfer to support team for technical issues"
+      }
+    ],
+    "warmTransferConfig": {
+      "holdMessage": "Please hold while I connect you with our support team.",
+      "holdMusicEnabled": true,
+      "summaryPrompt": "Summarize the customer issue in 1-2 sentences for the support agent.",
+      "introMessage": "I have a customer on the line who needs technical assistance."
+    }
+  }'
+```
+
+<Note>
+Warm transfer is also available as a node type in [Conversation Flows](/platform/conversation-flows), where you can configure hold and summary settings per-node.
 </Note>
 
 ### Voicemail Detection
@@ -152,6 +189,71 @@ When an outbound call connects, RevRing analyzes the audio to detect voicemail s
 - **Leave message action**: Agent speaks the configured message, then hangs up
 
 Detection accuracy is typically very high but not perfect. Review call logs to monitor detection performance.
+
+### Keypad Input (DTMF)
+
+The Keypad Input tool allows the agent to send DTMF touch tones during a call. This is useful when navigating IVR (interactive voice response) systems — for example, when the agent needs to press digits to navigate a phone menu during a transferred call or an outbound call to a phone system.
+
+#### When to Use
+
+- Navigating automated phone menus (e.g., "Press 1 for sales, press 2 for support")
+- Entering account numbers or PINs via keypad
+- Interacting with external IVR systems during outbound calls
+
+#### Configuration
+
+1. Navigate to the **Tools** tab
+2. Locate **Keypad Input (DTMF)** under System Tools
+3. Toggle the switch to enable
+4. Optionally set a **Description Override** to customize when the agent uses this tool
+5. Click **Save**
+
+#### Configuring via API
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "playKeypadTouchToneEnabled": true,
+    "playKeypadTouchToneDescriptionOverride": "Use this to press digits when navigating phone menus."
+  }'
+```
+
+<Note>
+DTMF input is also available as a dedicated node type (`press_digit`) in [Conversation Flows](/platform/conversation-flows), where you can specify which digits to listen for and how long to wait.
+</Note>
+
+### Disable Interruptions
+
+By default, callers can interrupt the agent while it's speaking. You can disable this behavior so the agent always finishes speaking before listening for input.
+
+#### When to Use
+
+- Delivering important legal disclaimers or disclosures that must be heard in full
+- Reading back critical information (order numbers, confirmation codes)
+- Playing scripted messages that should not be cut short
+
+#### Configuration
+
+1. Navigate to the **Advanced** tab
+2. Toggle **Disable Interruptions** to on
+3. Click **Save**
+
+#### Configuring via API
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "disableInterruptions": true
+  }'
+```
+
+<Note>
+Disable interruptions applies to all agent speech globally. In [Conversation Flows](/platform/conversation-flows), you can set `blockInterruptions` on individual nodes for more granular control.
+</Note>
 
 ## Custom Tools
 
@@ -240,11 +342,55 @@ Follow the [OpenAI function calling format](https://platform.openai.com/docs/gui
 ```
 </Note>
 
-### Webhook Implementation
+### Advanced Webhook Settings
 
-When the agent invokes your custom tool, RevRing POSTs to your webhook URL:
+By default, RevRing sends a `POST` request with a JSON body to your webhook URL when a tool is invoked. You can customize this behavior per tool:
 
-**Request:**
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **HTTP Method** | The HTTP method used to call your webhook (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) | `POST` |
+| **Headers** | Custom HTTP headers to include in the request (e.g., `Authorization: Bearer token123`) | None |
+| **Query Parameters** | Custom query parameters appended to the webhook URL (e.g., `source=revring`) | None |
+| **Send Raw Request Body** | When enabled, sends the tool arguments directly as the request body instead of the default `{ callId, tool, arguments }` wrapper | Off |
+
+These settings are configured per-tool in the dashboard or via the API:
+
+```bash
+curl -X POST https://api.revring.ai/v1/agents/{agentId}/custom-tools \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Check Order",
+    "webhookUrl": "https://api.yourcompany.com/tools/check-order",
+    "httpMethod": "POST",
+    "headers": [
+      { "key": "Authorization", "value": "Bearer your-token" }
+    ],
+    "queryParams": [
+      { "key": "source", "value": "revring" }
+    ],
+    "sendRawRequestBody": false,
+    "enabled": true,
+    "schema": {
+      "type": "function",
+      "name": "check_order_status",
+      "description": "Check order status by order ID",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "order_id": { "type": "string", "description": "The order ID" }
+        },
+        "required": ["order_id"]
+      }
+    }
+  }'
+```
+
+### Webhook Request Format
+
+When the agent invokes your custom tool, RevRing sends a request to your webhook URL.
+
+**Default request body (when Send Raw Request Body is off):**
 ```json
 {
   "callId": "dc582fd6-4e5c-4860-9ced-abc7390e62a9",
@@ -252,6 +398,13 @@ When the agent invokes your custom tool, RevRing POSTs to your webhook URL:
   "arguments": {
     "order_id": "ORD-12345"
   }
+}
+```
+
+**Raw request body (when Send Raw Request Body is on):**
+```json
+{
+  "order_id": "ORD-12345"
 }
 ```
 
