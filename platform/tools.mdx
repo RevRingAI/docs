@@ -116,8 +116,8 @@ Warm transfer is configured with the following settings:
 |---------|-------------|
 | **Hold Message** | Message spoken to the caller while on hold (e.g., "Please hold while I transfer you.") Max 500 characters. |
 | **Hold Music** | Enable or disable hold music while the caller waits |
-| **Summary Prompt** | Custom prompt used to generate the brief for the recipient. Max 2,000 characters. If omitted, a default summary is generated. |
-| **Intro Message** | Message spoken to the recipient before connecting (e.g., "I'm transferring a customer who needs help with a refund.") Max 500 characters. |
+| **Summary Instructions** | Extra guidance for the AI when briefing the human agent. Max 2,000 characters. If omitted, a default summary is generated. |
+| **Intro Message** | Spoken after the human agent accepts, heard by both parties (e.g., "You're now connected. They're up to speed on your request.") Max 500 characters. |
 
 #### Configuring via API
 
@@ -139,8 +139,8 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
     "warmTransferConfig": {
       "holdMessage": "Please hold while I connect you with our support team.",
       "holdMusicEnabled": true,
-      "summaryPrompt": "Summarize the customer issue in 1-2 sentences for the support agent.",
-      "introMessage": "I have a customer on the line who needs technical assistance."
+      "summaryPrompt": "Focus on the customer's main concern and any account details mentioned.",
+      "introMessage": "You're now connected. They're up to speed on your request."
     }
   }'
 ```
@@ -190,9 +190,9 @@ When an outbound call connects, RevRing analyzes the audio to detect voicemail s
 
 Detection accuracy is typically very high but not perfect. Review call logs to monitor detection performance.
 
-### Keypad Input (DTMF)
+### Press Digits (DTMF)
 
-The Keypad Input tool allows the agent to send DTMF touch tones during a call. This is useful when navigating IVR (interactive voice response) systems — for example, when the agent needs to press digits to navigate a phone menu during a transferred call or an outbound call to a phone system.
+The Press Digits tool allows the agent to send DTMF touch tones during a call. This is useful when navigating IVR (interactive voice response) systems — for example, when the agent needs to press digits to navigate a phone menu during a transferred call or an outbound call to a phone system.
 
 #### When to Use
 
@@ -203,9 +203,9 @@ The Keypad Input tool allows the agent to send DTMF touch tones during a call. T
 #### Configuration
 
 1. Navigate to the **Tools** tab
-2. Locate **Keypad Input (DTMF)** under System Tools
+2. Locate **Press Digits** under System Tools
 3. Toggle the switch to enable
-4. Optionally set a **Description Override** to customize when the agent uses this tool
+4. Optionally set a **Custom Instructions Override** to customize when the agent uses this tool
 5. Click **Save**
 
 #### Configuring via API
@@ -224,9 +224,11 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 DTMF input is also available as a dedicated node type (`press_digit`) in [Conversation Flows](/platform/conversation-flows), where you can specify which digits to listen for and how long to wait.
 </Note>
 
-### Disable Interruptions
+## Advanced Settings
 
-By default, callers can interrupt the agent while it's speaking. You can disable this behavior so the agent always finishes speaking before listening for input.
+### Block All Interruptions
+
+By default, callers can interrupt the agent while it's speaking. Enable **Block All Interruptions** to make the agent always finish speaking before listening for input.
 
 #### When to Use
 
@@ -237,7 +239,7 @@ By default, callers can interrupt the agent while it's speaking. You can disable
 #### Configuration
 
 1. Navigate to the **Advanced** tab
-2. Toggle **Disable Interruptions** to on
+2. Toggle **Block All Interruptions** to on
 3. Click **Save**
 
 #### Configuring via API
@@ -252,7 +254,7 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 ```
 
 <Note>
-Disable interruptions applies to all agent speech globally. In [Conversation Flows](/platform/conversation-flows), you can set `blockInterruptions` on individual nodes for more granular control.
+Block All Interruptions applies to all agent speech globally. In [Conversation Flows](/platform/conversation-flows), you can set `blockInterruptions` on individual nodes for more granular control.
 </Note>
 
 ## Custom Tools
@@ -509,7 +511,7 @@ The agent will communicate the error to the caller appropriately.
 ### Testing Custom Tools
 
 1. Create a simple test tool that returns static data
-2. Use the **Test Agent** tab to make a call
+2. Use the **test panel** to make a call
 3. During the call, prompt the agent to use the tool:
    - "Can you check order ORD-12345 for me?"
 4. Review the transcript to see:

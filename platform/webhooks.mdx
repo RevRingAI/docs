@@ -111,10 +111,10 @@ If your webhook fails, times out, or returns invalid JSON:
 - Check the call's `preCallWebhookStatus` field to see webhook delivery status
 
 **Webhook Status Values:**
-- `success`: Webhook responded successfully
-- `failed`: Webhook returned an error (4xx/5xx status)
-- `timeout`: Webhook didn't respond within 3 seconds
-- `null`: No webhook configured
+- `sent`: Webhook responded successfully
+- `failed`: Webhook returned an error or timed out
+- `skipped`: No webhook URL configured
+- `null`: Call has not yet reached the webhook stage
 
 ### Example Implementation
 
@@ -204,7 +204,7 @@ Post-call webhooks deliver complete call details immediately after a call ends, 
 
 ### Configuration
 
-1. Navigate to your agent's **Overview** tab
+1. Navigate to your agent's **Advanced** tab
 2. Set the **Post-call Webhook URL**:
    ```
    https://api.yourcompany.com/webhooks/post-call
@@ -378,7 +378,7 @@ If your webhook fails (4xx/5xx status) or times out:
 - Implement your own retry logic by querying failed calls via the API if needed
 
 **Webhook Status Values:**
-- `success`: Delivered successfully
+- `sent`: Delivered successfully
 - `failed`: Webhook returned an error or timed out
 - `null`: No webhook configured
 
@@ -567,7 +567,7 @@ curl -X POST http://localhost:3000/webhooks/pre-call \
 ### Test with Real Calls
 
 1. Configure your webhook URL
-2. Make a test call using the **Test Agent** tab
+2. Make a test call using the **test panel** on the right side of the agent page
 3. Review your server logs to see the webhook requests
 4. Check call details in [Call Logs](https://dashboard.revring.ai/app/calls) to verify webhook status
 
@@ -610,7 +610,7 @@ For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
   </Accordion>
   
   <Accordion title="Not receiving post-call webhooks">
-    - Confirm the webhook URL is configured in the agent's Overview tab
+    - Confirm the webhook URL is configured in the agent's **Advanced** tab
     - Verify the URL is correct and accessible
     - Check your server logs - RevRing may be sending but your server isn't logging
     - Test with webhook.site to confirm RevRing is sending requests

@@ -4527,11 +4527,13 @@
                     "postCallWebhookStatus": {
                         "type": "string",
                         "nullable": true,
+                        "enum": ["sent", "failed", null],
                         "description": "Status of post-call webhook delivery"
                     },
                     "preCallWebhookStatus": {
                         "type": "string",
                         "nullable": true,
+                        "enum": ["sent", "failed", "skipped", null],
                         "description": "Status of pre-call webhook delivery"
                     },
                     "createdAt": {
