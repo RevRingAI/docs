@@ -95,28 +95,30 @@ Browse all 300+ available voices in the [Voice Library](https://dashboard.revrin
 
 ## Step 3: Test Your Agent
 
-The test panel on the right side of the agent page provides an easy way to send outbound test calls to your agent.
+The **test panel** on the right side of the agent page lets you call your agent directly from the browser — no phone required.
 
-### Send a Test Call
+### Make a Test Call
 
-1. Open your agent and use the **test panel** on the right
-2. In the **Test Configuration** card:
-   - **Agent**: Already selected (your current agent)
-   - **From Number**: Select one of your trunk's phone numbers
-   - **To Number**: Enter your mobile number in E.164 format (e.g., `+14155552671`)
+1. Open your agent and look at the **test panel** on the right
+2. Click the **call button** (microphone icon) to start a WebRTC call
+3. Speak into your computer's microphone — you're now talking to your agent
+4. Click the button again (X icon) to end the call
+
+The **Transcript** section updates in real time as the conversation progresses. After the call ends, review the full transcript to check for errors or unexpected behavior.
+
+<Tip>
+Expand the **Test Variables** section at the bottom of the test panel to set variable values (like `{{customer_name}}`). These are passed to your agent during test calls so you can verify personalization works correctly.
+</Tip>
+
+### Send an Outbound Test Call
+
+To test outbound calling over the phone network (real SIP calls):
+
+1. Navigate to [Send Call](https://dashboard.revring.ai/app/testing/send)
+2. Select your **Agent**, enter a **From Number** and **To Number**
 3. Click **Send Test Call**
 
-<Note>
-The call will be initiated within a few seconds. Answer your phone to talk with your AI agent.
-</Note>
-
-### Review the Transcript
-
-As the call progresses, the **Live Transcript** card will update every 3 seconds showing the conversation in real-time. After the call ends:
-
-- Review the full transcript
-- Check for any errors or unexpected behavior
-- Click **View full call details** to see recording, summary, and call metrics
+The call will initiate within seconds. Answer your phone to speak with your agent.
 
 ### Iterate and Improve
 
@@ -125,7 +127,7 @@ Based on your test call:
 1. Return to the **Overview** tab
 2. Refine your **Prompt** to improve agent responses
 3. Adjust **First Message** if needed
-4. Send another test call to validate changes
+4. Make another test call to validate changes
 
 ## Next Steps
 

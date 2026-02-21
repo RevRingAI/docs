@@ -181,10 +181,22 @@ Configure timeout behavior in the **Advanced** tab:
 
 ### Using the Test Panel
 
-1. Open your agent and look at the **test panel** on the right
-2. Review the **Test Inbound Calls** banner showing your assigned numbers
-3. Call one of the listed numbers from your phone
-4. Watch the **Live Transcript** update in real-time as you speak with the agent
+The test panel on the right side of the agent page lets you call your agent directly from the browser via WebRTC — no phone needed.
+
+1. Open your agent and click the **call button** (microphone icon) in the test panel
+2. Speak through your microphone to talk to the agent
+3. Watch the **Transcript** update in real time
+4. Click the button again to end the call
+
+Set **Test Variables** at the bottom of the panel to simulate dynamic data your pre-call webhook would normally provide.
+
+### Calling from a Real Phone
+
+To test the full telephony path (SIP trunk, phone numbers, pre-call webhook):
+
+1. Go to the **Numbers** tab and note your assigned phone numbers
+2. Call one of those numbers from your mobile phone
+3. Review the call in [Call Logs](https://dashboard.revring.ai/app/calls) afterwards
 
 ### Best Practices for Testing
 

@@ -18,37 +18,29 @@ When you send an outbound call through RevRing:
 
 ## Sending Test Calls via Dashboard
 
-The dashboard provides an easy way to send test outbound calls and validate your agent configuration.
+### Using the Send Call Page
+
+The [Send Call](https://dashboard.revring.ai/app/testing/send) page is the primary way to test outbound calls from the dashboard.
+
+1. Navigate to [Send Call](https://dashboard.revring.ai/app/testing/send)
+2. Select your **Agent** from the dropdown
+3. Enter the **From Number** (must be a number on your SIP trunk, E.164 format)
+4. Enter the **To Number** (the recipient's phone number, E.164 format)
+5. Optionally set a **Caller ID Name** (up to 15 characters)
+6. Add **Variables** if your prompt uses dynamic content
+7. Click **Send Test Call**
+
+The **Live Transcript** card on the right updates in real time as the conversation progresses. After the call ends, click **View full call details** to see the recording, summary, and metrics.
+
+<Tip>
+Save frequently used configurations by entering a name and clicking **Save Config**. Load saved configs from the dropdown to quickly re-run tests with different scenarios.
+</Tip>
 
 ### Using the Test Panel
 
-1. Navigate to [Agents](https://dashboard.revring.ai/app/agents) and select your agent
-2. Use the **test panel** on the right side of the page
-3. Configure the test call:
-   - **Agent**: Pre-selected (your current agent)
-   - **From Number**: Select a phone number from your SIP trunk
-   - **To Number**: Enter the recipient's number in E.164 format (e.g., `+14155552671`)
-   - **Variables** (optional): Add key-value pairs to personalize the call
-4. Click **Send Test Call**
+The test panel on the right side of the agent page lets you call your agent directly from the browser via WebRTC. This is useful for quick iteration — you can tweak the prompt and immediately test without needing a phone.
 
-The call will initiate within seconds, and the **Live Transcript** will update in real-time as the conversation progresses.
-
-<Tip>
-Use saved configs to quickly re-run tests with different scenarios. Enter a name in the config field and click Save Config to store your settings.
-</Tip>
-
-### Using the Send Call Page
-
-For more advanced testing or one-off outbound calls:
-
-1. Navigate to [Send Call](https://dashboard.revring.ai/app/calls/send)
-2. Select your **Agent** from the dropdown
-3. Enter the **From Number** (must be from your SIP trunk)
-4. Enter the **To Number** (recipient's phone number)
-5. Add **Variables** if your prompt uses dynamic content
-6. Click **Send Test Call**
-
-You can save frequently used configurations by naming them and clicking **Save Config**.
+Note that test panel calls simulate **inbound** calls (you're calling the agent). To test outbound-specific behavior like first message delivery and caller ID, use the **Send Call** page instead.
 
 ## Sending Calls via API
 
