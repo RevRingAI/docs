@@ -261,6 +261,37 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 Block All Interruptions applies to all agent speech globally. In [Conversation Flows](/platform/conversation-flows), you can set `blockInterruptions` on individual nodes for more granular control.
 </Note>
 
+### Interruption Threshold
+
+The **Interruption Threshold** controls how much speech is required from the caller before the agent treats it as an interruption and stops talking. This is measured in milliseconds.
+
+- **Lower values** (e.g. 100 ms) make the agent very sensitive — even a short utterance will interrupt it.
+- **Higher values** (e.g. 2000 ms) make the agent less sensitive — the caller must speak for longer before the agent pauses.
+- **Default**: 500 ms
+
+This is useful for tuning the conversational feel. If your agent is being interrupted too easily by background noise or brief acknowledgements (like "uh huh"), increase the threshold. If callers have difficulty getting a word in, lower it.
+
+#### Configuration
+
+1. Navigate to the **Advanced** tab
+2. Adjust the **Interruption Threshold** slider (100–2000 ms)
+3. Click **Save**
+
+#### Configuring via API
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interruptionThresholdMs": 750
+  }'
+```
+
+<Note>
+If **Block All Interruptions** is enabled, the interruption threshold has no effect since all interruptions are disabled.
+</Note>
+
 ## Custom Tools
 
 Custom tools allow you to extend agent capabilities by integrating with your own systems via webhooks. When the agent invokes a custom tool, RevRing calls your webhook with the tool's arguments and includes the response in the conversation.

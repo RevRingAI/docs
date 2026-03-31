@@ -3610,6 +3610,13 @@
                         "type": "boolean",
                         "description": "When enabled, the agent will not be interrupted by the caller while speaking"
                     },
+                    "interruptionThresholdMs": {
+                        "type": "integer",
+                        "minimum": 100,
+                        "maximum": 2000,
+                        "default": 500,
+                        "description": "Minimum speech duration (ms) before the caller's speech is registered as an interruption. Lower values make the agent easier to interrupt. Range: 100-2000, default 500."
+                    },
                     "transferMode": {
                         "type": "string",
                         "enum": [
@@ -3864,6 +3871,13 @@
                         "type": "boolean",
                         "description": "When enabled, the agent will not be interrupted by the caller while speaking"
                     },
+                    "interruptionThresholdMs": {
+                        "type": "integer",
+                        "minimum": 100,
+                        "maximum": 2000,
+                        "default": 500,
+                        "description": "Minimum speech duration (ms) before the caller's speech is registered as an interruption. Lower values make the agent easier to interrupt. Range: 100-2000, default 500."
+                    },
                     "transferMode": {
                         "type": "string",
                         "enum": [
@@ -4113,6 +4127,13 @@
                     "disableInterruptions": {
                         "type": "boolean",
                         "description": "When enabled, the agent will not be interrupted by the caller while speaking"
+                    },
+                    "interruptionThresholdMs": {
+                        "type": "integer",
+                        "minimum": 100,
+                        "maximum": 2000,
+                        "default": 500,
+                        "description": "Minimum speech duration (ms) before the caller's speech is registered as an interruption. Lower values make the agent easier to interrupt. Range: 100-2000, default 500."
                     },
                     "transferMode": {
                         "type": "string",
@@ -4527,13 +4548,22 @@
                     "postCallWebhookStatus": {
                         "type": "string",
                         "nullable": true,
-                        "enum": ["sent", "failed", null],
+                        "enum": [
+                            "sent",
+                            "failed",
+                            null
+                        ],
                         "description": "Status of post-call webhook delivery"
                     },
                     "preCallWebhookStatus": {
                         "type": "string",
                         "nullable": true,
-                        "enum": ["sent", "failed", "skipped", null],
+                        "enum": [
+                            "sent",
+                            "failed",
+                            "skipped",
+                            null
+                        ],
                         "description": "Status of pre-call webhook delivery"
                     },
                     "createdAt": {
