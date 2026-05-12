@@ -177,9 +177,13 @@ RevRing enforces a concurrency limit on the maximum number of simultaneous calls
 
 ### Call Queuing
 
-When you send an outbound call and all concurrent call slots are in use, RevRing automatically **queues** the call. Queued calls are dispatched in order as slots become available.
+When you send an outbound call and all concurrent call slots are in use, RevRing automatically **queues** the call. Queued calls are dispatched in approximate order as slots become available.
 
 While a call is waiting, its status is `QUEUED`. Once a slot opens and the call is dispatched, the status transitions to `INITIATED` and then `ONGOING` when the recipient answers.
+
+<Note>
+Queued calls have a maximum wait time of approximately 4 hours. If a slot does not open within that window, or if the call fails to dispatch for another reason, the call transitions to `FAILED` rather than remaining `QUEUED` indefinitely. Inspect the `errorMessage` field to see why.
+</Note>
 
 You can check a call's status at any time:
 
