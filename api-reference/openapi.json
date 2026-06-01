@@ -294,6 +294,83 @@
                 }
             }
         },
+        "/sip-trunks/{id}/available-numbers": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "SIP trunk ID",
+                    "schema": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "List Available Phone Numbers",
+                "description": "Returns the trunk's phone numbers split into those that are available to assign and those already assigned to agents. Useful when assigning an inbound number to an agent to see what is free without having to track assignments manually.",
+                "operationId": "listAvailableTrunkNumbers",
+                "tags": [
+                    "SIP Trunks"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Trunk's phone number pool, partitioned",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "available": {
+                                                    "type": "array",
+                                                    "description": "Numbers from the trunk's pool that are not assigned to any agent",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "+12025550113"
+                                                    }
+                                                },
+                                                "assigned": {
+                                                    "type": "array",
+                                                    "description": "Numbers from the trunk's pool already assigned to an agent, with the holding agent's ID and name",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "e164": {
+                                                                "type": "string",
+                                                                "example": "+12025550111"
+                                                            },
+                                                            "agentId": {
+                                                                "type": "string"
+                                                            },
+                                                            "agentName": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
+        },
         "/agents": {
             "get": {
                 "summary": "List Agents",

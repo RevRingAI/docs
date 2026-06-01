@@ -53,6 +53,7 @@
                         "pages": [
                             "api-reference/sip-trunks/list",
                             "api-reference/sip-trunks/get",
+                            "api-reference/sip-trunks/list-available-numbers",
                             "api-reference/sip-trunks/create",
                             "api-reference/sip-trunks/update",
                             "api-reference/sip-trunks/delete"
