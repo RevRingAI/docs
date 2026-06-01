@@ -420,6 +420,74 @@
                 }
             }
         },
+        "/agents/batch-get": {
+            "post": {
+                "summary": "Batch Get Agents",
+                "description": "Fetch multiple agents by ID in a single request. Tenant-scoped — IDs that don't belong to your organization (or don't exist) are silently omitted from the response. Useful for multi-tenant resellers who store RevRing agent IDs in their own database and need to hydrate full agent details for an arbitrary subset. Max 100 IDs per request.",
+                "operationId": "batchGetAgents",
+                "tags": [
+                    "Agents"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "ids"
+                                ],
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "description": "Agent IDs to fetch. Duplicates are de-duped server-side.",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "maxItems": 100
+                                    },
+                                    "minimal": {
+                                        "type": "boolean",
+                                        "description": "If true, omits heavy fields (promptTemplate, flowDefinition, defaultVariables, testVariables, runtimeConfig, customTools, knowledgeBases) from each agent.",
+                                        "default": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Found agents. Response order is not guaranteed; match by `id` field rather than array index. IDs that don't belong to your organization (or don't exist) are omitted — diff against your requested list to detect stale IDs.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Agent"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    }
+                }
+            }
+        },
         "/agents/{id}": {
             "parameters": [
                 {
@@ -592,6 +660,72 @@
                                     "required": [
                                         "error"
                                     ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/agents/{id}/duplicate": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "ID of the agent to duplicate",
+                    "schema": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            ],
+            "post": {
+                "summary": "Duplicate Agent",
+                "description": "Create a copy of an existing agent within the same organization. Copies all scalar configuration fields, runtime config, custom tools, and knowledge base links. Phone numbers are not copied (each phone number is globally unique and can only be assigned to one agent). The new agent's name is the source agent's name with ` (Copy)` appended.",
+                "operationId": "duplicateAgent",
+                "tags": [
+                    "Agents"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Duplicated agent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Agent"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    },
+                    "409": {
+                        "description": "Conflict — a uniqueness constraint was violated while creating the copy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "enum": [
+                                                "conflict"
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1223,6 +1357,74 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/calls/batch-get": {
+            "post": {
+                "summary": "Batch Get Calls",
+                "description": "Fetch multiple calls by ID in a single request. Tenant-scoped — IDs that don't belong to your organization (or don't exist) are silently omitted from the response. Useful for multi-tenant resellers who store RevRing call IDs in their own database and need to hydrate full call details for an arbitrary subset. Max 100 IDs per request.",
+                "operationId": "batchGetCalls",
+                "tags": [
+                    "Calls"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "ids"
+                                ],
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "description": "Call IDs to fetch. Duplicates are de-duped server-side.",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "maxItems": 100
+                                    },
+                                    "minimal": {
+                                        "type": "boolean",
+                                        "description": "If true, omits heavy fields (transcript, summary, metrics, variables) from each call.",
+                                        "default": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Found calls. Response order is not guaranteed; match by `id` field rather than array index. IDs that don't belong to your organization (or don't exist) are omitted — diff against your requested list to detect stale IDs.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Call"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
                     }
                 }
             }

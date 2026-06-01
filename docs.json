@@ -63,8 +63,10 @@
                         "pages": [
                             "api-reference/agents/list",
                             "api-reference/agents/get",
+                            "api-reference/agents/batch-get",
                             "api-reference/agents/create",
                             "api-reference/agents/update",
+                            "api-reference/agents/duplicate",
                             "api-reference/agents/delete"
                         ]
                     },
@@ -116,6 +118,7 @@
                         "pages": [
                             "api-reference/calls/list",
                             "api-reference/calls/get",
+                            "api-reference/calls/batch-get",
                             "api-reference/calls/send",
                             "api-reference/calls/cancel"
                         ]
