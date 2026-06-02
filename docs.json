@@ -72,6 +72,15 @@
                         ]
                     },
                     {
+                        "group": "Agent Folders",
+                        "pages": [
+                            "api-reference/agent-folders/list",
+                            "api-reference/agent-folders/create",
+                            "api-reference/agent-folders/update",
+                            "api-reference/agent-folders/delete"
+                        ]
+                    },
+                    {
                         "group": "Agent Phone Numbers",
                         "pages": [
                             "api-reference/agents/list-phone-numbers",

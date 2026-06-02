@@ -30,6 +30,10 @@
             "description": "Manage AI voice agents and their configuration"
         },
         {
+            "name": "Agent Folders",
+            "description": "Organize agents into folders for dashboard navigation"
+        },
+        {
             "name": "Calls",
             "description": "Manage and query phone calls"
         },
@@ -374,29 +378,72 @@
         "/agents": {
             "get": {
                 "summary": "List Agents",
-                "description": "Retrieve all AI voice agents for your organization",
+                "description": "List agents with filtering, sorting, and pagination. Default page size is 25 (maximum 100). To hydrate a known set of agents in one call, use `POST /agents/batch-get` instead.",
                 "operationId": "listAgents",
                 "tags": [
                     "Agents"
                 ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "schema": { "type": "integer", "minimum": 1, "default": 1 }
+                    },
+                    {
+                        "name": "pageSize",
+                        "in": "query",
+                        "description": "Items per page",
+                        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 25 }
+                    },
+                    {
+                        "name": "sortBy",
+                        "in": "query",
+                        "description": "Sort field",
+                        "schema": { "type": "string", "enum": ["createdAt", "updatedAt", "name"], "default": "createdAt" }
+                    },
+                    {
+                        "name": "sortDir",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "schema": { "type": "string", "enum": ["active", "disabled"] }
+                    },
+                    {
+                        "name": "folderId",
+                        "in": "query",
+                        "description": "Filter by folder. Pass a folder ID to only return agents in that folder, or `none` to only return agents not in any folder. Omit to return agents from all folders.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search agents by name (case-insensitive substring match)",
+                        "schema": { "type": "string", "maxLength": 128 }
+                    },
+                    {
+                        "name": "minimal",
+                        "in": "query",
+                        "description": "Return a compact representation, omitting prompt template, flow definition, variables, runtime config, custom tools, and knowledge bases",
+                        "schema": { "type": "boolean", "default": false }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "List of agents",
+                        "description": "Paginated list of agents",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Agent"
-                                            }
-                                        }
-                                    }
-                                }
+                                "schema": { "$ref": "#/components/schemas/AgentsList" }
                             }
                         }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequestError"
                     },
                     "401": {
                         "$ref": "#/components/responses/UnauthorizedError"
@@ -1194,6 +1241,184 @@
                     "404": {
                         "$ref": "#/components/responses/NotFoundError"
                     }
+                }
+            }
+        },
+        "/agent-folders": {
+            "get": {
+                "summary": "List Agent Folders",
+                "description": "Returns all folders for your organization plus the count of uncategorized agents (agents not in any folder).",
+                "operationId": "listAgentFolders",
+                "tags": ["Agent Folders"],
+                "responses": {
+                    "200": {
+                        "description": "Folders with agent counts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": { "$ref": "#/components/schemas/AgentFolder" }
+                                        },
+                                        "uncategorizedCount": {
+                                            "type": "integer",
+                                            "description": "Number of agents not assigned to any folder"
+                                        }
+                                    },
+                                    "required": ["data", "uncategorizedCount"]
+                                }
+                            }
+                        }
+                    },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "402": { "$ref": "#/components/responses/BillingInactiveError" }
+                }
+            },
+            "post": {
+                "summary": "Create Agent Folder",
+                "description": "Create a new folder for organizing agents. Folder names must be unique within your organization.",
+                "operationId": "createAgentFolder",
+                "tags": ["Agent Folders"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["name"],
+                                "properties": {
+                                    "name": { "type": "string", "maxLength": 64 },
+                                    "color": { "type": "string", "nullable": true, "description": "Preset color key for UI styling" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Folder created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": { "$ref": "#/components/schemas/AgentFolder" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { "$ref": "#/components/responses/BadRequestError" },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "402": { "$ref": "#/components/responses/BillingInactiveError" },
+                    "409": {
+                        "description": "A folder with this name already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": { "type": "string", "enum": ["name_exists"] },
+                                        "message": { "type": "string" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/agent-folders/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "Folder ID",
+                    "schema": { "type": "string", "format": "uuid" }
+                }
+            ],
+            "patch": {
+                "summary": "Update Agent Folder",
+                "description": "Rename a folder or change its color.",
+                "operationId": "updateAgentFolder",
+                "tags": ["Agent Folders"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { "type": "string", "maxLength": 64 },
+                                    "color": { "type": "string", "nullable": true }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Folder updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": { "$ref": "#/components/schemas/AgentFolder" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { "$ref": "#/components/responses/BadRequestError" },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "402": { "$ref": "#/components/responses/BillingInactiveError" },
+                    "404": { "$ref": "#/components/responses/NotFoundError" },
+                    "409": {
+                        "description": "A folder with this name already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": { "type": "string", "enum": ["name_exists"] }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete Agent Folder",
+                "description": "Delete a folder. Agents in the folder are moved to Uncategorized (not deleted).",
+                "operationId": "deleteAgentFolder",
+                "tags": ["Agent Folders"],
+                "responses": {
+                    "200": {
+                        "description": "Folder deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": { "type": "string", "format": "uuid" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "402": { "$ref": "#/components/responses/BillingInactiveError" },
+                    "404": { "$ref": "#/components/responses/NotFoundError" }
                 }
             }
         },
@@ -3698,6 +3923,22 @@
                             }
                         }
                     },
+                    "folderId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "ID of the folder this agent belongs to, or null for uncategorized"
+                    },
+                    "folder": {
+                        "type": "object",
+                        "nullable": true,
+                        "description": "Summary of the folder this agent belongs to",
+                        "properties": {
+                            "id": { "type": "string", "format": "uuid" },
+                            "name": { "type": "string" },
+                            "color": { "type": "string", "nullable": true }
+                        }
+                    },
                     "name": {
                         "type": "string",
                         "description": "Agent name"
@@ -3980,6 +4221,12 @@
                         "description": "SIP trunk ID to use for this agent's calls",
                         "nullable": true
                     },
+                    "folderId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Folder to place this agent in. Omit or pass null for uncategorized."
+                    },
                     "name": {
                         "type": "string",
                         "maxLength": 128,
@@ -4236,6 +4483,12 @@
                         "format": "uuid",
                         "description": "SIP trunk ID to use for this agent's calls",
                         "nullable": true
+                    },
+                    "folderId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Folder ID. Pass null to move to Uncategorized."
                     },
                     "name": {
                         "type": "string",
@@ -4904,6 +5157,35 @@
                     "toNumber",
                     "fromNumber"
                 ]
+            },
+            "AgentsList": {
+                "type": "object",
+                "description": "Paginated list of agents",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "description": "Array of agents on the current page",
+                        "items": { "$ref": "#/components/schemas/Agent" }
+                    },
+                    "page": { "type": "integer", "minimum": 1 },
+                    "pageSize": { "type": "integer", "minimum": 1, "maximum": 100 },
+                    "total": { "type": "integer" },
+                    "hasNextPage": { "type": "boolean" }
+                },
+                "required": ["data", "page", "pageSize", "total", "hasNextPage"]
+            },
+            "AgentFolder": {
+                "type": "object",
+                "description": "A folder for organizing agents in the dashboard",
+                "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "name": { "type": "string", "maxLength": 64 },
+                    "color": { "type": "string", "nullable": true, "description": "Preset color key for UI styling" },
+                    "agentCount": { "type": "integer", "description": "Number of agents currently in this folder" },
+                    "createdAt": { "type": "string", "format": "date-time" },
+                    "updatedAt": { "type": "string", "format": "date-time" }
+                },
+                "required": ["id", "name", "agentCount", "createdAt", "updatedAt"]
             },
             "CallsList": {
                 "type": "object",
