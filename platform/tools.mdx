@@ -122,6 +122,7 @@ Warm transfer is configured with the following settings:
 | **Hold Music** | Enable or disable hold music while the caller waits |
 | **Summary Instructions** | Extra guidance for the AI when briefing the human agent. Max 2,000 characters. If omitted, a default summary is generated. |
 | **Intro Message** | Spoken after the human agent accepts, heard by both parties (e.g., "You're now connected. They're up to speed on your request.") Max 500 characters. |
+| **Continue Recording After Handoff** | Keep recording after the agent hands off, so the recording also includes the human agent and caller conversation. |
 
 #### Configuring via API
 
@@ -144,7 +145,8 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
       "holdMessage": "Please hold while I connect you with our support team.",
       "holdMusicEnabled": true,
       "summaryPrompt": "Focus on the customer's main concern and any account details mentioned.",
-      "introMessage": "You're now connected. They're up to speed on your request."
+      "introMessage": "You're now connected. They're up to speed on your request.",
+      "continueRecordingAfterTransfer": false
     }
   }'
 ```

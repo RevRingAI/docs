@@ -4168,6 +4168,10 @@
                                 "type": "string",
                                 "maxLength": 500,
                                 "description": "Message the AI speaks to the human agent before connecting the caller"
+                            },
+                            "continueRecordingAfterTransfer": {
+                                "type": "boolean",
+                                "description": "Keep recording after the warm handoff completes, so the recording also includes the human agent and caller conversation."
                             }
                         }
                     },
@@ -4435,6 +4439,10 @@
                                 "type": "string",
                                 "maxLength": 500,
                                 "description": "Message the AI speaks to the human agent before connecting the caller"
+                            },
+                            "continueRecordingAfterTransfer": {
+                                "type": "boolean",
+                                "description": "Keep recording after the warm handoff completes, so the recording also includes the human agent and caller conversation."
                             }
                         }
                     },
@@ -4698,6 +4706,10 @@
                                 "type": "string",
                                 "maxLength": 500,
                                 "description": "Message the AI speaks to the human agent before connecting the caller"
+                            },
+                            "continueRecordingAfterTransfer": {
+                                "type": "boolean",
+                                "description": "Keep recording after the warm handoff completes, so the recording also includes the human agent and caller conversation."
                             }
                         }
                     },

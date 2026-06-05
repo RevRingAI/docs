@@ -168,6 +168,7 @@ Transfers the call to another phone number.
 | `holdMusicEnabled` | boolean | No | Play hold music (warm transfer) |
 | `summaryPrompt` | string | No | Prompt used to generate a brief for the recipient (warm transfer, max 2000 chars) |
 | `introMessage` | string | No | Message spoken to the recipient before connecting (warm transfer, max 500 chars) |
+| `continueRecordingAfterTransfer` | boolean | No | Keep recording after the handoff, so the recording also includes the recipient and caller conversation (warm transfer) |
 
 **Example:**
 ```json
@@ -182,7 +183,8 @@ Transfers the call to another phone number.
     "speakDuringExecution": true,
     "speakInstruction": "Let me connect you with our support team.",
     "holdMessage": "Please hold while I connect you.",
-    "holdMusicEnabled": true
+    "holdMusicEnabled": true,
+    "continueRecordingAfterTransfer": false
   }
 }
 ```
