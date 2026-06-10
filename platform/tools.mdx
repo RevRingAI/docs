@@ -75,7 +75,7 @@ The Transfer tool enables agents to transfer calls to other phone numbers or dep
 2. Locate **Transfer** under System Tools
 3. Toggle the switch to enable
 4. Click **Configure** to set up transfer routes
-5. Select **Transfer Mode**:
+5. Select the **Default Transfer Mode** (applied to any route that doesn't set its own mode):
    - **Cold Transfer** — the agent transfers the call immediately and disconnects
    - **Warm Transfer** — the agent places the caller on hold, calls the recipient to brief them, then connects the parties
 
@@ -84,6 +84,7 @@ The Transfer tool enables agents to transfer calls to other phone numbers or dep
 **Transfer Routes**:
 - **To number**: `+12025559999` (destination phone number in E.164 format)
 - **Condition**: `Transfer to sales team for pricing questions or to close deals`
+- **Mode**: `Default`, `Cold`, or `Warm` — overrides the default transfer mode for this specific route
 
 Click **Add route** to add multiple destinations.
 
@@ -93,6 +94,10 @@ Click **Add route** to add multiple destinations.
 
 <Tip>
 You can configure multiple transfer routes for different scenarios. The agent will choose the appropriate route based on the conversation context and conditions you define.
+</Tip>
+
+<Tip>
+**Fallback chains**: Because each route can set its own mode, you can build a ring tree. For example, a warm transfer to a primary number, a warm transfer to a backup if the first isn't answered, and a final cold transfer as a last resort. When a warm transfer isn't answered, the agent continues to the next route based on your prompt and conditions. (Cold transfers hand off immediately and cannot fall back, so they belong last.)
 </Tip>
 
 #### Cold Transfer
@@ -126,7 +131,7 @@ Warm transfer is configured with the following settings:
 
 #### Configuring via API
 
-Set `transferMode` and `warmTransferConfig` when creating or updating an agent:
+Set `transferMode` (the default mode) and `warmTransferConfig` when creating or updating an agent. Each route may include an optional `mode` (`"cold"` or `"warm"`) that overrides the default for that route; omit it to inherit `transferMode`. The example below builds a warm primary, warm backup, then cold last-resort fallback chain:
 
 ```bash
 curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
@@ -138,7 +143,18 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
     "transferRoutes": [
       {
         "to_number": "+12025559999",
-        "condition": "Transfer to support team for technical issues"
+        "condition": "Primary: transfer to the support team",
+        "mode": "warm"
+      },
+      {
+        "to_number": "+12025550000",
+        "condition": "Backup: use if the primary line is not answered",
+        "mode": "warm"
+      },
+      {
+        "to_number": "+12025551111",
+        "condition": "Last resort: drop to the main line if no one is available",
+        "mode": "cold"
       }
     ],
     "warmTransferConfig": {
