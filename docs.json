@@ -34,7 +34,8 @@
                             "platform/knowledge-bases",
                             "platform/test-suites",
                             "platform/webhooks",
-                            "platform/webrtc"
+                            "platform/webrtc",
+                            "platform/messaging"
                         ]
                     }
                 ]
@@ -57,6 +58,16 @@
                             "api-reference/sip-trunks/create",
                             "api-reference/sip-trunks/update",
                             "api-reference/sip-trunks/delete"
+                        ]
+                    },
+                    {
+                        "group": "Messaging Connections",
+                        "pages": [
+                            "api-reference/messaging-connections/list",
+                            "api-reference/messaging-connections/get",
+                            "api-reference/messaging-connections/create",
+                            "api-reference/messaging-connections/update",
+                            "api-reference/messaging-connections/delete"
                         ]
                     },
                     {

@@ -22,6 +22,10 @@
     ],
     "tags": [
         {
+            "name": "Messaging Connections",
+            "description": "Connect messaging providers so agents can send text messages"
+        },
+        {
             "name": "SIP Trunks",
             "description": "Manage SIP trunks for connecting agents to the phone network"
         },
@@ -51,6 +55,268 @@
         }
     ],
     "paths": {
+        "/messaging-connections": {
+            "get": {
+                "summary": "List Messaging Connections",
+                "description": "Retrieve all messaging provider connections for your organization. Secrets (such as the provider Auth Token) are never returned.",
+                "operationId": "listMessagingConnections",
+                "tags": [
+                    "Messaging Connections"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of messaging connections",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MessagingConnection"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create Messaging Connection",
+                "description": "Connect a messaging provider. Credentials are verified with the provider before the connection is saved. The Auth Token is stored securely and is never returned.",
+                "operationId": "createMessagingConnection",
+                "tags": [
+                    "Messaging Connections"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MessagingConnectionCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Connection created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MessagingConnection"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, or the provider rejected the credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "enum": [
+                                                "invalid_body",
+                                                "invalid_credentials",
+                                                "messaging_service_not_found"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    },
+                    "502": {
+                        "description": "Could not reach the provider to verify credentials; try again",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "provider_unreachable"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/messaging-connections/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "Messaging connection ID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get Messaging Connection",
+                "description": "Retrieve a specific messaging connection by ID. Secrets are never returned.",
+                "operationId": "getMessagingConnection",
+                "tags": [
+                    "Messaging Connections"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Connection details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MessagingConnection"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update Messaging Connection",
+                "description": "Update a messaging connection. If credentials change they are re-verified with the provider. Provide authToken only to rotate it.",
+                "operationId": "updateMessagingConnection",
+                "tags": [
+                    "Messaging Connections"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MessagingConnectionUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connection updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MessagingConnection"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete Messaging Connection",
+                "description": "Delete a messaging connection. Cannot delete if agents are still using it.",
+                "operationId": "deleteMessagingConnection",
+                "tags": [
+                    "Messaging Connections"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Connection deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    },
+                    "409": {
+                        "description": "Connection is in use by one or more agents",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "has_dependent_agents"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/sip-trunks": {
             "get": {
                 "summary": "List SIP Trunks",
@@ -3766,6 +4032,97 @@
             }
         },
         "schemas": {
+            "MessagingConnection": {
+                "type": "object",
+                "description": "A connected messaging provider. Secrets (the provider Auth Token) are never included.",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "friendlyName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "channel": {
+                        "type": "string",
+                        "enum": [
+                            "sms"
+                        ]
+                    },
+                    "provider": {
+                        "type": "string",
+                        "enum": [
+                            "twilio"
+                        ]
+                    },
+                    "accountSid": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "messagingServiceSid": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "config": {
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "MessagingConnectionCreate": {
+                "type": "object",
+                "required": [
+                    "accountSid",
+                    "authToken"
+                ],
+                "properties": {
+                    "friendlyName": {
+                        "type": "string",
+                        "maxLength": 128
+                    },
+                    "accountSid": {
+                        "type": "string",
+                        "description": "Twilio Account SID (starts with AC)"
+                    },
+                    "authToken": {
+                        "type": "string",
+                        "description": "Twilio Auth Token. Stored securely and never returned."
+                    },
+                    "messagingServiceSid": {
+                        "type": "string",
+                        "description": "Twilio Messaging Service SID (starts with MG). Recommended."
+                    }
+                }
+            },
+            "MessagingConnectionUpdate": {
+                "type": "object",
+                "properties": {
+                    "friendlyName": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "nullable": true
+                    },
+                    "accountSid": {
+                        "type": "string"
+                    },
+                    "authToken": {
+                        "type": "string",
+                        "description": "Provide only to rotate the token. Never returned."
+                    },
+                    "messagingServiceSid": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
             "SipTrunk": {
                 "type": "object",
                 "description": "SIP Trunk for routing phone calls",

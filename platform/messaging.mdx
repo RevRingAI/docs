@@ -1,0 +1,125 @@
+---
+title: 'Messaging'
+description: 'Let your agents send text messages (SMS), from the same number they call from'
+icon: 'comments'
+---
+
+Connect a messaging provider so your agents can send text messages. Today your agents can send an SMS **during a live call** (for example, texting the caller a booking or payment link), using the same number they call from. Support for more messaging workflows is on the way.
+
+## How it works
+
+1. You connect your own messaging provider once (Twilio today).
+2. You enable **Send SMS on call** for an agent and choose that connection.
+3. During a call, when it's useful, the agent texts the person on the call. For example, the caller says "can you text me the link?" and the agent sends it while staying on the call.
+4. The message is sent through your connected provider account.
+
+<Note>
+You bring your own provider account, so messages are sent from your numbers and billed to you by your provider, at your provider's rates.
+</Note>
+
+## Prerequisites
+
+Before you begin:
+
+- An active RevRing account with at least one configured agent
+- Your own Twilio account (this can be the same account you use for voice)
+- A Twilio **Messaging Service** with at least one SMS-capable number in its sender pool (recommended). Twilio's Messaging Service picks the sender for each message and handles compliance features for you.
+
+<Tip>
+To send texts from the **same number** your agent calls from, add that number to your Twilio Messaging Service's sender pool, or set it as the agent's send-from number in the next steps.
+</Tip>
+
+## Setup
+
+### Step 1: Connect your provider
+
+1. In the RevRing dashboard, go to [Connect → Messaging](https://dashboard.revring.ai/app/messaging).
+2. Click **Connect provider** and choose **Twilio**.
+3. Enter the values from your [Twilio Console](https://console.twilio.com):
+   - **Account SID** (starts with `AC`)
+   - **Auth Token**
+   - **Messaging Service SID** (starts with `MG`) — recommended
+4. Click **Connect**.
+
+We verify the credentials with your provider before saving them, so you'll know right away if something is off.
+
+<Warning>
+Your Auth Token is stored securely so we can send messages on your behalf, and it is never shown again or returned by the API. You can rotate it any time by editing the connection.
+</Warning>
+
+### Step 2: Enable Send SMS on an agent
+
+1. Go to [Agents](https://dashboard.revring.ai/app/agents) and open the agent.
+2. Open the **Tools** tab and find **Send SMS on call**.
+3. Turn it on, then:
+   - **Messaging connection** — choose the connection from Step 1.
+   - **Send-from number** (optional) — the number texts should come from. Leave blank to let your Messaging Service choose the sender. Set a number to always send from it (it must be SMS-capable on your provider account).
+   - **Custom instructions** (optional) — override when and how the agent should text the caller.
+4. Click **Save**.
+
+That's it. On the agent's next call, it can text the caller when appropriate.
+
+## Guiding when the agent texts
+
+The agent decides when to send a text based on the conversation and its prompt. To make it reliable, mention it in your agent's prompt, for example:
+
+```text
+If the caller asks for a link, address, or confirmation, offer to text it to them and then send it.
+```
+
+You can also use the **Custom instructions** field on the Send SMS tool to tune this behavior without touching your main prompt.
+
+<Note>
+The agent can only text the person it is currently on the call with. It writes the message itself, in your agent's voice, based on what the caller asked for.
+</Note>
+
+## Using the same number for calls and texts
+
+A common goal is to have a contact see calls and texts from one number. Because your provider account owns the numbers, you control this:
+
+- Make sure the number your agent calls from is also SMS-capable in your provider account.
+- Add it to your Twilio Messaging Service sender pool, or set it as the agent's **Send-from number**.
+
+## Manage connections via API
+
+If you provision many agents or brands programmatically, you can manage messaging connections through the API instead of the dashboard. See [Messaging Connections](/api-reference/messaging-connections/list).
+
+## Troubleshooting
+
+### "We couldn't verify those credentials"
+
+**Cause:** The Account SID or Auth Token is incorrect.
+
+**Solution:** Re-copy both from your Twilio Console and try again. The Account SID starts with `AC`.
+
+### "That Messaging Service SID wasn't found on the account"
+
+**Cause:** The Messaging Service SID doesn't belong to that account.
+
+**Solution:** Confirm the SID (starts with `MG`) under Messaging in your Twilio Console, and that it's on the same account as the Account SID you entered.
+
+### The agent isn't texting
+
+**Solution:**
+
+1. Confirm **Send SMS on call** is enabled on the agent and a connection is selected.
+2. Make sure the connection has a Messaging Service, or set a **Send-from number** on the agent.
+3. Confirm the send-from number is SMS-capable in your provider account.
+4. Encourage the behavior in your agent's prompt or the tool's custom instructions.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Prompting & Variables" icon="pen" href="/platform/prompting-variables">
+    Tell your agent when to text the caller
+  </Card>
+  <Card title="Tools" icon="wrench" href="/platform/tools">
+    See all built-in and custom agent tools
+  </Card>
+  <Card title="Messaging Connections API" icon="code" href="/api-reference/messaging-connections/list">
+    Manage connections programmatically
+  </Card>
+  <Card title="Connect Messaging" icon="comments" href="https://dashboard.revring.ai/app/messaging">
+    Open the dashboard
+  </Card>
+</CardGroup>
