@@ -4409,7 +4409,7 @@
                 "type": "object",
                 "description": "Per-agent messaging settings. A JSON object; set only the keys you need.",
                 "properties": {
-                    "smsPrompt": { "type": "string", "description": "Instructions the agent follows when composing text replies. Separate from the call prompt." },
+                    "smsPrompt": { "type": "string", "description": "Optional instructions for composing text replies. If omitted, the agent uses its main prompt. Set it to give texting its own tone, separate from the call prompt." },
                     "inboundMode": { "type": "string", "enum": ["auto_reply", "notify"], "description": "What happens when someone texts in: 'auto_reply' (RevRing composes and sends a reply from smsPrompt) or 'notify' (RevRing forwards the message to inboundWebhookUrl and you send the reply)." },
                     "inboundWebhookUrl": { "type": "string", "description": "Where RevRing POSTs incoming texts when inboundMode is 'notify'." },
                     "fromNumber": { "type": "string", "description": "Default sender number in E.164. If unset, the connection's Messaging Service chooses the sender." },

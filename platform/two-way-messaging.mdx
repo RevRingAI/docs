@@ -30,7 +30,7 @@ With **Notify your webhook**, RevRing POSTs a `message_received` event to your U
 
 ### The SMS prompt
 
-For automatic replies, the agent follows its **SMS prompt**, set on the agent's **Messaging** tab. This is separate from the prompt it uses on calls, so texting can have its own tone and instructions. RevRing keeps the recent conversation with each contact, so replies stay in context.
+For automatic replies, the agent uses its **SMS prompt** (set on the agent's **Messaging** tab) when you've added one, and otherwise falls back to the agent's main prompt — so auto-reply works out of the box. Add an SMS prompt only when you want texting to have its own tone, separate from calls. RevRing keeps the recent conversation with each contact, so replies stay in context.
 
 ### Set up incoming texts
 
@@ -39,7 +39,7 @@ For automatic replies, the agent follows its **SMS prompt**, set on the agent's 
     Follow [Messaging](/platform/messaging) to connect a provider, then open the agent's **Messaging** tab and select the connection.
   </Step>
   <Step title="Choose what happens on an incoming text">
-    On the **Messaging** tab, set **When a text comes in** to either reply automatically or notify your webhook, and write the SMS prompt.
+    On the **Messaging** tab, set **When a text comes in** to either reply automatically or notify your webhook. The SMS prompt is optional — auto-reply uses the agent's main prompt if you leave it blank.
   </Step>
   <Step title="Assign the number to the agent">
     On the agent's **Numbers** tab, add the number that will receive texts. Incoming texts are routed to the agent that owns the number.
