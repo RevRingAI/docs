@@ -194,7 +194,8 @@
                         "group": "Webhooks",
                         "pages": [
                             "api-reference/webhooks/pre-call",
-                            "api-reference/webhooks/post-call"
+                            "api-reference/webhooks/post-call",
+                            "api-reference/webhooks/message-received"
                         ]
                     }
                 ]

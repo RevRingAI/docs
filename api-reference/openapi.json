@@ -3911,6 +3911,56 @@
         }
     },
     "webhooks": {
+        "message-received": {
+            "post": {
+                "summary": "Inbound Message Webhook",
+                "description": "Sent when someone texts an agent whose inbound mode is 'notify'. RevRing forwards the incoming message so your system can reply (via the Send Message API). In 'auto_reply' mode RevRing replies automatically and no webhook is sent.",
+                "tags": [
+                    "Webhooks"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "event": { "type": "string", "example": "message_received" },
+                                    "organizationId": { "type": "string", "description": "Your organization ID" },
+                                    "agentId": { "type": "string", "description": "The agent that owns the number that received the text" },
+                                    "conversationId": { "type": "string", "description": "RevRing's id for the thread with this contact; use it with the messages log to read the full conversation" },
+                                    "fromNumber": { "type": "string", "description": "The contact's number (E.164)", "example": "+14155551234" },
+                                    "toNumber": { "type": "string", "description": "Your number that received the text (E.164)", "example": "+12025559999" },
+                                    "body": { "type": "string", "description": "The text content of the incoming message", "example": "Yes, that time works for me" },
+                                    "messageSid": { "type": "string", "description": "Your provider's id for the inbound message" }
+                                },
+                                "required": [
+                                    "event",
+                                    "fromNumber",
+                                    "toNumber",
+                                    "body"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Acknowledge receipt. RevRing does not require a response body and does not retry.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "received": { "type": "boolean", "example": true }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "pre-call": {
             "post": {
                 "summary": "Pre-Call Webhook",
