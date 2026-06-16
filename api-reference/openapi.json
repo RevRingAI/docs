@@ -111,7 +111,17 @@
                     "required": true,
                     "content": {
                         "application/json": {
-                            "schema": { "$ref": "#/components/schemas/MessageSend" }
+                            "schema": { "$ref": "#/components/schemas/MessageSend" },
+                            "examples": {
+                                "raw": {
+                                    "summary": "Send a specific message",
+                                    "value": { "to": "+14155551234", "messagingConnectionId": "mc_123abc", "body": "Your booking is confirmed for 2:00 PM." }
+                                },
+                                "generated": {
+                                    "summary": "Let AI compose the reply from the agent's SMS prompt",
+                                    "value": { "to": "+14155551234", "agentId": "agent_456def", "generate": true }
+                                }
+                            }
                         }
                     }
                 },
@@ -4345,6 +4355,19 @@
                     "smsPrompt": { "type": "string", "description": "Optional prompt override for generation. Defaults to the agent's SMS prompt." }
                 }
             },
+            "MessagingConfig": {
+                "type": "object",
+                "description": "Per-agent messaging settings. A JSON object; set only the keys you need.",
+                "properties": {
+                    "smsPrompt": { "type": "string", "description": "Instructions the agent follows when composing text replies. Separate from the call prompt." },
+                    "inboundMode": { "type": "string", "enum": ["auto_reply", "notify"], "description": "What happens when someone texts in: 'auto_reply' (RevRing composes and sends a reply from smsPrompt) or 'notify' (RevRing forwards the message to inboundWebhookUrl and you send the reply)." },
+                    "inboundWebhookUrl": { "type": "string", "description": "Where RevRing POSTs incoming texts when inboundMode is 'notify'." },
+                    "fromNumber": { "type": "string", "description": "Default sender number in E.164. If unset, the connection's Messaging Service chooses the sender." },
+                    "sendMessageEnabled": { "type": "boolean", "description": "Allow the agent to send a text during a live call." },
+                    "sendMessageDescriptionOverride": { "type": "string", "description": "Custom instructions for when and how the agent texts during a call." },
+                    "conversationIdleResetDays": { "type": "integer", "description": "Days of inactivity after which earlier conversation history is no longer used as reply context. Defaults to 30." }
+                }
+            },
             "SipTrunk": {
                 "type": "object",
                 "description": "SIP Trunk for routing phone calls",
@@ -4482,6 +4505,8 @@
                 "type": "object",
                 "description": "AI Voice Agent configuration",
                 "properties": {
+                    "messagingConnectionId": { "type": "string", "nullable": true, "description": "ID of the messaging connection this agent sends and receives texts through (see Messaging Connections)." },
+                    "messagingConfig": { "$ref": "#/components/schemas/MessagingConfig" },
                     "id": {
                         "type": "string",
                         "format": "uuid"
@@ -4798,6 +4823,8 @@
                 "type": "object",
                 "description": "Create a new AI voice agent",
                 "properties": {
+                    "messagingConnectionId": { "type": "string", "nullable": true, "description": "ID of the messaging connection this agent sends and receives texts through (see Messaging Connections)." },
+                    "messagingConfig": { "$ref": "#/components/schemas/MessagingConfig" },
                     "sipTrunkId": {
                         "type": "string",
                         "format": "uuid",
@@ -5065,6 +5092,8 @@
                 "type": "object",
                 "description": "Update an existing AI voice agent. All fields are optional.",
                 "properties": {
+                    "messagingConnectionId": { "type": "string", "nullable": true, "description": "ID of the messaging connection this agent sends and receives texts through (see Messaging Connections)." },
+                    "messagingConfig": { "$ref": "#/components/schemas/MessagingConfig" },
                     "sipTrunkId": {
                         "type": "string",
                         "format": "uuid",

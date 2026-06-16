@@ -24,6 +24,10 @@ Each agent chooses what happens when a text comes in:
   </Card>
 </CardGroup>
 
+<Note>
+With **Notify your webhook**, RevRing POSTs a `message_received` event to your URL. See [Inbound Message Webhook](/platform/webhooks#inbound-message-webhook) for the exact payload and a code sample.
+</Note>
+
 ### The SMS prompt
 
 For automatic replies, the agent follows its **SMS prompt**, set on the agent's **Messaging** tab. This is separate from the prompt it uses on calls, so texting can have its own tone and instructions. RevRing keeps the recent conversation with each contact, so replies stay in context.

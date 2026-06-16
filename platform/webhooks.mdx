@@ -707,6 +707,100 @@ app.post('/webhooks/post-call', async (req, res) => {
 });
 ```
 
+## Inbound Message Webhook
+
+When an agent's inbound messaging mode is set to **notify**, RevRing forwards each incoming text to a webhook URL you choose, and your own system composes and sends the reply. (In **auto-reply** mode RevRing replies automatically from the agent's SMS prompt, and no webhook is sent — see [Two-way texting](/platform/two-way-messaging).)
+
+### When to Use
+
+- You orchestrate replies yourself (in N8N, Make, your CRM, etc.) and want full control over each reply.
+- You want to log, score, or branch on an inbound text before responding.
+
+### Configuration
+
+1. On the agent's **Messaging** tab, set **When a text comes in** to **Notify my webhook** and enter your webhook URL.
+2. Assign the receiving number to the agent under **Numbers**.
+3. Point your provider's inbound message webhook at RevRing:
+
+```
+https://api.revring.ai/webhooks/twilio/inbound
+```
+
+### Request Format
+
+When an inbound text arrives, RevRing sends a POST request to your webhook URL:
+
+```json
+{
+  "event": "message_received",
+  "organizationId": "org_123abc",
+  "agentId": "agent_456def",
+  "conversationId": "conv_789ghi",
+  "fromNumber": "+14155551234",
+  "toNumber": "+12025559999",
+  "body": "Yes, that time works for me",
+  "messageSid": "SM0123456789abcdef"
+}
+```
+
+**Field Descriptions:**
+- `event`: Always `"message_received"` for inbound messages.
+- `organizationId`: Your organization ID.
+- `agentId`: The agent that owns the number that received the text.
+- `conversationId`: RevRing's id for the thread with this contact. Use it with the [messages log](/api-reference/messages/list) to read the full conversation.
+- `fromNumber`: The contact's number (E.164).
+- `toNumber`: Your number that received the text (E.164).
+- `body`: The text content of the incoming message.
+- `messageSid`: Your provider's id for the inbound message.
+
+### Response Expectations
+
+Respond with `200 OK` promptly. RevRing does not require a response body and does not retry. To reply, call the [Send Message API](/api-reference/messages/send).
+
+### Example Implementation
+
+**Node.js / Express:**
+
+```javascript
+app.post('/webhooks/revring-inbound', async (req, res) => {
+  const { fromNumber, toNumber, agentId } = req.body
+
+  // Acknowledge immediately
+  res.status(200).json({ received: true })
+
+  // Reply via RevRing. Pass your own `body`, or let RevRing write it from the
+  // agent's SMS prompt with `generate: true`. Set `from` to the number that
+  // received the text so the reply continues the same conversation.
+  await fetch('https://api.revring.ai/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': process.env.REVRING_API_KEY,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ agentId, to: fromNumber, from: toNumber, generate: true }),
+  })
+})
+```
+
+**Python / Flask:**
+
+```python
+@app.route('/webhooks/revring-inbound', methods=['POST'])
+def revring_inbound():
+    data = request.get_json()
+    requests.post(
+        'https://api.revring.ai/v1/messages',
+        headers={'x-api-key': os.environ['REVRING_API_KEY']},
+        json={
+            'agentId': data['agentId'],
+            'to': data['fromNumber'],
+            'from': data['toNumber'],
+            'generate': True,
+        },
+    )
+    return {'received': True}, 200
+```
+
 ## Next Steps
 
 <CardGroup cols={2}>
