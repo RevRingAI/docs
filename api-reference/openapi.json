@@ -26,6 +26,10 @@
             "description": "Connect messaging providers so agents can send text messages"
         },
         {
+            "name": "Messages",
+            "description": "Send text messages and read your message log"
+        },
+        {
             "name": "SIP Trunks",
             "description": "Manage SIP trunks for connecting agents to the phone network"
         },
@@ -55,6 +59,178 @@
         }
     ],
     "paths": {
+        "/messages": {
+            "get": {
+                "summary": "List Messages",
+                "description": "Retrieve the message log for your organization, newest first. Offset-paginated.",
+                "operationId": "listMessages",
+                "tags": [
+                    "Messages"
+                ],
+                "parameters": [
+                    { "name": "agentId", "in": "query", "required": false, "schema": { "type": "string" } },
+                    { "name": "callId", "in": "query", "required": false, "schema": { "type": "string" } },
+                    { "name": "direction", "in": "query", "required": false, "schema": { "type": "string", "enum": ["INBOUND", "OUTBOUND"] } },
+                    { "name": "status", "in": "query", "required": false, "schema": { "type": "string" } },
+                    { "name": "page", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+                    { "name": "pageSize", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 25 } }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message log page",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": { "$ref": "#/components/schemas/Message" }
+                                        },
+                                        "page": { "type": "integer" },
+                                        "pageSize": { "type": "integer" },
+                                        "total": { "type": "integer" },
+                                        "hasNextPage": { "type": "boolean" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "402": { "$ref": "#/components/responses/BillingInactiveError" }
+                }
+            },
+            "post": {
+                "summary": "Send Message",
+                "description": "Send an SMS. Provide either a raw `body` or set `generate` to true to compose the message with AI from the agent's SMS prompt and optional inline history. Sends through your connected provider.",
+                "operationId": "sendMessage",
+                "tags": [
+                    "Messages"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/MessageSend" }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Message accepted and sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": { "$ref": "#/components/schemas/Message" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, missing connection, or missing prompt for generation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "enum": ["invalid_body", "missing_connection", "no_prompt", "connection_misconfigured", "missing_sender"]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "402": { "$ref": "#/components/responses/BillingInactiveError" },
+                    "404": {
+                        "description": "Agent or connection not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "enum": ["agent_not_found", "connection_not_found"]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Generation or provider send failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "enum": ["generation_failed", "send_failed"]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/messages/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "Message ID",
+                    "schema": { "type": "string" }
+                }
+            ],
+            "get": {
+                "summary": "Get Message",
+                "description": "Retrieve a single message from your organization's log by ID.",
+                "operationId": "getMessage",
+                "tags": [
+                    "Messages"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The message",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": { "$ref": "#/components/schemas/Message" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "402": { "$ref": "#/components/responses/BillingInactiveError" },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": { "type": "string", "example": "not_found" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/messaging-connections": {
             "get": {
                 "summary": "List Messaging Connections",
@@ -4121,6 +4297,52 @@
                         "type": "string",
                         "nullable": true
                     }
+                }
+            },
+            "Message": {
+                "type": "object",
+                "description": "A logged text message (sent or received).",
+                "properties": {
+                    "id": { "type": "string" },
+                    "agentId": { "type": "string", "nullable": true },
+                    "messagingConnectionId": { "type": "string", "nullable": true },
+                    "callId": { "type": "string", "nullable": true },
+                    "conversationId": { "type": "string", "nullable": true },
+                    "direction": { "type": "string", "enum": ["INBOUND", "OUTBOUND"] },
+                    "channel": { "type": "string", "enum": ["sms"] },
+                    "fromNumber": { "type": "string" },
+                    "toNumber": { "type": "string" },
+                    "body": { "type": "string" },
+                    "status": { "type": "string", "description": "queued | sent | delivered | failed | received" },
+                    "providerMessageId": { "type": "string", "nullable": true },
+                    "generatedByLlm": { "type": "boolean" },
+                    "errorMessage": { "type": "string", "nullable": true },
+                    "createdAt": { "type": "string", "format": "date-time" }
+                }
+            },
+            "MessageSend": {
+                "type": "object",
+                "required": ["to"],
+                "description": "Send a text. Provide exactly one of `body` (raw) or `generate: true` (AI-composed).",
+                "properties": {
+                    "to": { "type": "string", "description": "Recipient phone number in E.164, e.g. +12025550123" },
+                    "from": { "type": "string", "description": "Optional sender number in E.164. Defaults to the agent's send-from number, or the connection's Messaging Service." },
+                    "agentId": { "type": "string", "description": "Agent to attribute the message to. For generation, its SMS prompt and connection are used." },
+                    "messagingConnectionId": { "type": "string", "description": "Connection to send through. Required if no agentId is given or the agent has no connection." },
+                    "body": { "type": "string", "minLength": 1, "maxLength": 1600, "description": "Raw message text. Use this OR generate." },
+                    "generate": { "type": "boolean", "description": "If true, compose the message with AI from the SMS prompt and optional messages history." },
+                    "messages": {
+                        "type": "array",
+                        "description": "Optional inline conversation history for generation (stateless; you own the memory).",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "role": { "type": "string", "enum": ["user", "assistant"] },
+                                "content": { "type": "string" }
+                            }
+                        }
+                    },
+                    "smsPrompt": { "type": "string", "description": "Optional prompt override for generation. Defaults to the agent's SMS prompt." }
                 }
             },
             "SipTrunk": {

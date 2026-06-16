@@ -35,7 +35,8 @@
                             "platform/test-suites",
                             "platform/webhooks",
                             "platform/webrtc",
-                            "platform/messaging"
+                            "platform/messaging",
+                            "platform/two-way-messaging"
                         ]
                     }
                 ]
@@ -68,6 +69,14 @@
                             "api-reference/messaging-connections/create",
                             "api-reference/messaging-connections/update",
                             "api-reference/messaging-connections/delete"
+                        ]
+                    },
+                    {
+                        "group": "Messages",
+                        "pages": [
+                            "api-reference/messages/send",
+                            "api-reference/messages/list",
+                            "api-reference/messages/get"
                         ]
                     },
                     {

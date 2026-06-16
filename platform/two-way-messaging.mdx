@@ -1,0 +1,81 @@
+---
+title: 'Two-way texting'
+description: 'Let your agents hold text conversations and send SMS outside of a call'
+icon: 'messages'
+---
+
+Beyond texting during a call, your agents can hold full back-and-forth text conversations and send messages outside of a call, all from the same number they call from.
+
+There are two parts:
+
+- **Incoming texts:** when someone texts your number, your agent can reply automatically with AI, or RevRing can forward the message to your own system.
+- **Sending texts:** send a message from your own automations (for example, following up when a lead does not answer a call) using the [Send Message API](/api-reference/messages/send).
+
+## Replying to incoming texts
+
+Each agent chooses what happens when a text comes in:
+
+<CardGroup cols={2}>
+  <Card title="Reply automatically with AI" icon="robot">
+    RevRing writes a reply using the agent's SMS prompt and the recent conversation, then sends it back. Hands-off for you.
+  </Card>
+  <Card title="Notify your webhook" icon="bell">
+    RevRing forwards each incoming text to a URL you choose, so your own system can decide how to respond.
+  </Card>
+</CardGroup>
+
+### The SMS prompt
+
+For automatic replies, the agent follows its **SMS prompt**, set on the agent's **Messaging** tab. This is separate from the prompt it uses on calls, so texting can have its own tone and instructions. RevRing keeps the recent conversation with each contact, so replies stay in context.
+
+### Set up incoming texts
+
+<Steps>
+  <Step title="Connect a provider and choose it on the agent">
+    Follow [Messaging](/platform/messaging) to connect a provider, then open the agent's **Messaging** tab and select the connection.
+  </Step>
+  <Step title="Choose what happens on an incoming text">
+    On the **Messaging** tab, set **When a text comes in** to either reply automatically or notify your webhook, and write the SMS prompt.
+  </Step>
+  <Step title="Assign the number to the agent">
+    On the agent's **Numbers** tab, add the number that will receive texts. Incoming texts are routed to the agent that owns the number.
+  </Step>
+  <Step title="Point your provider's inbound webhook to RevRing">
+    In your provider, set the inbound message webhook for your Messaging Service to:
+    ```
+    https://api.revring.ai/webhooks/twilio/inbound
+    ```
+  </Step>
+</Steps>
+
+<Note>
+To receive texts on a number, assign it to an agent, the same way you do to receive calls. That keeps calls and texts for one number flowing to the same agent.
+</Note>
+
+## Sending texts from your own automations
+
+Use the [Send Message API](/api-reference/messages/send) to send an SMS outside of a call. You can either:
+
+- Send a **raw message** by passing `body`, or
+- Have RevRing **compose the message** with AI by passing `generate: true`. It uses the agent's SMS prompt and the ongoing conversation with that contact, or a history you pass inline with `messages` if you prefer to manage memory yourself.
+
+This fits reseller and CRM workflows well. For example, when a lead does not answer a call, your automation platform can trigger a follow-up text.
+
+<Note>
+Messages you send through the API join the same conversation as incoming texts for that contact. So if you send an opener and the contact replies, an automatic reply already has the context of what you sent.
+</Note>
+
+<Note>
+You bring your own provider account, so messages are sent from your numbers and billed to you by your provider, at your provider's rates.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Connect Messaging" icon="comments" href="/platform/messaging">
+    Connect a provider and enable texting on a call
+  </Card>
+  <Card title="Send Message API" icon="code" href="/api-reference/messages/send">
+    Send and generate messages programmatically
+  </Card>
+</CardGroup>
