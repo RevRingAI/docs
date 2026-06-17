@@ -198,6 +198,45 @@ curl -X POST https://api.revring.ai/v1/calls \
 }
 ```
 
+## First Message
+
+The first message is the line your agent speaks when the call connects. It has two modes, controlled by the `firstMessageMode` field on the agent.
+
+### Static (default)
+
+The agent speaks the `firstMessage` text exactly as written. It supports `{{variables}}`, just like the prompt:
+
+```
+Hi {{customer_name}}, this is Alex from {{business_name}}. How can I help you today?
+```
+
+Leave `firstMessage` empty to have the agent wait for the caller to speak first.
+
+### Dynamic
+
+Set `firstMessageMode` to `dynamic` and the agent generates its opening line from the prompt instead of speaking a fixed string. This is useful when a single agent handles both inbound and outbound calls and needs a different greeting for each, since the `{{direction}}` system variable is available in the prompt:
+
+```
+You are a scheduling assistant for {{business_name}}.
+
+When the call begins, greet the caller:
+- If {{direction}} is inbound, thank them for calling {{business_name}} and ask how you can help.
+- If {{direction}} is outbound, introduce yourself and explain you are calling to confirm their appointment.
+```
+
+Enable it via the API:
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/agent_123abc \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstMessageMode": "dynamic"
+  }'
+```
+
+In dynamic mode the `firstMessage` text is ignored. To return to a fixed greeting, set `firstMessageMode` back to `static` (or `null`).
+
 ## Working with Timezones
 
 RevRing automatically handles timezone conversion for you. The `{{current_time}}` system variable is formatted in your agent's configured timezone, and the `{{timezone}}` variable contains the IANA timezone identifier.

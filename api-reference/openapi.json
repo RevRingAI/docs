@@ -4618,6 +4618,12 @@
                         "nullable": true,
                         "description": "Agent's opening message"
                     },
+                    "firstMessageMode": {
+                        "type": "string",
+                        "enum": ["static", "dynamic"],
+                        "nullable": true,
+                        "description": "How the agent opens the call. \"static\" speaks the first message text. \"dynamic\" generates the opening line from the agent's prompt. null uses the default behavior: speak the first message if set, otherwise wait for the caller."
+                    },
                     "turnTimeoutSeconds": {
                         "type": "integer",
                         "description": "Seconds to wait for user response"
@@ -4913,6 +4919,11 @@
                         "maxLength": 4000,
                         "description": "Agent's opening message"
                     },
+                    "firstMessageMode": {
+                        "type": "string",
+                        "enum": ["static", "dynamic"],
+                        "description": "How the agent opens the call. \"static\" (default) speaks the first message text. \"dynamic\" generates the opening line from the agent's prompt, so one agent can greet inbound and outbound callers differently. When omitted, the agent speaks the first message if set, otherwise waits for the caller."
+                    },
                     "turnTimeoutSeconds": {
                         "type": "integer",
                         "minimum": -1,
@@ -5182,6 +5193,12 @@
                         "type": "string",
                         "maxLength": 4000,
                         "description": "Agent's opening message"
+                    },
+                    "firstMessageMode": {
+                        "type": "string",
+                        "enum": ["static", "dynamic"],
+                        "nullable": true,
+                        "description": "How the agent opens the call. \"static\" speaks the first message text. \"dynamic\" generates the opening line from the agent's prompt, so one agent can greet inbound and outbound callers differently. Pass null to restore the default behavior."
                     },
                     "turnTimeoutSeconds": {
                         "type": "integer",
