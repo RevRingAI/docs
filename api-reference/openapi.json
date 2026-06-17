@@ -1964,6 +1964,14 @@
                         }
                     },
                     {
+                        "name": "folderId",
+                        "in": "query",
+                        "description": "Filter by the call's agent folder. Pass a folder ID to only return calls whose agent is in that folder, or `none` to only return calls whose agent has no folder. Calls whose agent has been deleted are not returned by this filter.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "name": "sipTrunkId",
                         "in": "query",
                         "description": "Filter by SIP trunk ID",
