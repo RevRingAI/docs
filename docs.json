@@ -80,6 +80,13 @@
                         ]
                     },
                     {
+                        "group": "Conversations",
+                        "pages": [
+                            "api-reference/conversations/list",
+                            "api-reference/conversations/delete"
+                        ]
+                    },
+                    {
                         "group": "Agents",
                         "pages": [
                             "api-reference/agents/list",
