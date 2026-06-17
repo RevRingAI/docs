@@ -4451,13 +4451,15 @@
             },
             "Conversation": {
                 "type": "object",
-                "description": "A managed conversation thread: one per contact per agent number. Holds the recent message memory used for auto-replies.",
+                "description": "A managed conversation thread: one per contact per agent number. Holds the recent message memory an agent uses to reply in context.",
                 "properties": {
                     "id": { "type": "string" },
                     "agentId": { "type": "string", "nullable": true },
+                    "agentName": { "type": "string", "nullable": true, "description": "The agent that owns this thread" },
                     "channel": { "type": "string", "enum": ["sms"] },
-                    "agentAddress": { "type": "string", "description": "Your number (the agent endpoint)" },
+                    "agentAddress": { "type": "string", "description": "The agent's number this thread is on" },
                     "senderAddress": { "type": "string", "description": "The contact's number" },
+                    "messageCount": { "type": "integer", "description": "Messages currently in this thread's memory" },
                     "lastMessageAt": { "type": "string", "format": "date-time", "nullable": true },
                     "createdAt": { "type": "string", "format": "date-time" }
                 }
@@ -4468,6 +4470,7 @@
                 "properties": {
                     "id": { "type": "string" },
                     "agentId": { "type": "string", "nullable": true },
+                    "agentName": { "type": "string", "nullable": true, "description": "The agent that sent or received this message" },
                     "messagingConnectionId": { "type": "string", "nullable": true },
                     "callId": { "type": "string", "nullable": true },
                     "conversationId": { "type": "string", "nullable": true },
