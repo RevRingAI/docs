@@ -161,8 +161,9 @@ Voicemail detection is particularly useful for outbound calling to avoid wasting
    - **Leave Message**: Speak a pre-recorded message before hanging up
 5. If leaving a message, configure the voicemail message:
    ```
-   Hi, this is Acme Corp calling to confirm your appointment. Please call us back at 1-800-555-0123 at your earliest convenience. Thank you.
+   Hi {{first_name}}, this is Acme Corp calling to confirm your appointment. Please call us back at 1-800-555-0123 at your earliest convenience. Thank you.
    ```
+   The voicemail message supports `{{variables}}`, just like your prompt and first message. Variables are filled in from the call's variables (for example, `first_name`). If a variable has no value, the placeholder is left as-is.
 6. Click **Save**
 
 <Tip>

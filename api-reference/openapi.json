@@ -4820,7 +4820,7 @@
                     "voicemailMessage": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Message to leave on voicemail (if action is leave_message)"
+                        "description": "Message to leave on voicemail (if action is leave_message). Supports {{variables}} like the prompt and first message."
                     },
                     "voiceId": {
                         "type": "string",
@@ -5121,7 +5121,7 @@
                     },
                     "voicemailMessage": {
                         "type": "string",
-                        "description": "Message to leave on voicemail"
+                        "description": "Message to leave on voicemail. Supports {{variables}} like the prompt and first message."
                     },
                     "voiceId": {
                         "type": "string",
@@ -5403,7 +5403,7 @@
                     "voicemailMessage": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Message to leave on voicemail"
+                        "description": "Message to leave on voicemail. Supports {{variables}} like the prompt and first message."
                     },
                     "voiceId": {
                         "type": "string",
