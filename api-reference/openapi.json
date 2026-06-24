@@ -4796,6 +4796,11 @@
                                 "condition": {
                                     "type": "string",
                                     "description": "When to offer this transfer option"
+                                },
+                                "extension": {
+                                    "type": "string",
+                                    "pattern": "^[0-9*#w]+$",
+                                    "description": "Optional touch-tone digits dialed after the call connects, to reach an extension behind a phone menu (e.g. \"123#\"). Allowed: 0-9, *, #, and w for a 0.5s pause. Warm transfers only."
                                 }
                             }
                         }
@@ -5095,6 +5100,11 @@
                                 "condition": {
                                     "type": "string",
                                     "description": "When to offer this transfer"
+                                },
+                                "extension": {
+                                    "type": "string",
+                                    "pattern": "^[0-9*#w]+$",
+                                    "description": "Optional touch-tone digits dialed after the call connects, to reach an extension behind a phone menu (e.g. \"123#\"). Allowed: 0-9, *, #, and w for a 0.5s pause. Warm transfers only."
                                 }
                             },
                             "required": [
@@ -5375,6 +5385,11 @@
                                 "condition": {
                                     "type": "string",
                                     "description": "When to offer this transfer"
+                                },
+                                "extension": {
+                                    "type": "string",
+                                    "pattern": "^[0-9*#w]+$",
+                                    "description": "Optional touch-tone digits dialed after the call connects, to reach an extension behind a phone menu (e.g. \"123#\"). Allowed: 0-9, *, #, and w for a 0.5s pause. Warm transfers only."
                                 }
                             },
                             "required": [

@@ -162,6 +162,7 @@ Transfers the call to another phone number.
 |-------|------|----------|-------------|
 | `transferTo` | string | Yes | Destination phone number in E.164 format (e.g. `"+14155551234"`) or a `{{variable}}` |
 | `transferMode` | `"cold"` or `"warm"` | No | Cold = immediate transfer. Warm = agent briefs the recipient first. |
+| `extension` | string | No | Touch-tone digits dialed after the call connects, to reach an extension behind a phone menu (e.g. `"123#"`). Allowed: `0-9`, `*`, `#`, and `w` for a 0.5-second pause. Warm transfers only. |
 | `speakDuringExecution` | boolean | No | Speak while the transfer is being set up |
 | `speakInstruction` | string | No | What to say during transfer |
 | `holdMessage` | string | No | Message spoken to the caller while on hold (warm transfer, max 500 chars) |

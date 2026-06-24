@@ -83,6 +83,7 @@ The Transfer tool enables agents to transfer calls to other phone numbers or dep
 
 **Transfer Routes**:
 - **To number**: `+12025559999` (destination phone number in E.164 format)
+- **Extension** (optional): touch-tone digits dialed after the call connects, to reach an extension behind a phone menu or auto-attendant (e.g. `123#`). Allowed characters: `0-9`, `*`, `#`, and `w` for a 0.5-second pause. Sent on warm transfers only.
 - **Condition**: `Transfer to sales team for pricing questions or to close deals`
 - **Mode**: `Default`, `Cold`, or `Warm` — overrides the default transfer mode for this specific route
 
@@ -129,6 +130,10 @@ Warm transfer is configured with the following settings:
 | **Intro Message** | Spoken after the human agent accepts, heard by both parties (e.g., "You're now connected. They're up to speed on your request.") Max 500 characters. |
 | **Continue Recording After Handoff** | Keep recording after the agent hands off, so the recording also includes the human agent and caller conversation. |
 
+<Note>
+**Reaching an extension**: If a route has an **Extension**, the agent dials it as touch tones once the recipient's line connects, so you can reach a specific extension behind a phone menu or auto-attendant. Add `w` to insert a 0.5-second pause if the menu needs a moment before it accepts input (e.g. `w123#`). Extensions are dialed on warm transfers only, because a cold transfer hands the call off immediately.
+</Note>
+
 #### Configuring via API
 
 Set `transferMode` (the default mode) and `warmTransferConfig` when creating or updating an agent. Each route may include an optional `mode` (`"cold"` or `"warm"`) that overrides the default for that route; omit it to inherit `transferMode`. The example below builds a warm primary, warm backup, then cold last-resort fallback chain:
@@ -144,7 +149,8 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
       {
         "to_number": "+12025559999",
         "condition": "Primary: transfer to the support team",
-        "mode": "warm"
+        "mode": "warm",
+        "extension": "123#"
       },
       {
         "to_number": "+12025550000",
