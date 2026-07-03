@@ -106,6 +106,69 @@
                         "$ref": "#/components/responses/BillingInactiveError"
                     }
                 }
+            },
+            "post": {
+                "summary": "Create Voice",
+                "description": "Create a custom voice for your organization from an audio sample. Send `multipart/form-data` with a display name and a clear recording of a single speaker (about 10 to 30 seconds). The new voice can be assigned to any agent via its `voiceId`.",
+                "operationId": "createVoice",
+                "tags": [
+                    "Voices"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "displayName",
+                                    "voice"
+                                ],
+                                "properties": {
+                                    "displayName": {
+                                        "type": "string",
+                                        "description": "Name for the new voice"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "description": "Language code the voice speaks (e.g. 'en'). Defaults to 'en'."
+                                    },
+                                    "voice": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "description": "Audio sample of a single speaker (about 10 to 30 seconds)"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The created voice",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Voice"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    }
+                }
             }
         },
         "/voices/{id}": {
@@ -151,6 +214,231 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Rename Voice",
+                "description": "Rename one of your organization's custom voices. Built-in voices cannot be changed.",
+                "operationId": "renameVoice",
+                "tags": [
+                    "Voices"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "displayName"
+                                ],
+                                "properties": {
+                                    "displayName": {
+                                        "type": "string",
+                                        "description": "New name for the voice"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The updated voice",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Voice"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete Voice",
+                "description": "Delete one of your organization's custom voices. Built-in voices cannot be deleted. Any agent still using the voice falls back to a default voice.",
+                "operationId": "deleteVoice",
+                "tags": [
+                    "Voices"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The voice was deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
+        },
+        "/voices/{id}/preview": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "Voice ID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Preview Voice",
+                "description": "Get a short spoken preview of a voice as an MP3. Optionally provide your own text.",
+                "operationId": "previewVoice",
+                "tags": [
+                    "Voices"
+                ],
+                "parameters": [
+                    {
+                        "name": "text",
+                        "in": "query",
+                        "required": false,
+                        "description": "Text to speak in the preview (up to 300 characters). Defaults to a sample sentence.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An MP3 audio preview",
+                        "content": {
+                            "audio/mpeg": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
+        },
+        "/voices/design": {
+            "post": {
+                "summary": "Design Voices",
+                "description": "Generate candidate voices from a plain-text description. Returns one or more options, each with a short audio preview. Save the one you like with Create Voice.",
+                "operationId": "designVoices",
+                "tags": [
+                    "Voices"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "instruction"
+                                ],
+                                "properties": {
+                                    "instruction": {
+                                        "type": "string",
+                                        "description": "A description of the voice you want (1 to 2000 characters), e.g. 'A warm, confident female voice with a natural American accent.'"
+                                    },
+                                    "n": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 4,
+                                        "default": 2,
+                                        "description": "How many candidate voices to generate"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Generated voice candidates",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "candidates": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "index": {
+                                                                "type": "integer",
+                                                                "description": "Position of this candidate in the list"
+                                                            },
+                                                            "audioBase64": {
+                                                                "type": "string",
+                                                                "description": "Base64-encoded WAV audio preview of this candidate"
+                                                            },
+                                                            "durationMs": {
+                                                                "type": "integer",
+                                                                "description": "Length of the preview audio in milliseconds"
+                                                            },
+                                                            "sampleRate": {
+                                                                "type": "integer",
+                                                                "description": "Sample rate of the preview audio in Hz"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
                     }
                 }
             }

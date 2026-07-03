@@ -54,7 +54,12 @@
                         "group": "Voices",
                         "pages": [
                             "api-reference/voices/list",
-                            "api-reference/voices/get"
+                            "api-reference/voices/get",
+                            "api-reference/voices/preview",
+                            "api-reference/voices/create",
+                            "api-reference/voices/design",
+                            "api-reference/voices/rename",
+                            "api-reference/voices/delete"
                         ]
                     },
                     {
