@@ -51,54 +51,6 @@
                         ]
                     },
                     {
-                        "group": "Voices",
-                        "pages": [
-                            "api-reference/voices/list",
-                            "api-reference/voices/get",
-                            "api-reference/voices/preview",
-                            "api-reference/voices/create",
-                            "api-reference/voices/design",
-                            "api-reference/voices/rename",
-                            "api-reference/voices/delete"
-                        ]
-                    },
-                    {
-                        "group": "SIP Trunks",
-                        "pages": [
-                            "api-reference/sip-trunks/list",
-                            "api-reference/sip-trunks/get",
-                            "api-reference/sip-trunks/list-available-numbers",
-                            "api-reference/sip-trunks/create",
-                            "api-reference/sip-trunks/update",
-                            "api-reference/sip-trunks/delete"
-                        ]
-                    },
-                    {
-                        "group": "Messaging Connections",
-                        "pages": [
-                            "api-reference/messaging-connections/list",
-                            "api-reference/messaging-connections/get",
-                            "api-reference/messaging-connections/create",
-                            "api-reference/messaging-connections/update",
-                            "api-reference/messaging-connections/delete"
-                        ]
-                    },
-                    {
-                        "group": "Messages",
-                        "pages": [
-                            "api-reference/messages/send",
-                            "api-reference/messages/list",
-                            "api-reference/messages/get"
-                        ]
-                    },
-                    {
-                        "group": "Conversations",
-                        "pages": [
-                            "api-reference/conversations/list",
-                            "api-reference/conversations/delete"
-                        ]
-                    },
-                    {
                         "group": "Agents",
                         "pages": [
                             "api-reference/agents/list",
@@ -108,15 +60,6 @@
                             "api-reference/agents/update",
                             "api-reference/agents/duplicate",
                             "api-reference/agents/delete"
-                        ]
-                    },
-                    {
-                        "group": "Agent Folders",
-                        "pages": [
-                            "api-reference/agent-folders/list",
-                            "api-reference/agent-folders/create",
-                            "api-reference/agent-folders/update",
-                            "api-reference/agent-folders/delete"
                         ]
                     },
                     {
@@ -145,6 +88,36 @@
                         ]
                     },
                     {
+                        "group": "Agent Folders",
+                        "pages": [
+                            "api-reference/agent-folders/list",
+                            "api-reference/agent-folders/create",
+                            "api-reference/agent-folders/update",
+                            "api-reference/agent-folders/delete"
+                        ]
+                    },
+                    {
+                        "group": "SIP Trunks",
+                        "pages": [
+                            "api-reference/sip-trunks/list",
+                            "api-reference/sip-trunks/get",
+                            "api-reference/sip-trunks/list-available-numbers",
+                            "api-reference/sip-trunks/create",
+                            "api-reference/sip-trunks/update",
+                            "api-reference/sip-trunks/delete"
+                        ]
+                    },
+                    {
+                        "group": "Calls",
+                        "pages": [
+                            "api-reference/calls/list",
+                            "api-reference/calls/get",
+                            "api-reference/calls/batch-get",
+                            "api-reference/calls/send",
+                            "api-reference/calls/cancel"
+                        ]
+                    },
+                    {
                         "group": "Knowledge Bases",
                         "pages": [
                             "api-reference/knowledge-bases/list",
@@ -163,13 +136,15 @@
                         ]
                     },
                     {
-                        "group": "Calls",
+                        "group": "Voices",
                         "pages": [
-                            "api-reference/calls/list",
-                            "api-reference/calls/get",
-                            "api-reference/calls/batch-get",
-                            "api-reference/calls/send",
-                            "api-reference/calls/cancel"
+                            "api-reference/voices/list",
+                            "api-reference/voices/get",
+                            "api-reference/voices/preview",
+                            "api-reference/voices/create",
+                            "api-reference/voices/design",
+                            "api-reference/voices/rename",
+                            "api-reference/voices/delete"
                         ]
                     },
                     {
@@ -207,6 +182,31 @@
                             "api-reference/test-suites/get-run",
                             "api-reference/test-suites/start-run",
                             "api-reference/test-suites/cancel-run"
+                        ]
+                    },
+                    {
+                        "group": "Messaging Connections",
+                        "pages": [
+                            "api-reference/messaging-connections/list",
+                            "api-reference/messaging-connections/get",
+                            "api-reference/messaging-connections/create",
+                            "api-reference/messaging-connections/update",
+                            "api-reference/messaging-connections/delete"
+                        ]
+                    },
+                    {
+                        "group": "Messages",
+                        "pages": [
+                            "api-reference/messages/send",
+                            "api-reference/messages/list",
+                            "api-reference/messages/get"
+                        ]
+                    },
+                    {
+                        "group": "Conversations",
+                        "pages": [
+                            "api-reference/conversations/list",
+                            "api-reference/conversations/delete"
                         ]
                     },
                     {
