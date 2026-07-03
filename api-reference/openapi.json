@@ -60,9 +60,101 @@
         {
             "name": "Test Suites",
             "description": "Manage test suites, test cases, and test runs for agent evaluation"
+        },
+        {
+            "name": "Voices",
+            "description": "Browse the voices available to your organization for agent speech"
         }
     ],
     "paths": {
+        "/voices": {
+            "get": {
+                "summary": "List Voices",
+                "description": "Retrieve the voices available to your organization. Use a voice's `id` as an agent's `voiceId` to set how it speaks.",
+                "operationId": "listVoices",
+                "tags": [
+                    "Voices"
+                ],
+                "parameters": [
+                    { "name": "language", "in": "query", "required": false, "description": "Filter by language code (e.g. 'en').", "schema": { "type": "string" } },
+                    { "name": "category", "in": "query", "required": false, "description": "Filter by category (e.g. 'English').", "schema": { "type": "string" } },
+                    { "name": "search", "in": "query", "required": false, "description": "Case-insensitive match on the voice display name.", "schema": { "type": "string" } }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of voices",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Voice"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    }
+                }
+            }
+        },
+        "/voices/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "Voice ID",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get Voice",
+                "description": "Retrieve a specific voice by ID",
+                "operationId": "getVoice",
+                "tags": [
+                    "Voices"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Voice details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Voice"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/BillingInactiveError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
+        },
         "/messages": {
             "get": {
                 "summary": "List Messages",
@@ -4358,6 +4450,49 @@
             }
         },
         "schemas": {
+            "Voice": {
+                "type": "object",
+                "description": "A voice available to your organization. Use its `id` as an agent's `voiceId`.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier, used as an agent's `voiceId` (e.g. 'revring-rachel')"
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "description": "Human-readable voice name"
+                    },
+                    "language": {
+                        "type": "string",
+                        "description": "Language code the voice speaks (e.g. 'en')"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Voice gender, when known ('female' | 'male')"
+                    },
+                    "category": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Grouping label for the voice (e.g. 'English')"
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "Origin of the voice: 'system' for built-in voices, or 'cloned' / 'designed' for your organization's custom voices"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Readiness of the voice: 'ready', 'processing', or 'failed'"
+                    }
+                },
+                "required": [
+                    "id",
+                    "displayName",
+                    "language",
+                    "source",
+                    "status"
+                ]
+            },
             "MessagingConnection": {
                 "type": "object",
                 "description": "A connected messaging provider. Secrets (the provider Auth Token) are never included.",

@@ -51,6 +51,13 @@
                         ]
                     },
                     {
+                        "group": "Voices",
+                        "pages": [
+                            "api-reference/voices/list",
+                            "api-reference/voices/get"
+                        ]
+                    },
+                    {
                         "group": "SIP Trunks",
                         "pages": [
                             "api-reference/sip-trunks/list",
