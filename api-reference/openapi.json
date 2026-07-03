@@ -4834,14 +4834,26 @@
                     "voiceTemperature": {
                         "type": "number",
                         "minimum": 0,
-                        "maximum": 2,
-                        "description": "Voice randomness/creativity (0 = consistent, 2 = varied)"
+                        "maximum": 1,
+                        "description": "Voice expressiveness (0 = consistent, 1 = more varied). Default 0.7."
                     },
                     "voiceSpeed": {
                         "type": "number",
                         "minimum": 0.5,
-                        "maximum": 1.5,
-                        "description": "Speech speed multiplier (0.5 = half speed, 1.5 = 1.5x speed)"
+                        "maximum": 2,
+                        "description": "Speaking rate multiplier (0.5 = half speed, 2.0 = double speed). Default 1.0."
+                    },
+                    "voiceVolume": {
+                        "type": "number",
+                        "minimum": -20,
+                        "maximum": 20,
+                        "description": "Output level in decibels (-20 to 20; 0 = standard). Default 0."
+                    },
+                    "voiceTopP": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Advanced sampling range (0 to 1). Default 0.7."
                     },
                     "runtimeConfig": {
                         "type": "object",
@@ -5140,14 +5152,26 @@
                     "voiceTemperature": {
                         "type": "number",
                         "minimum": 0,
-                        "maximum": 2,
-                        "description": "Voice randomness (0-2)"
+                        "maximum": 1,
+                        "description": "Voice expressiveness (0 = consistent, 1 = more varied). Default 0.7."
                     },
                     "voiceSpeed": {
                         "type": "number",
                         "minimum": 0.5,
-                        "maximum": 1.5,
-                        "description": "Speech speed (0.5-1.5)"
+                        "maximum": 2,
+                        "description": "Speaking rate multiplier (0.5 = half speed, 2.0 = double speed). Default 1.0."
+                    },
+                    "voiceVolume": {
+                        "type": "number",
+                        "minimum": -20,
+                        "maximum": 20,
+                        "description": "Output level in decibels (-20 to 20; 0 = standard). Default 0."
+                    },
+                    "voiceTopP": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Advanced sampling range (0 to 1). Default 0.7."
                     },
                     "runtimeConfig": {
                         "type": "object",
@@ -5427,14 +5451,26 @@
                     "voiceTemperature": {
                         "type": "number",
                         "minimum": 0,
-                        "maximum": 2,
-                        "description": "Voice randomness (0-2)"
+                        "maximum": 1,
+                        "description": "Voice expressiveness (0 = consistent, 1 = more varied). Default 0.7."
                     },
                     "voiceSpeed": {
                         "type": "number",
                         "minimum": 0.5,
-                        "maximum": 1.5,
-                        "description": "Speech speed (0.5-1.5)"
+                        "maximum": 2,
+                        "description": "Speaking rate multiplier (0.5 = half speed, 2.0 = double speed). Default 1.0."
+                    },
+                    "voiceVolume": {
+                        "type": "number",
+                        "minimum": -20,
+                        "maximum": 20,
+                        "description": "Output level in decibels (-20 to 20; 0 = standard). Default 0."
+                    },
+                    "voiceTopP": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Advanced sampling range (0 to 1). Default 0.7."
                     },
                     "runtimeConfig": {
                         "type": "object",
