@@ -4947,6 +4947,36 @@
                     "conversationIdleResetDays": { "type": "integer", "description": "Days of inactivity after which earlier conversation history is no longer used as reply context. Defaults to 30." }
                 }
             },
+            "WidgetConfig": {
+                "type": "object",
+                "description": "Per-agent website chat widget settings. A JSON object; set only the keys you need. Enabling the widget the first time mints a public embed key (returned as the read-only 'widgetKey' on the agent).",
+                "properties": {
+                    "enabled": { "type": "boolean", "description": "Whether the website chat widget is live. When true, the widget loads on the allowed domains." },
+                    "allowedDomains": { "type": "array", "items": { "type": "string" }, "description": "Hostnames the widget may run on (e.g. 'www.example.com'). Subdomains are listed separately. Requests from any other origin are refused." },
+                    "webchatPrompt": { "type": "string", "description": "Optional instructions for composing web chat replies. If omitted, the agent uses its main prompt. Set it to give website chat its own tone, separate from calls and texting." },
+                    "appearance": {
+                        "type": "object",
+                        "description": "Visual customization for the widget.",
+                        "properties": {
+                            "position": { "type": "string", "enum": ["bottom-right", "bottom-left", "top-right", "top-left"], "description": "Corner the launcher bubble sits in. Defaults to 'bottom-right'." },
+                            "accentColor": { "type": "string", "description": "Brand color as a 3- or 6-digit hex (e.g. '#1a56db'). Defaults to '#1a56db'." },
+                            "theme": { "type": "string", "enum": ["light", "dark", "auto"], "description": "Color theme. 'auto' follows the visitor's device. Defaults to 'auto'." },
+                            "launcherLabel": { "type": "string", "description": "Text on the launcher bubble. Defaults to 'Chat with us'." },
+                            "agentDisplayName": { "type": "string", "description": "Name shown in the chat header. Defaults to the agent's name." },
+                            "avatarUrl": { "type": "string", "description": "Image URL shown as the agent avatar." },
+                            "welcomeMessage": { "type": "string", "description": "Message shown when a visitor opens the chat for the first time." },
+                            "chatPlaceholder": { "type": "string", "description": "Placeholder text in the message input. Defaults to 'Type a message...'." }
+                        }
+                    },
+                    "limits": {
+                        "type": "object",
+                        "description": "Usage limits for the widget.",
+                        "properties": {
+                            "messagesPerDay": { "type": "integer", "description": "Maximum visitor messages answered per conversation per rolling day. Defaults to 300." }
+                        }
+                    }
+                }
+            },
             "SipTrunk": {
                 "type": "object",
                 "description": "SIP Trunk for routing phone calls",
@@ -5086,6 +5116,8 @@
                 "properties": {
                     "messagingConnectionId": { "type": "string", "nullable": true, "description": "ID of the messaging connection this agent sends and receives texts through (see Messaging Connections)." },
                     "messagingConfig": { "$ref": "#/components/schemas/MessagingConfig" },
+                    "widgetKey": { "type": "string", "nullable": true, "readOnly": true, "description": "Public embed key for the website chat widget (starts with 'rrwk_'). Minted automatically the first time the widget is enabled. Read-only; it appears in the embed snippet you paste on your site." },
+                    "widgetConfig": { "$ref": "#/components/schemas/WidgetConfig" },
                     "id": {
                         "type": "string",
                         "format": "uuid"
@@ -5427,6 +5459,7 @@
                 "properties": {
                     "messagingConnectionId": { "type": "string", "nullable": true, "description": "ID of the messaging connection this agent sends and receives texts through (see Messaging Connections)." },
                     "messagingConfig": { "$ref": "#/components/schemas/MessagingConfig" },
+                    "widgetConfig": { "$ref": "#/components/schemas/WidgetConfig" },
                     "sipTrunkId": {
                         "type": "string",
                         "format": "uuid",
@@ -5718,6 +5751,7 @@
                 "properties": {
                     "messagingConnectionId": { "type": "string", "nullable": true, "description": "ID of the messaging connection this agent sends and receives texts through (see Messaging Connections)." },
                     "messagingConfig": { "$ref": "#/components/schemas/MessagingConfig" },
+                    "widgetConfig": { "$ref": "#/components/schemas/WidgetConfig" },
                     "sipTrunkId": {
                         "type": "string",
                         "format": "uuid",

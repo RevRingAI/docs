@@ -1,255 +1,256 @@
 {
-    "$schema": "https://mintlify.com/docs.json",
-    "theme": "mint",
-    "name": "RevRing AI Documentation",
-    "colors": {
-        "primary": "#005cdd",
-        "light": "#5b9efa",
-        "dark": "#005cdd"
-    },
-    "favicon": "/favicon.svg",
-    "navigation": {
-        "tabs": [
-            {
-                "tab": "Guides",
-                "groups": [
-                    {
-                        "group": "Getting started",
-                        "pages": [
-                            "index",
-                            "quickstart",
-                            "mcp-server"
-                        ]
-                    },
-                    {
-                        "group": "Platform",
-                        "pages": [
-                            "platform/telephony",
-                            "platform/inbound",
-                            "platform/outbound",
-                            "platform/prompting-variables",
-                            "platform/tools",
-                            "platform/multilingual",
-                            "platform/conversation-flows",
-                            "platform/knowledge-bases",
-                            "platform/test-suites",
-                            "platform/webhooks",
-                            "platform/webrtc",
-                            "platform/messaging",
-                            "platform/two-way-messaging"
-                        ]
-                    }
-                ]
-            },
-            {
-                "tab": "API Reference",
-                "groups": [
-                    {
-                        "group": "API documentation",
-                        "pages": [
-                            "api-reference/introduction"
-                        ]
-                    },
-                    {
-                        "group": "Agents",
-                        "pages": [
-                            "api-reference/agents/list",
-                            "api-reference/agents/get",
-                            "api-reference/agents/batch-get",
-                            "api-reference/agents/create",
-                            "api-reference/agents/update",
-                            "api-reference/agents/duplicate",
-                            "api-reference/agents/delete"
-                        ]
-                    },
-                    {
-                        "group": "Agent Phone Numbers",
-                        "pages": [
-                            "api-reference/agents/list-phone-numbers",
-                            "api-reference/agents/add-phone-number",
-                            "api-reference/agents/remove-phone-number"
-                        ]
-                    },
-                    {
-                        "group": "Agent Custom Tools",
-                        "pages": [
-                            "api-reference/agents/list-custom-tools",
-                            "api-reference/agents/create-custom-tool",
-                            "api-reference/agents/update-custom-tool",
-                            "api-reference/agents/delete-custom-tool"
-                        ]
-                    },
-                    {
-                        "group": "Agent Knowledge Bases",
-                        "pages": [
-                            "api-reference/agents/list-knowledge-bases",
-                            "api-reference/agents/link-knowledge-base",
-                            "api-reference/agents/unlink-knowledge-base"
-                        ]
-                    },
-                    {
-                        "group": "Agent Folders",
-                        "pages": [
-                            "api-reference/agent-folders/list",
-                            "api-reference/agent-folders/create",
-                            "api-reference/agent-folders/update",
-                            "api-reference/agent-folders/delete"
-                        ]
-                    },
-                    {
-                        "group": "SIP Trunks",
-                        "pages": [
-                            "api-reference/sip-trunks/list",
-                            "api-reference/sip-trunks/get",
-                            "api-reference/sip-trunks/list-available-numbers",
-                            "api-reference/sip-trunks/create",
-                            "api-reference/sip-trunks/update",
-                            "api-reference/sip-trunks/delete"
-                        ]
-                    },
-                    {
-                        "group": "Calls",
-                        "pages": [
-                            "api-reference/calls/list",
-                            "api-reference/calls/get",
-                            "api-reference/calls/batch-get",
-                            "api-reference/calls/send",
-                            "api-reference/calls/cancel"
-                        ]
-                    },
-                    {
-                        "group": "Knowledge Bases",
-                        "pages": [
-                            "api-reference/knowledge-bases/list",
-                            "api-reference/knowledge-bases/get",
-                            "api-reference/knowledge-bases/create",
-                            "api-reference/knowledge-bases/update",
-                            "api-reference/knowledge-bases/delete"
-                        ]
-                    },
-                    {
-                        "group": "Knowledge Base Sources",
-                        "pages": [
-                            "api-reference/knowledge-bases/add-source",
-                            "api-reference/knowledge-bases/get-source",
-                            "api-reference/knowledge-bases/delete-source"
-                        ]
-                    },
-                    {
-                        "group": "Voices",
-                        "pages": [
-                            "api-reference/voices/list",
-                            "api-reference/voices/get",
-                            "api-reference/voices/preview",
-                            "api-reference/voices/create",
-                            "api-reference/voices/design",
-                            "api-reference/voices/rename",
-                            "api-reference/voices/delete"
-                        ]
-                    },
-                    {
-                        "group": "Analytics",
-                        "pages": [
-                            "api-reference/analytics/overview",
-                            "api-reference/analytics/active"
-                        ]
-                    },
-                    {
-                        "group": "Test Suites",
-                        "pages": [
-                            "api-reference/test-suites/list",
-                            "api-reference/test-suites/get",
-                            "api-reference/test-suites/create",
-                            "api-reference/test-suites/update",
-                            "api-reference/test-suites/delete"
-                        ]
-                    },
-                    {
-                        "group": "Test Cases",
-                        "pages": [
-                            "api-reference/test-suites/list-tests",
-                            "api-reference/test-suites/get-test",
-                            "api-reference/test-suites/create-test",
-                            "api-reference/test-suites/update-test",
-                            "api-reference/test-suites/delete-test",
-                            "api-reference/test-suites/generate-tests"
-                        ]
-                    },
-                    {
-                        "group": "Test Runs",
-                        "pages": [
-                            "api-reference/test-suites/list-runs",
-                            "api-reference/test-suites/get-run",
-                            "api-reference/test-suites/start-run",
-                            "api-reference/test-suites/cancel-run"
-                        ]
-                    },
-                    {
-                        "group": "Messaging Connections",
-                        "pages": [
-                            "api-reference/messaging-connections/list",
-                            "api-reference/messaging-connections/get",
-                            "api-reference/messaging-connections/create",
-                            "api-reference/messaging-connections/update",
-                            "api-reference/messaging-connections/delete"
-                        ]
-                    },
-                    {
-                        "group": "Messages",
-                        "pages": [
-                            "api-reference/messages/send",
-                            "api-reference/messages/list",
-                            "api-reference/messages/get"
-                        ]
-                    },
-                    {
-                        "group": "Conversations",
-                        "pages": [
-                            "api-reference/conversations/list",
-                            "api-reference/conversations/delete"
-                        ]
-                    },
-                    {
-                        "group": "Webhooks",
-                        "pages": [
-                            "api-reference/webhooks/pre-call",
-                            "api-reference/webhooks/post-call",
-                            "api-reference/webhooks/message-received"
-                        ]
-                    }
-                ]
-            }
-        ],
-        "global": {
-            "anchors": []
-        }
-    },
-    "logo": {
-        "light": "/logo/light.svg",
-        "dark": "/logo/dark.svg"
-    },
-    "navbar": {
-        "links": [
-            {
-                "label": "Support",
-                "href": "mailto:contact@revring.ai"
-            }
-        ],
-        "primary": {
-            "type": "button",
-            "label": "Dashboard",
-            "href": "https://dashboard.revring.ai"
-        }
-    },
-    "contextual": {
-        "options": [
-            "copy",
-            "view"
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "RevRing AI Documentation",
+  "colors": {
+    "primary": "#005cdd",
+    "light": "#5b9efa",
+    "dark": "#005cdd"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "index",
+              "quickstart",
+              "mcp-server"
+            ]
+          },
+          {
+            "group": "Platform",
+            "pages": [
+              "platform/telephony",
+              "platform/inbound",
+              "platform/outbound",
+              "platform/prompting-variables",
+              "platform/tools",
+              "platform/multilingual",
+              "platform/conversation-flows",
+              "platform/knowledge-bases",
+              "platform/test-suites",
+              "platform/webhooks",
+              "platform/webrtc",
+              "platform/messaging",
+              "platform/two-way-messaging",
+              "platform/web-widget"
+            ]
+          }
         ]
-    },
-    "footer": {
-        "socials": {
-            "linkedin": "https://www.linkedin.com/company/revring/"
-        }
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "API documentation",
+            "pages": [
+              "api-reference/introduction"
+            ]
+          },
+          {
+            "group": "Agents",
+            "pages": [
+              "api-reference/agents/list",
+              "api-reference/agents/get",
+              "api-reference/agents/batch-get",
+              "api-reference/agents/create",
+              "api-reference/agents/update",
+              "api-reference/agents/duplicate",
+              "api-reference/agents/delete"
+            ]
+          },
+          {
+            "group": "Agent Phone Numbers",
+            "pages": [
+              "api-reference/agents/list-phone-numbers",
+              "api-reference/agents/add-phone-number",
+              "api-reference/agents/remove-phone-number"
+            ]
+          },
+          {
+            "group": "Agent Custom Tools",
+            "pages": [
+              "api-reference/agents/list-custom-tools",
+              "api-reference/agents/create-custom-tool",
+              "api-reference/agents/update-custom-tool",
+              "api-reference/agents/delete-custom-tool"
+            ]
+          },
+          {
+            "group": "Agent Knowledge Bases",
+            "pages": [
+              "api-reference/agents/list-knowledge-bases",
+              "api-reference/agents/link-knowledge-base",
+              "api-reference/agents/unlink-knowledge-base"
+            ]
+          },
+          {
+            "group": "Agent Folders",
+            "pages": [
+              "api-reference/agent-folders/list",
+              "api-reference/agent-folders/create",
+              "api-reference/agent-folders/update",
+              "api-reference/agent-folders/delete"
+            ]
+          },
+          {
+            "group": "SIP Trunks",
+            "pages": [
+              "api-reference/sip-trunks/list",
+              "api-reference/sip-trunks/get",
+              "api-reference/sip-trunks/list-available-numbers",
+              "api-reference/sip-trunks/create",
+              "api-reference/sip-trunks/update",
+              "api-reference/sip-trunks/delete"
+            ]
+          },
+          {
+            "group": "Calls",
+            "pages": [
+              "api-reference/calls/list",
+              "api-reference/calls/get",
+              "api-reference/calls/batch-get",
+              "api-reference/calls/send",
+              "api-reference/calls/cancel"
+            ]
+          },
+          {
+            "group": "Knowledge Bases",
+            "pages": [
+              "api-reference/knowledge-bases/list",
+              "api-reference/knowledge-bases/get",
+              "api-reference/knowledge-bases/create",
+              "api-reference/knowledge-bases/update",
+              "api-reference/knowledge-bases/delete"
+            ]
+          },
+          {
+            "group": "Knowledge Base Sources",
+            "pages": [
+              "api-reference/knowledge-bases/add-source",
+              "api-reference/knowledge-bases/get-source",
+              "api-reference/knowledge-bases/delete-source"
+            ]
+          },
+          {
+            "group": "Voices",
+            "pages": [
+              "api-reference/voices/list",
+              "api-reference/voices/get",
+              "api-reference/voices/preview",
+              "api-reference/voices/create",
+              "api-reference/voices/design",
+              "api-reference/voices/rename",
+              "api-reference/voices/delete"
+            ]
+          },
+          {
+            "group": "Analytics",
+            "pages": [
+              "api-reference/analytics/overview",
+              "api-reference/analytics/active"
+            ]
+          },
+          {
+            "group": "Test Suites",
+            "pages": [
+              "api-reference/test-suites/list",
+              "api-reference/test-suites/get",
+              "api-reference/test-suites/create",
+              "api-reference/test-suites/update",
+              "api-reference/test-suites/delete"
+            ]
+          },
+          {
+            "group": "Test Cases",
+            "pages": [
+              "api-reference/test-suites/list-tests",
+              "api-reference/test-suites/get-test",
+              "api-reference/test-suites/create-test",
+              "api-reference/test-suites/update-test",
+              "api-reference/test-suites/delete-test",
+              "api-reference/test-suites/generate-tests"
+            ]
+          },
+          {
+            "group": "Test Runs",
+            "pages": [
+              "api-reference/test-suites/list-runs",
+              "api-reference/test-suites/get-run",
+              "api-reference/test-suites/start-run",
+              "api-reference/test-suites/cancel-run"
+            ]
+          },
+          {
+            "group": "Messaging Connections",
+            "pages": [
+              "api-reference/messaging-connections/list",
+              "api-reference/messaging-connections/get",
+              "api-reference/messaging-connections/create",
+              "api-reference/messaging-connections/update",
+              "api-reference/messaging-connections/delete"
+            ]
+          },
+          {
+            "group": "Messages",
+            "pages": [
+              "api-reference/messages/send",
+              "api-reference/messages/list",
+              "api-reference/messages/get"
+            ]
+          },
+          {
+            "group": "Conversations",
+            "pages": [
+              "api-reference/conversations/list",
+              "api-reference/conversations/delete"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/webhooks/pre-call",
+              "api-reference/webhooks/post-call",
+              "api-reference/webhooks/message-received"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": []
     }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:contact@revring.ai"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://dashboard.revring.ai"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "linkedin": "https://www.linkedin.com/company/revring/"
+    }
+  }
 }

@@ -1,0 +1,106 @@
+---
+title: 'Web Widget'
+description: 'Put your agent on any website as a chat bubble, with memory that follows the visitor'
+icon: 'message-bot'
+---
+
+Add your agent to any website as a floating chat bubble. Visitors chat with it right on the page, and the agent remembers each visitor across pages, reloads, and return visits — no account or login needed on your visitor's side.
+
+The widget works on any site, including traditional websites where every click is a full page reload: the conversation picks up exactly where it left off on the next page.
+
+<Note>
+Web chat runs on the same managed conversations as [two-way texting](/platform/two-way-messaging), so everything you know about conversations, memory, and the Messages API applies here too. Web chat messages appear in your Message Logs and Conversations pages with a **Web** badge.
+</Note>
+
+## How it works
+
+1. You enable the widget on an agent and list the websites it may run on.
+2. You paste one line of code into the website.
+3. Visitors click the bubble and chat. Replies come from your agent's prompt, with the recent conversation kept in context per visitor.
+4. Every conversation shows up in your dashboard under **Conversations**, and each message in **Message Logs**.
+
+## Setup
+
+<Steps>
+  <Step title="Turn on the widget">
+    Open your agent, go to the **Widget** tab, and list the website domains the widget is allowed to run on (one per line, for example `www.example.com`). Click **Turn on the widget**.
+  </Step>
+  <Step title="Copy your embed code">
+    The tab now shows your embed code. Copy it. It looks like this:
+    ```html
+    <script src="https://widget.revring.ai/v1.js" data-key="rrwk_..." async></script>
+    ```
+  </Step>
+  <Step title="Paste it into the website">
+    Paste the snippet once, ideally right before the closing `</body>` tag, on every page where the widget should appear. Most site builders and CMSs have a "custom code" or "scripts" area for this.
+  </Step>
+</Steps>
+
+That's the whole setup. The widget loads its look and behavior from your agent's settings, so changes you make in the dashboard apply to the live website automatically — no code changes needed.
+
+## Make it yours
+
+Everything visual is configurable on the agent's **Widget** tab, with a live preview:
+
+- **Display name** and **avatar image** shown in the chat header
+- **Button label** on the floating bubble (for example "Chat with Ava")
+- **Welcome message** shown when a visitor opens the chat for the first time
+- **Accent color**, **position** (any corner), and **light/dark theme**
+- **Message placeholder** text in the input
+
+There is no RevRing branding on the widget. What your visitors see is your brand only.
+
+## The web chat prompt
+
+Replies use the agent's **Web chat prompt** (set on the Widget tab) when you've added one, and otherwise fall back to the agent's main prompt — so the widget works out of the box on any agent. Add a web chat prompt when website chat should have its own tone or rules, separate from calls and texting.
+
+## Memory and conversations
+
+The widget remembers each visitor automatically. A visitor who browses five pages, leaves, and comes back tomorrow continues the same conversation with full context.
+
+- Threads appear on the **Conversations** page (and the [Conversations API](/api-reference/conversations/list)) alongside your texting threads, marked **Web**.
+- After a period of inactivity the conversation starts fresh, using the same per-agent idle window as texting. See [Managing conversations](/platform/two-way-messaging#managing-conversations).
+- Clearing a thread from the dashboard makes that visitor start over as brand new.
+
+## Staying in control
+
+- **Allowed websites.** The widget only runs on the domains you list. On any other site it stays hidden and prints a short explanation in the browser console for your web team.
+- **Sensible limits.** Conversations have per-minute and per-day message budgets so a stuck script or bad actor can't run up your usage. Visitors see a friendly "come back later" note if a limit is reached.
+- **No secrets in the page.** The embed key in your snippet is public by design and only works on your allowed domains.
+
+## Troubleshooting
+
+### The bubble doesn't appear
+
+**Solution:**
+
+1. Open the browser console on the page. The widget logs one line explaining exactly why it did not start (domain not on the allowlist, widget turned off, or an invalid key) and what to change.
+2. Confirm the widget is on: agent **Widget** tab, the switch at the top.
+3. Confirm the page's domain is listed under **Allowed websites**. Subdomains count separately, so `www.example.com` and `example.com` are different entries.
+
+### Replies stopped coming
+
+**Cause:** the conversation hit its per-minute or daily message budget, or the site is offline.
+
+**Solution:** wait a moment and try again. Budgets reset automatically. If it persists, check the conversation on the **Conversations** page.
+
+### The website has a strict Content Security Policy
+
+**Solution:** allow `https://widget.revring.ai` in `script-src` and `https://api.revring.ai` in `connect-src`.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Two-way texting" icon="messages" href="/platform/two-way-messaging">
+    The same conversations and memory, over SMS
+  </Card>
+  <Card title="Conversations API" icon="code" href="/api-reference/conversations/list">
+    List and clear conversation memory programmatically
+  </Card>
+  <Card title="Prompting & Variables" icon="pen" href="/platform/prompting-variables">
+    Shape how your agent talks
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/platform/webhooks">
+    Connect conversations to your systems
+  </Card>
+</CardGroup>
