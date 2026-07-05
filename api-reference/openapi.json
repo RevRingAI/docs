@@ -4952,6 +4952,7 @@
                 "description": "Per-agent website chat widget settings. A JSON object; set only the keys you need. Enabling the widget the first time mints a public embed key (returned as the read-only 'widgetKey' on the agent).",
                 "properties": {
                     "enabled": { "type": "boolean", "description": "Whether the website chat widget is live. When true, the widget loads on the allowed domains." },
+                    "modes": { "type": "object", "description": "Which interaction modes the widget offers. Chat is always on; voice is opt-in.", "properties": { "chat": { "type": "boolean", "description": "Text chat (always available; defaults to true)." }, "voice": { "type": "boolean", "description": "In-browser voice calls. Adds a call button to the widget. Defaults to false." } } },
                     "allowedDomains": { "type": "array", "items": { "type": "string" }, "description": "Hostnames the widget may run on (e.g. 'www.example.com'). Subdomains are listed separately. Requests from any other origin are refused." },
                     "webchatPrompt": { "type": "string", "description": "Optional instructions for composing web chat replies. If omitted, the agent uses its main prompt. Set it to give website chat its own tone, separate from calls and texting." },
                     "appearance": {
