@@ -4551,6 +4551,11 @@
                                         "enum": ["web_widget", null],
                                         "description": "How the call originated. web_widget for calls started from the Web Widget call button; null for phone calls."
                                     },
+                                    "continuedFromCallId": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "description": "When a dropped web widget call was silently re-dialed, the id of the call this one continues; null otherwise."
+                                    },
                                     "recordingUrl": {
                                         "type": "string",
                                         "nullable": true,
@@ -6320,6 +6325,11 @@
                         "nullable": true,
                         "enum": ["web_widget", null],
                         "description": "How the call originated. web_widget for calls started from the Web Widget call button; null for phone calls."
+                    },
+                    "continuedFromCallId": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "When a dropped web widget call was silently re-dialed, the id of the call this one continues; null otherwise."
                     },
                     "agentCallerIdName": {
                         "type": "string",

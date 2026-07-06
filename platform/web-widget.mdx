@@ -61,6 +61,8 @@ Let visitors talk to your agent by voice, right in the browser. Turn on **Voice 
 - **Nothing to install for your visitors.** They click the call button, allow their microphone, and start talking. The call happens in the browser, so there is no phone number and no ringing.
 - **Same agent, one place to manage.** A voice call uses the same prompt, voice, and settings as the agent's phone calls. Pick a professional voice on the agent's **Voice** tab.
 - **Everything is recorded like a normal call.** Voice widget calls show up in your [Call Logs](https://dashboard.revring.ai/app/calls) with full transcript, recording, and webhooks, exactly like phone calls. They're marked as web calls (a `source` of `web_widget` in the API), so you can tell them apart from phone calls at a glance.
+- **Calls continue across pages.** If a visitor clicks to another page or reloads mid-call, the same call picks back up automatically in a few seconds, with the same conversation in progress. No redial, no starting over. If they're gone longer and the call has already wrapped up, coming back within a couple of minutes quietly starts a follow-up call where the agent picks up right where things left off (the two calls are linked in the API via `continuedFromCallId`).
+- **Chat and voice share one memory.** The agent treats a visitor's chat messages and voice calls as one ongoing relationship: on a call it already knows what was discussed in chat, and back in chat it remembers what was said on the call. Clearing the visitor's conversation clears all of it.
 - **HTTPS required.** Browsers only allow microphone access on secure (https) pages, which any live website already uses.
 
 <Note>
@@ -69,7 +71,7 @@ Voice is off by default. Text chat keeps working whether or not you enable voice
 
 ## Memory and conversations
 
-The widget remembers each visitor automatically. A visitor who browses five pages, leaves, and comes back tomorrow continues the same conversation with full context.
+The widget remembers each visitor automatically. A visitor who browses five pages, leaves, and comes back tomorrow continues the same conversation with full context. Voice calls are part of that same memory: after a call, the chat knows what was said, and the next call knows what was typed.
 
 - Threads appear on the **Conversations** page (and the [Conversations API](/api-reference/conversations/list)) alongside your texting threads, marked **Web**.
 - After a period of inactivity the conversation starts fresh, using the same per-agent idle window as texting. See [Managing conversations](/platform/two-way-messaging#managing-conversations).
