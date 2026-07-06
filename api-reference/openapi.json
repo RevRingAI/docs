@@ -4539,11 +4539,17 @@
                                     },
                                     "fromNumber": {
                                         "type": "string",
-                                        "description": "Caller's number (E.164)"
+                                        "description": "Caller's number (E.164). For web widget calls, the visitor's anonymous ID in the form visitor:<id>."
                                     },
                                     "toNumber": {
                                         "type": "string",
-                                        "description": "Called number (E.164)"
+                                        "description": "Called number (E.164). For web widget calls, the agent ID."
+                                    },
+                                    "source": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "enum": ["web_widget", null],
+                                        "description": "How the call originated. web_widget for calls started from the Web Widget call button; null for phone calls."
                                     },
                                     "recordingUrl": {
                                         "type": "string",
@@ -6303,11 +6309,17 @@
                     },
                     "fromNumber": {
                         "type": "string",
-                        "description": "Caller's number (E.164)"
+                        "description": "Caller's number (E.164). For web widget calls, the visitor's anonymous ID in the form visitor:<id>."
                     },
                     "toNumber": {
                         "type": "string",
-                        "description": "Called number (E.164)"
+                        "description": "Called number (E.164). For web widget calls, the agent ID."
+                    },
+                    "source": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": ["web_widget", null],
+                        "description": "How the call originated. web_widget for calls started from the Web Widget call button; null for phone calls."
                     },
                     "agentCallerIdName": {
                         "type": "string",
