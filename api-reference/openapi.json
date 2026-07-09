@@ -4608,6 +4608,11 @@
                                         "nullable": true,
                                         "description": "Call duration in seconds"
                                     },
+                                    "llmModel": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "description": "Language model tier the call ran on (revring-standard, revring-max, or revring-ultra); null for older calls"
+                                    },
                                     "organizationId": {
                                         "type": "string",
                                         "description": "Organization ID"
@@ -5216,6 +5221,15 @@
                         "maximum": 2,
                         "description": "LLM temperature for response randomness (0 = deterministic, 2 = very creative)"
                     },
+                    "llmModel": {
+                        "type": "string",
+                        "enum": [
+                            "revring-standard",
+                            "revring-max",
+                            "revring-ultra"
+                        ],
+                        "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.065/min. Defaults to revring-standard."
+                    },
                     "timezone": {
                         "type": "string",
                         "description": "IANA timezone identifier (e.g., America/New_York, Europe/London)"
@@ -5537,6 +5551,15 @@
                         "maximum": 2,
                         "description": "LLM temperature for response randomness (0-2)"
                     },
+                    "llmModel": {
+                        "type": "string",
+                        "enum": [
+                            "revring-standard",
+                            "revring-max",
+                            "revring-ultra"
+                        ],
+                        "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.065/min. Defaults to revring-standard."
+                    },
                     "timezone": {
                         "type": "string",
                         "description": "IANA timezone identifier (e.g., America/New_York)"
@@ -5830,6 +5853,15 @@
                         "minimum": 0,
                         "maximum": 2,
                         "description": "LLM temperature for response randomness (0-2)"
+                    },
+                    "llmModel": {
+                        "type": "string",
+                        "enum": [
+                            "revring-standard",
+                            "revring-max",
+                            "revring-ultra"
+                        ],
+                        "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.065/min. Defaults to revring-standard."
                     },
                     "timezone": {
                         "type": "string",
@@ -6401,6 +6433,17 @@
                         "type": "integer",
                         "nullable": true,
                         "description": "Call duration in seconds (null if never answered)"
+                    },
+                    "llmModel": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "revring-standard",
+                            "revring-max",
+                            "revring-ultra",
+                            null
+                        ],
+                        "description": "Language model tier the call ran on, fixed at call start. null for calls placed before model tiers existed (billed at the standard rate)."
                     },
                     "postCallWebhookStatus": {
                         "type": "string",
