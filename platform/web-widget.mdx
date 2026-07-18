@@ -16,7 +16,7 @@ Web chat runs on the same managed conversations as [two-way texting](/platform/t
 
 1. You enable the widget on an agent and list the websites it may run on.
 2. You paste one line of code into the website.
-3. Visitors click the bubble and chat. Replies come from your agent's prompt, with the recent conversation kept in context per visitor.
+3. Visitors click the bubble and chat. Replies come from your agent's prompt, knowledge bases, and tools, with the recent conversation kept in context per visitor.
 4. Every conversation shows up in your dashboard under **Conversations**, and each message in **Message Logs**.
 
 ## Setup
@@ -53,6 +53,24 @@ There is no RevRing branding on the widget. What your visitors see is your brand
 ## The web chat prompt
 
 Replies use the agent's **Web chat prompt** (set on the Widget tab) when you've added one, and otherwise fall back to the agent's main prompt — so the widget works out of the box on any agent. Add a web chat prompt when website chat should have its own tone or rules, separate from calls and texting.
+
+## Knowledge bases and tools in chat
+
+Web chat uses the same [knowledge bases](/platform/knowledge-bases) and [custom tools](/platform/tools) as the agent's voice calls — there is nothing separate to set up. Attach a knowledge base or add a tool to the agent, and chat picks it up automatically.
+
+- **Knowledge bases** — chat looks up relevant information from the agent's attached knowledge bases when answering, using the agent's existing retrieval settings. Keep reference content (product details, policies, FAQs) in a knowledge base so it stays current without editing the prompt.
+- **Custom tools** — when the conversation calls for it, chat invokes the agent's custom tools (for example booking an appointment, requesting a callback, or looking up live data from your systems) and uses the result in its reply. The tool's webhook receives the same request shape as on a call, with `callId` set to `null` and `conversationId` and `channel` (`web_chat`) identifying the chat thread instead.
+- **Live data** — for values that change minute to minute (inventory, pricing, availability), a custom tool pointed at your own API is the best fit; the agent fetches fresh data at the moment it's asked. Knowledge bases are best for content that changes occasionally.
+
+Tools that only make sense on a phone call (transferring the call, touch-tone dialing) stay call-only.
+
+## What chat knows automatically
+
+Each chat reply is generated with:
+
+- **The current date and time** in the agent's timezone, so rules like opening hours or seasonal schedules apply on their own. You can also place `{{current_time}}` anywhere in the prompt to control exactly where it appears.
+- **The page the visitor is on** (title and URL), so the agent can speak to what they're looking at — a specific product or listing, for example. Available in the prompt as `{{page_context}}` if you want to reference it explicitly.
+- **The agent's default variables**, which render into the prompt with `{{variable}}` templating, the same as on calls.
 
 ## Voice calls
 

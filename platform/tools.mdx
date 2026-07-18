@@ -469,6 +469,10 @@ When the agent invokes your custom tool, RevRing sends a request to your webhook
 }
 ```
 
+<Note>
+Custom tools also run in [web widget chat](/platform/web-widget). Chat invocations use the same request format, with `callId` set to `null` and two extra fields — `conversationId` and `channel` (`"web_chat"`) — identifying the chat thread instead of a call.
+</Note>
+
 **Response Examples:**
 
 You can return either JSON or plain text:
