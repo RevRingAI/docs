@@ -32,6 +32,16 @@ With **Notify your webhook**, RevRing POSTs a `message_received` event to your U
 
 For automatic replies, the agent uses its **SMS prompt** (set on the agent's **Messaging** tab) when you've added one, and otherwise falls back to the agent's main prompt — so auto-reply works out of the box. Add an SMS prompt only when you want texting to have its own tone, separate from calls. RevRing keeps the recent conversation with each contact, so replies stay in context.
 
+### Knowledge bases, tools, and what texting knows
+
+Text replies use the same [knowledge bases](/platform/knowledge-bases) and [custom tools](/platform/tools) as the agent's calls — nothing separate to set up. Attach a knowledge base or add a tool to the agent, and texting picks it up automatically:
+
+- **Knowledge bases** — replies look up relevant information from the agent's attached knowledge bases, using the agent's existing retrieval settings.
+- **Custom tools** — when the conversation calls for it, the agent invokes its custom tools (booking, callbacks, live lookups against your systems) and uses the result in its reply. Tool webhooks receive the same request shape as on a call, with `callId` set to `null` and `conversationId` and `channel` (`"sms"`) identifying the thread instead. Call-only tools (phone transfer, keypad tones) stay call-only.
+- **Current date and time** — every reply knows the current date and time in the agent's timezone, so rules like opening hours apply on their own. `{{current_time}}` and the agent's default variables also render in the SMS prompt with `{{variable}}` templating, the same as on calls.
+
+This applies to automatic replies and to API sends with `generate: true` when an `agentId` is provided.
+
 ### Set up incoming texts
 
 <Steps>
