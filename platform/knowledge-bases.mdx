@@ -157,6 +157,10 @@ When a knowledge base is linked to an agent, you can configure how the agent use
 | `automatic` | Labeled **Automatic (RAG)** in the dashboard. The agent automatically searches the knowledge base before every response. This is the default and recommended mode. |
 | `query_tool` | Labeled **Query Tool** in the dashboard. The agent uses a dedicated tool to search the knowledge base. This gives you more control over when retrieval happens — useful if you want the agent to only search when explicitly asked. |
 
+<Note>
+**Small knowledge bases are used in full.** In automatic mode, when the combined text of an agent's knowledge bases is small enough, the agent is simply given all of it — no search step, no chance of missing a passage, and no added latency. Larger knowledge bases (and ones built from uploaded files) use retrieval as described below. This applies across calls, web chat, and SMS.
+</Note>
+
 ### Chunks to Retrieve
 
 The number of text passages to retrieve per query (1–20, default 3). Higher values provide more context but use more tokens. Start with the default and increase if the agent is missing relevant information.
