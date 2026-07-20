@@ -36,11 +36,12 @@ Test runs are billed like regular usage at your listed per-minute rates, based o
 2. Click **New Test Suite**
 3. Enter a **Name**
 4. Select the **Target Agent** to test
-5. Choose a tester mode:
+5. Choose the **Test Type**: **Chat** (default) for fast text conversations, or **Voice** for full simulated calls
+6. Choose a tester mode:
    - **Use system tester** — simpler, no setup required. RevRing's built-in tester follows each test script automatically.
    - **Use custom agent as tester** — select one of your own agents to play the caller role. Useful when you need the tester to have specific voice, language, or behavioral settings.
-6. Set **Max Concurrency** to control how many test calls run in parallel (min 2, max 100, default 2). The minimum is 2 because each test requires two concurrent calls — one outbound from the tester and one inbound to the target.
-7. Click **Create**
+7. Set **Max Concurrency** to control how many test calls run in parallel (min 2, max 100, default 2). Applies to voice tests, where each test requires two concurrent calls — one outbound from the tester and one inbound to the target.
+8. Click **Create**
 
 <Note>
 **Default Variables** can be added after creation by editing the test suite. Open the suite and click **Edit** to set variables that apply to all test calls.
@@ -55,6 +56,7 @@ curl -X POST https://api.revring.ai/v1/test-suites \
   -d '{
     "name": "Customer Support Regression Tests",
     "targetAgentId": "agent_target_id",
+    "testMode": "chat",
     "testerAgentId": "agent_tester_id",
     "maxConcurrency": 5,
     "defaultVariables": {
@@ -63,6 +65,15 @@ curl -X POST https://api.revring.ai/v1/test-suites \
     }
   }'
 ```
+
+To list suites, optionally filtered to one agent (useful when older agents' suites would otherwise fall outside the first page):
+
+```bash
+curl "https://api.revring.ai/v1/test-suites?targetAgentId=agent_target_id&page=1&pageSize=25" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+When starting a run you can override the suite's test type for that run only, for example a final voice validation on a chat suite: pass `{ "mode": "voice" }` to the run endpoint.
 
 ## Writing Test Cases
 
@@ -144,6 +155,10 @@ curl -X POST https://api.revring.ai/v1/test-suites/{suiteId}/generate-tests \
 ```
 
 The response includes generated test cases with `name`, `script`, and `scoringRubric` fields that you can review, edit, and save.
+
+## Suggest a fix
+
+When a test attempt fails, open it and click **Suggest a fix**. RevRing reviews the conversation, the test script, the pass criteria, and your agent's prompt, then proposes a minimal prompt update with a clear explanation and a line-by-line view of exactly what would change. If the test's pass criteria themselves look unachievable (for example, requiring an outcome outside the agent's control), that is flagged too, so you can fix the test instead of the agent. **Apply and rerun** applies the update and starts a fresh run in one step — with chat tests, you'll see the result in seconds.
 
 ## Running Tests
 
