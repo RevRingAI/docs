@@ -15,7 +15,18 @@ A test suite consists of:
 - **Test cases** — individual scenarios, each with a script and scoring rubric
 - **Test runs** — executions of the full suite, producing pass/fail results for each case
 
-When you start a test run, RevRing places calls between the tester and target agents. After each call, the transcript is evaluated against the scoring rubric to produce a pass, fail, or error result with reasoning.
+Each suite has a **test type** that controls how runs execute:
+
+| Type | What happens | Best for |
+|------|--------------|----------|
+| **Chat** (default) | The tester and your agent hold a fast text conversation. Your agent uses its real prompt, knowledge bases, and tools — same brain, no audio. Runs finish in seconds. | Everyday iteration: build, test, fix, rerun |
+| **Voice** | A full simulated phone call between the tester and your agent. | Final validation of the live call experience before launch |
+
+In chat tests, phone-only actions are simulated so the whole flow can be scored: when your agent transfers the caller, the transfer succeeds in the simulation, so rubrics can verify the agent transferred to the right number under the right conditions. A chat-type suite can still run a one-off voice test by passing `mode: "voice"` when starting a run.
+
+After each conversation, the transcript is evaluated against the scoring rubric to produce a pass, fail, or error result with reasoning.
+
+Test runs are billed like regular usage at your listed per-minute rates, based on conversation length. Chat tests are typically much shorter — and therefore cheaper — than voice tests.
 
 ## Creating a Test Suite
 
