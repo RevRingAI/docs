@@ -88,6 +88,7 @@ You bring your own provider account, so messages are sent from your numbers and 
 RevRing keeps a managed conversation for each contact, on each of your numbers. This is the memory behind automatic replies and AI-composed sends: the recent back-and-forth that keeps responses in context.
 
 - **Automatic idle reset.** After 30 days with no messages, a conversation starts fresh on its own, so a contact who returns much later isn't answered with stale context. This window is configurable per agent.
+- **Read the full thread.** Open any conversation on the **Conversations** page to see the whole back-and-forth. When the agent used a tool or its knowledge base to answer, that activity is shown right under the reply, so you can see what the agent did and where its answer came from. The same detail is available on the API with `GET /v1/conversations/{id}`, where each generated reply includes a `meta` object listing the tools it called and the knowledge base sources it cited.
 - **Clear a conversation.** See active threads on the **Conversations** page in the dashboard, or with the [Conversations API](/api-reference/conversations/list). Clearing a thread deletes it and its logged messages, so the very next text from that contact starts a brand-new conversation.
 
 Clearing is handy when you want to re-test an agent as if you were a new contact, or to forget a contact's history on request.
