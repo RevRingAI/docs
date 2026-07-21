@@ -6518,6 +6518,11 @@
                         "type": "boolean",
                         "default": false,
                         "description": "When true, returns a 429 error immediately if the concurrency limit is reached instead of queuing the call"
+                    },
+                    "voicemailAction": {
+                        "type": "string",
+                        "enum": ["hangup", "leave_message"],
+                        "description": "Override the agent's voicemail behavior for this call only. 'leave_message' leaves the agent's configured voicemail when an answering machine is detected; 'hangup' ends the call without leaving a message. Omit to use the agent's saved setting. The agent must have voicemail detection enabled for this to take effect. Useful for multi-attempt outreach where only the final attempt should leave a voicemail."
                     }
                 },
                 "required": [
