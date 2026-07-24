@@ -7383,6 +7383,16 @@
                         "type": "string",
                         "maxLength": 128,
                         "description": "Test run name (optional, auto-generated if omitted)"
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": ["chat", "voice"],
+                        "description": "Override the suite's test type for this run only. Omit to use the suite's configured type."
+                    },
+                    "testCaseIds": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "Run only these test cases instead of the entire suite (for example, to re-run just the tests that failed). Omit to run the whole suite. IDs that do not belong to the suite are ignored; if none match, the request is rejected."
                     }
                 }
             },
