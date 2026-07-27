@@ -5437,6 +5437,12 @@
                             "continueRecordingAfterTransfer": {
                                 "type": "boolean",
                                 "description": "Keep recording after the warm handoff completes, so the recording also includes the human agent and caller conversation."
+                            },
+                            "callerIdMode": {
+                                "type": "string",
+                                "enum": ["agent", "original_caller"],
+                                "default": "agent",
+                                "description": "Caller ID presented to the warm transfer recipient. \"agent\" (default) shows the agent's own number for the call. \"original_caller\" shows the customer's number. A warm transfer places a new outbound call over your own trunk, so sending a caller ID you do not own depends on your telephony provider; many support it (often as a per-trunk ANI override option) and some require it to be enabled first. If your provider rejects or replaces it, or the caller withheld their number, the agent's number is presented instead and the transfer still completes."
                             }
                         }
                     },
@@ -5742,6 +5748,12 @@
                             "continueRecordingAfterTransfer": {
                                 "type": "boolean",
                                 "description": "Keep recording after the warm handoff completes, so the recording also includes the human agent and caller conversation."
+                            },
+                            "callerIdMode": {
+                                "type": "string",
+                                "enum": ["agent", "original_caller"],
+                                "default": "agent",
+                                "description": "Caller ID presented to the warm transfer recipient. \"agent\" (default) shows the agent's own number for the call. \"original_caller\" shows the customer's number. A warm transfer places a new outbound call over your own trunk, so sending a caller ID you do not own depends on your telephony provider; many support it (often as a per-trunk ANI override option) and some require it to be enabled first. If your provider rejects or replaces it, or the caller withheld their number, the agent's number is presented instead and the transfer still completes."
                             }
                         }
                     },
@@ -6044,6 +6056,12 @@
                             "continueRecordingAfterTransfer": {
                                 "type": "boolean",
                                 "description": "Keep recording after the warm handoff completes, so the recording also includes the human agent and caller conversation."
+                            },
+                            "callerIdMode": {
+                                "type": "string",
+                                "enum": ["agent", "original_caller"],
+                                "default": "agent",
+                                "description": "Caller ID presented to the warm transfer recipient. \"agent\" (default) shows the agent's own number for the call. \"original_caller\" shows the customer's number. A warm transfer places a new outbound call over your own trunk, so sending a caller ID you do not own depends on your telephony provider; many support it (often as a per-trunk ANI override option) and some require it to be enabled first. If your provider rejects or replaces it, or the caller withheld their number, the agent's number is presented instead and the transfer still completes."
                             }
                         }
                     },

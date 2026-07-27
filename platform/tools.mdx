@@ -129,6 +129,13 @@ Warm transfer is configured with the following settings:
 | **Summary Instructions** | Extra guidance for the AI when briefing the human agent. Max 2,000 characters. If omitted, a default summary is generated. |
 | **Intro Message** | Spoken after the human agent accepts, heard by both parties (e.g., "You're now connected. They're up to speed on your request.") Max 500 characters. |
 | **Continue Recording After Handoff** | Keep recording after the agent hands off, so the recording also includes the human agent and caller conversation. |
+| **Caller ID Shown to Recipient** | Which number the transfer recipient sees. `agent` (default) shows the agent's own number for the call. `original_caller` shows the customer's number, so the recipient sees who is on the line. |
+
+<Note>
+**Presenting the original caller's number**: a warm transfer places a new outbound call to the recipient over your own trunk, so `callerIdMode: "original_caller"` sends a caller ID your account does not own. Support for this is set by your telephony provider, not by RevRing. Many providers allow it, often as a per-trunk option named something like ANI override or caller ID passthrough, and some require it to be enabled before it takes effect. Others only permit caller IDs you own or have verified in advance, in which case this option will not take effect on that trunk. If your provider rejects or replaces the number, or the caller withheld it, the agent's number is presented instead and the transfer still completes normally.
+
+A cold transfer is handed off by your provider rather than re-dialed, so the caller ID it presents is governed by your trunk's own transfer settings.
+</Note>
 
 <Note>
 **Reaching an extension**: If a route has an **Extension**, the agent dials it as touch tones once the recipient's line connects, so you can reach a specific extension behind a phone menu or auto-attendant. Add `w` to insert a 0.5-second pause if the menu needs a moment before it accepts input (e.g. `w123#`). Extensions are dialed on warm transfers only, because a cold transfer hands the call off immediately.
