@@ -7077,6 +7077,11 @@
                         "type": "string",
                         "description": "Test suite name"
                     },
+                    "testMode": {
+                        "type": "string",
+                        "enum": ["chat", "voice", "sms", "web_chat"],
+                        "description": "How this suite's tests run"
+                    },
                     "targetAgentId": {
                         "type": "string",
                         "format": "uuid",
@@ -7131,6 +7136,11 @@
             "TestSuiteCreate": {
                 "type": "object",
                 "properties": {
+                    "testMode": {
+                        "type": "string",
+                        "enum": ["chat", "voice", "sms", "web_chat"],
+                        "description": "How this suite's tests run. 'chat' (default): fast text conversation against the agent's call configuration. 'voice': full simulated phone call. 'sms' / 'web_chat': simulated text conversation against the agent's SMS or web chat setup (its channel prompt, knowledge, and tools)."
+                    },
                     "name": {
                         "type": "string",
                         "maxLength": 128,
@@ -7166,6 +7176,11 @@
             "TestSuiteUpdate": {
                 "type": "object",
                 "properties": {
+                    "testMode": {
+                        "type": "string",
+                        "enum": ["chat", "voice", "sms", "web_chat"],
+                        "description": "How this suite's tests run. 'chat' (default): fast text conversation against the agent's call configuration. 'voice': full simulated phone call. 'sms' / 'web_chat': simulated text conversation against the agent's SMS or web chat setup (its channel prompt, knowledge, and tools)."
+                    },
                     "name": {
                         "type": "string",
                         "maxLength": 128,
@@ -7333,6 +7348,12 @@
                         "type": "string",
                         "description": "Test run name"
                     },
+                    "mode": {
+                        "type": "string",
+                        "enum": ["chat", "voice", "sms", "web_chat"],
+                        "nullable": true,
+                        "description": "How this run executed; null on runs created before test types existed (voice)"
+                    },
                     "status": {
                         "type": "string",
                         "enum": [
@@ -7404,7 +7425,7 @@
                     },
                     "mode": {
                         "type": "string",
-                        "enum": ["chat", "voice"],
+                        "enum": ["chat", "voice", "sms", "web_chat"],
                         "description": "Override the suite's test type for this run only. Omit to use the suite's configured type."
                     },
                     "testCaseIds": {
