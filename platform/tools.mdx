@@ -83,7 +83,7 @@ The Transfer tool enables agents to transfer calls to other phone numbers or dep
 
 **Transfer Routes**:
 - **To number**: `+12025559999` (destination phone number in E.164 format)
-- **Extension** (optional): touch-tone digits dialed after the call connects, to reach an extension behind a phone menu or auto-attendant (e.g. `123#`). Allowed characters: `0-9`, `*`, `#`, and `w` for a 0.5-second pause. Sent on warm transfers only.
+- **Extension** (optional): touch-tone digits dialed after the call connects, to reach an extension behind a phone menu or auto-attendant. Allowed characters: `0-9`, `*`, `#`, and `w` for a 0.5-second pause. Start with `wwww` (a 2-second pause) so the destination is ready for input, e.g. `wwww1234` — see [Reaching an extension](#warm-transfer) below. Sent on warm transfers only.
 - **Condition**: `Transfer to sales team for pricing questions or to close deals`
 - **Mode**: `Default`, `Cold`, or `Warm` — overrides the default transfer mode for this specific route
 
@@ -138,7 +138,14 @@ A cold transfer is handed off by your provider rather than re-dialed, so the cal
 </Note>
 
 <Note>
-**Reaching an extension**: If a route has an **Extension**, the agent dials it as touch tones once the recipient's line connects, so you can reach a specific extension behind a phone menu or auto-attendant. Add `w` to insert a 0.5-second pause if the menu needs a moment before it accepts input (e.g. `w123#`). Extensions are dialed on warm transfers only, because a cold transfer hands the call off immediately.
+**Reaching an extension**: If a route has an **Extension**, the agent dials it as touch tones the moment the recipient's line answers — sooner than any person could dial by hand. Many phone menus and auto-attendants are not ready for input in that first instant, and digits that arrive too early are silently ignored, leaving the call wherever the line answered (typically the main menu or front desk).
+
+To avoid this, begin the extension with `w` pauses. Each `w` waits 0.5 seconds before the digits are dialed, and we recommend starting with `wwww` (2 seconds), which works with nearly all phone systems:
+
+- `wwww1234` — wait 2 seconds, then dial `1234`
+- `wwww1ww8011` — pauses and digits can be mixed, e.g. to navigate a menu before an extension
+
+If the destination still doesn't pick up the digits, add more `w`s. Extensions are dialed on warm transfers only, because a cold transfer hands the call off immediately.
 </Note>
 
 #### Configuring via API
