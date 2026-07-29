@@ -5313,6 +5313,11 @@
                         "type": "string",
                         "description": "Voice ID (copy from dashboard Voice Library)"
                     },
+                    "fallbackVoiceId": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Backup voice ID for seamless voice continuity: in the rare case the primary voice is temporarily unavailable, the agent switches to this voice automatically. Omit or set null to let the platform pick a standard backup voice."
+                    },
                     "voiceTemperature": {
                         "type": "number",
                         "minimum": 0,
@@ -5647,6 +5652,11 @@
                         "type": "string",
                         "description": "Voice ID (copy from dashboard Voice Library)"
                     },
+                    "fallbackVoiceId": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Backup voice ID for seamless voice continuity: in the rare case the primary voice is temporarily unavailable, the agent switches to this voice automatically. Omit or set null to let the platform pick a standard backup voice."
+                    },
                     "voiceTemperature": {
                         "type": "number",
                         "minimum": 0,
@@ -5961,6 +5971,11 @@
                     "voiceId": {
                         "type": "string",
                         "description": "Voice ID (copy from dashboard Voice Library)"
+                    },
+                    "fallbackVoiceId": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Backup voice ID for seamless voice continuity: in the rare case the primary voice is temporarily unavailable, the agent switches to this voice automatically. Omit or set null to let the platform pick a standard backup voice."
                     },
                     "voiceTemperature": {
                         "type": "number",
