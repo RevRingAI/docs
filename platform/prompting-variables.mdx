@@ -198,6 +198,17 @@ curl -X POST https://api.revring.ai/v1/calls \
 }
 ```
 
+### Where Variables Are Substituted
+
+`{{variable}}` placeholders are replaced in all of the following fields:
+
+- Agent prompt
+- First message
+- Voicemail message
+- Warm transfer fields: hold message, summary instructions (the briefing spoken to the person you transfer to), and intro message
+
+Substitution uses the variables available on that specific call: system variables, the agent's default variables, and the per-call variables you send. A placeholder whose variable is not set on the call is left exactly as typed (for example `{{external_id}}` stays visible), so missing data is easy to spot rather than silently disappearing. Make sure every variable referenced in these fields is supplied on each call.
+
 ## First Message
 
 The first message is the line your agent speaks when the call connects. It has two modes, controlled by the `firstMessageMode` field on the agent.
