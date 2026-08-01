@@ -4014,6 +4014,48 @@
                 }
             }
         },
+        "/test-suites/{id}/attempts/{attemptId}/suggest-fix": {
+            "parameters": [
+                { "name": "id", "in": "path", "required": true, "description": "Test suite ID", "schema": { "type": "string", "format": "uuid" } },
+                { "name": "attemptId", "in": "path", "required": true, "description": "Test attempt ID, from a test run's `attempts`", "schema": { "type": "string", "format": "uuid" } }
+            ],
+            "post": {
+                "summary": "Suggest a Fix",
+                "description": "Ask for a prompt change that would make a failed test attempt pass.\n\nPreparing a suggestion takes time, especially for agents with long prompts, so this starts the work and waits up to 105 seconds. If the suggestion is ready in that time it is returned directly; if not, the response is `status: running` and you fetch it with Get Suggested Fix.\n\nPass `wait=0` to skip the wait and always get `status: running` straight away. This is the recommended pattern, because the request never depends on how long preparation takes.\n\nAsking again while a suggestion is already being prepared joins the one in progress instead of starting another, and a suggestion prepared within the last 10 minutes is returned immediately, so repeating a request after a timeout is instant. Suggestions are available for failed attempts only.",
+                "operationId": "suggestFix",
+                "tags": ["Test Suites"],
+                "parameters": [
+                    { "name": "wait", "in": "query", "required": false, "description": "Set to `0` to return immediately instead of waiting for the suggestion.", "schema": { "type": "string", "enum": ["0"] } }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The suggestion, when it was ready in time. The suggestion fields are also present at the top level of `data`.",
+                        "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/SuggestedFix" } } } } }
+                    },
+                    "202": {
+                        "description": "The suggestion is being prepared. Poll Get Suggested Fix until `status` is `ready`.",
+                        "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/SuggestedFix" } } } } }
+                    },
+                    "400": { "description": "The attempt did not fail, so there is nothing to fix" },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "404": { "$ref": "#/components/responses/NotFoundError" }
+                }
+            },
+            "get": {
+                "summary": "Get Suggested Fix",
+                "description": "Fetch the suggestion for a failed test attempt. Poll this every couple of seconds after requesting one: `status` stays `running` while it is being prepared and becomes `ready` when `result` holds the suggestion. `failed` means it could not be prepared; request a new one.",
+                "operationId": "getSuggestedFix",
+                "tags": ["Test Suites"],
+                "responses": {
+                    "200": {
+                        "description": "Current state of the suggestion",
+                        "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/SuggestedFix" } } } } }
+                    },
+                    "401": { "$ref": "#/components/responses/UnauthorizedError" },
+                    "404": { "$ref": "#/components/responses/NotFoundError" }
+                }
+            }
+        },
         "/test-suites/{id}/generate-tests": {
             "parameters": [
                 {
@@ -7344,6 +7386,29 @@
                         "type": "object",
                         "nullable": true,
                         "description": "Test case specific variables (override suite defaults)"
+                    }
+                }
+            },
+            "SuggestedFix": {
+                "type": "object",
+                "description": "A proposed prompt change that would make a failed test pass.",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": ["idle", "running", "ready", "failed"],
+                        "description": "`idle` = none requested for this attempt. `running` = being prepared. `ready` = `result` holds the suggestion. `failed` = could not be prepared, request another."
+                    },
+                    "result": {
+                        "type": "object",
+                        "nullable": true,
+                        "description": "The suggestion. Present when `status` is `ready`, otherwise null.",
+                        "properties": {
+                            "analysis": { "type": "string", "description": "Why the test failed" },
+                            "changesSummary": { "type": "array", "items": { "type": "string" }, "description": "Plain-language summary of what was changed" },
+                            "suggestedPrompt": { "type": "string", "description": "The complete corrected prompt, ready to save to the agent" },
+                            "currentPrompt": { "type": "string", "description": "The agent prompt the suggestion was written against, for comparison" },
+                            "rubricIssues": { "type": "array", "items": { "type": "string" }, "description": "Problems found in the test's pass criteria, if any" }
+                        }
                     }
                 }
             },

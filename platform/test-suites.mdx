@@ -36,6 +36,26 @@ Test conversations run until they end naturally: the tester finishes its script,
 
 Test runs are billed like regular usage at your listed per-minute rates, based on conversation length. Chat tests are typically much shorter — and therefore cheaper — than voice tests.
 
+## Suggest a Fix
+
+When a test fails, you can ask for a suggested prompt change that would make it pass. The suggestion includes an explanation of the failure, a plain-language summary of what changed, the complete corrected prompt ready to save to the agent, and any problems found in the test's own pass criteria. In the dashboard, open a failed test result and choose **Suggest a fix**.
+
+Preparing a suggestion takes time, particularly for agents with long prompts, so over the API it works as a short-lived job:
+
+<Steps>
+  <Step title="Request the suggestion">
+    `POST /v1/test-suites/{id}/attempts/{attemptId}/suggest-fix?wait=0` returns immediately with `status: "running"`.
+  </Step>
+  <Step title="Poll until it is ready">
+    `GET` the same URL every couple of seconds. `status` stays `running` while it is being prepared, then becomes `ready` with the suggestion in `result`.
+  </Step>
+  <Step title="Apply it">
+    Save `result.suggestedPrompt` to the agent with the usual agent update call, then rerun the suite to confirm the fix.
+  </Step>
+</Steps>
+
+Because the request never waits for preparation, this pattern is unaffected by how long a suggestion takes. If you would rather not poll, omit `wait=0` and the request waits up to 105 seconds and returns the suggestion directly when it is ready in time; if your client gives up first, simply repeat the request and the finished suggestion comes back immediately.
+
 ## Creating a Test Suite
 
 ### From the Dashboard

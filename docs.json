@@ -182,7 +182,9 @@
               "api-reference/test-suites/list-runs",
               "api-reference/test-suites/get-run",
               "api-reference/test-suites/start-run",
-              "api-reference/test-suites/cancel-run"
+              "api-reference/test-suites/cancel-run",
+              "api-reference/test-suites/suggest-fix",
+              "api-reference/test-suites/get-suggested-fix"
             ]
           },
           {
