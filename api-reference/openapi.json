@@ -5239,6 +5239,11 @@
                         "nullable": true,
                         "description": "Agent's opening message"
                     },
+                    "firstMessageOutbound": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Optional outbound-specific opening. On outbound calls it is spoken instead of firstMessage; null or empty means firstMessage is used for both directions. Supports {{variables}}."
+                    },
                     "firstMessageMode": {
                         "type": "string",
                         "enum": ["static", "dynamic"],

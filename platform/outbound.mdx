@@ -115,6 +115,12 @@ Hi {{customer_name}}, this is Alex calling from Acme Corp regarding your appoint
 Unlike inbound calls where leaving first message empty makes sense, outbound calls should almost always include a first message to properly introduce the purpose of the call.
 </Note>
 
+### Separate Inbound and Outbound Openings
+
+Agents that handle both directions often need different openings: "Thank you for calling..." inbound versus "Hi, this is ... calling from ..." outbound. Set the **Outbound First Message** field (API: `firstMessageOutbound`) with the outbound text, and keep **First Message** as the inbound text. On outbound calls the agent speaks the outbound text; on inbound calls (or when the outbound field is empty) it speaks First Message, so existing agents are unaffected until you set it.
+
+Both fields support `{{variables}}` with the same substitution as the prompt, so per-call personalization works in either direction. This applies to static first messages; in dynamic mode the opening is generated from the prompt, which can branch on the `{{direction}}` variable instead.
+
 ### Outbound-Specific Prompts
 
 Tailor your prompt for outbound scenarios:
