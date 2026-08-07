@@ -26,7 +26,7 @@ Each suite has a **test type** that controls how runs execute:
 
 In chat tests, phone-only actions are simulated so the whole flow can be scored: when your agent transfers the caller, the transfer succeeds in the simulation, so rubrics can verify the agent transferred to the right number under the right conditions. A chat-type suite can still run a one-off voice test by passing `mode: "voice"` when starting a run.
 
-In voice tests, transfers are simulated the same way: the test call is isolated by design, so instead of dialing a live phone line the transfer completes in simulation and rubrics score the agent's transfer behavior normally. To test how your agent handles a failed transfer (for example a take-a-message flow), set the variable `_sim_transfer` to `fail` on the test case; the simulated transfer then fails and the agent follows its failure instructions. The same variable works in chat tests.
+In voice tests, transfers are simulated the same way: the test call is isolated by design, so instead of dialing a live phone line the transfer completes in simulation and rubrics score the agent's transfer behavior normally. See [Simulating Transfer Outcomes](#simulating-transfer-outcomes) for testing the failure path.
 
 SMS and web chat tests exercise your agent's real messaging behavior end to end, with two safety guarantees: no actual message is ever sent to a phone number or visitor, and nothing is written to your Conversations. Custom tools do run for real, and their webhook calls are marked with channel `"test"` (plus the test call ID) so your integrations can tell test traffic apart. A test's conversation lives on the test attempt, exactly like every other test type.
 
@@ -35,6 +35,25 @@ After each conversation, the transcript is evaluated against the scoring rubric 
 Test conversations run until they end naturally: the tester finishes its script, or your agent ends the call. There is no practical length limit — long intake cases with dozens of exchanges run to completion. (An extreme safeguard of several thousand messages exists purely to stop a misconfigured never-ending conversation, far beyond any realistic test.)
 
 Test runs are billed like regular usage at your listed per-minute rates, based on conversation length. Chat tests are typically much shorter — and therefore cheaper — than voice tests.
+
+
+## Simulating Transfer Outcomes
+
+Transfers complete in simulation on every test call, in both chat and voice mode, so transfer cases score the agent's behavior rather than the test environment. By default the simulated transfer succeeds.
+
+To test how an agent handles a transfer that does not go through (for example a take-a-message flow), set the test variable `_sim_transfer` to `fail` on the case. In the dashboard this is the "Simulate a failed transfer in this test" checkbox on the test case. Via the API, set it in the case's `variables`:
+
+```json
+POST /v1/test-suites/{suiteId}/tests
+{
+  "name": "Failed transfer takes a message",
+  "script": "Ask to speak with a person. When offered a message instead, accept and provide your details.",
+  "scoringRubric": "PASS only if the agent offers to take a message after the failed transfer and collects the caller's details.",
+  "variables": { "_sim_transfer": "fail" }
+}
+```
+
+With the variable set, the simulated transfer fails and the agent follows its failure instructions, so rubrics can score that path. Real calls are never affected by this variable.
 
 ## Suggest a Fix
 
