@@ -26,7 +26,7 @@ Each suite has a **test type** that controls how runs execute:
 
 In chat tests, phone-only actions are simulated so the whole flow can be scored: when your agent transfers the caller, the transfer succeeds in the simulation, so rubrics can verify the agent transferred to the right number under the right conditions. A chat-type suite can still run a one-off voice test by passing `mode: "voice"` when starting a run.
 
-In voice tests, a transfer cannot actually connect to a live phone line (the test call is isolated by design), so the transfer attempt fails and the agent continues per its failure instructions. For test cases that assert transfer behavior, use chat mode; use voice runs for audio, turn-taking, and greeting checks.
+In voice tests, transfers are simulated the same way: the test call is isolated by design, so instead of dialing a live phone line the transfer completes in simulation and rubrics score the agent's transfer behavior normally. To test how your agent handles a failed transfer (for example a take-a-message flow), set the variable `sim_transfer` to `fail` on the test case; the simulated transfer then fails and the agent follows its failure instructions. The same variable works in chat tests.
 
 SMS and web chat tests exercise your agent's real messaging behavior end to end, with two safety guarantees: no actual message is ever sent to a phone number or visitor, and nothing is written to your Conversations. Custom tools do run for real, and their webhook calls are marked with channel `"test"` (plus the test call ID) so your integrations can tell test traffic apart. A test's conversation lives on the test attempt, exactly like every other test type.
 
