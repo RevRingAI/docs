@@ -330,6 +330,54 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 If **Block All Interruptions** is enabled, the interruption threshold has no effect since all interruptions are disabled.
 </Note>
 
+## Live Appointment Booking with Cal.com
+
+RevRing hosts a Cal.com connector so agents can check real availability and book appointments live on a call, with no backend required. Two custom tools point at the hosted endpoints and carry your Cal.com API key in server side header configuration, where the model never sees it.
+
+Register these two tools on the agent (dashboard Custom Tools, or `POST /v1/agents/{agentId}/custom-tools`), replacing the key, event type id, and timezone:
+
+```json
+{
+  "name": "Check Availability",
+  "webhookUrl": "https://api.revring.ai/public/integrations/calcom/check-availability?eventTypeId=YOUR_EVENT_TYPE_ID&timeZone=America/New_York",
+  "enabled": true,
+  "headers": [{ "key": "x-cal-api-key", "value": "YOUR_CAL_API_KEY" }],
+  "schema": {
+    "type": "function",
+    "name": "check_availability",
+    "description": "Check the calendar for open appointment times. Use when the caller asks about available times or wants to schedule.",
+    "parameters": { "type": "object", "properties": {
+      "date": { "type": "string", "description": "Date to check availability (YYYY-MM-DD). Defaults to today." },
+      "days_ahead": { "type": "number", "description": "Days ahead to check. Default 2. Max 5." } } }
+  }
+}
+```
+
+```json
+{
+  "name": "Book Appointment",
+  "webhookUrl": "https://api.revring.ai/public/integrations/calcom/book-appointment?eventTypeId=YOUR_EVENT_TYPE_ID&timeZone=America/New_York",
+  "enabled": true,
+  "headers": [{ "key": "x-cal-api-key", "value": "YOUR_CAL_API_KEY" }],
+  "schema": {
+    "type": "function",
+    "name": "book_appointment",
+    "description": "Book an appointment on the calendar. Only use after the caller has confirmed a specific date and time.",
+    "parameters": { "type": "object", "required": ["date", "time"], "properties": {
+      "date": { "type": "string", "description": "Appointment date YYYY-MM-DD." },
+      "time": { "type": "string", "description": "Time in HH:MM 24-hour format." },
+      "first_name": { "type": "string", "description": "Caller's first name." },
+      "last_name": { "type": "string", "description": "Caller's last name." },
+      "email": { "type": "string", "description": "Caller's email, required for the calendar invite." },
+      "phone": { "type": "string", "description": "Caller's phone number, if known." } } }
+  }
+}
+```
+
+Then add booking behavior to the prompt: check availability before offering times, offer only times the tool returned, collect the email (and phone when the calendar requires it), book only after the caller confirms, and confirm only after the tool reports success. Have the agent speak a short bridge line ("Let me check what is open...") before each tool call so the lookup never sounds like dead air.
+
+The tools return short spoken ready text, including clear guidance on failures (slot taken, phone number required), so the agent recovers naturally. Phone numbers are normalized automatically, and both Cal.com response formats are handled. If you prefer to run the endpoints on your own backend for custom logic, point the same tools at your URLs instead and keep the key server side.
+
 ## Custom Tools
 
 Custom tools allow you to extend agent capabilities by integrating with your own systems via webhooks. When the agent invokes a custom tool, RevRing calls your webhook with the tool's arguments and includes the response in the conversation.
