@@ -5454,6 +5454,26 @@
                         "default": 500,
                         "description": "Minimum speech duration (ms) before the caller's speech is registered as an interruption. Lower values make the agent easier to interrupt. Range: 100-2000, default 500."
                     },
+                    "interruptionIgnoreWords": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                        },
+                        "maxItems": 50,
+                        "description": "Acknowledgment words or short phrases that never interrupt the agent while it is speaking (for example \"okay\", \"yeah\", \"uh-huh\"). Anything beyond a brief acknowledgment still interrupts normally, and these words behave normally when the agent is not speaking. null (default) uses the recommended platform list, [] disables the feature, and a list fully replaces the recommended list."
+                    },
+                    "minInterruptionWords": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10,
+                        "default": 1,
+                        "description": "Number of transcribed words required before the caller's speech interrupts the agent while it is speaking. Default 1 keeps the agent responsive. Higher values make the agent harder to interrupt. 0 interrupts on any caller sound, including background noise."
+                    },
                     "transferMode": {
                         "type": "string",
                         "enum": [
@@ -5776,6 +5796,26 @@
                         "default": 500,
                         "description": "Minimum speech duration (ms) before the caller's speech is registered as an interruption. Lower values make the agent easier to interrupt. Range: 100-2000, default 500."
                     },
+                    "interruptionIgnoreWords": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                        },
+                        "maxItems": 50,
+                        "description": "Acknowledgment words or short phrases that never interrupt the agent while it is speaking (for example \"okay\", \"yeah\", \"uh-huh\"). Anything beyond a brief acknowledgment still interrupts normally, and these words behave normally when the agent is not speaking. null (default) uses the recommended platform list, [] disables the feature, and a list fully replaces the recommended list."
+                    },
+                    "minInterruptionWords": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10,
+                        "default": 1,
+                        "description": "Number of transcribed words required before the caller's speech interrupts the agent while it is speaking. Default 1 keeps the agent responsive. Higher values make the agent harder to interrupt. 0 interrupts on any caller sound, including background noise."
+                    },
                     "transferMode": {
                         "type": "string",
                         "enum": [
@@ -6094,6 +6134,26 @@
                         "maximum": 2000,
                         "default": 500,
                         "description": "Minimum speech duration (ms) before the caller's speech is registered as an interruption. Lower values make the agent easier to interrupt. Range: 100-2000, default 500."
+                    },
+                    "interruptionIgnoreWords": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                        },
+                        "maxItems": 50,
+                        "description": "Acknowledgment words or short phrases that never interrupt the agent while it is speaking (for example \"okay\", \"yeah\", \"uh-huh\"). Anything beyond a brief acknowledgment still interrupts normally, and these words behave normally when the agent is not speaking. null (default) uses the recommended platform list, [] disables the feature, and a list fully replaces the recommended list."
+                    },
+                    "minInterruptionWords": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10,
+                        "default": 1,
+                        "description": "Number of transcribed words required before the caller's speech interrupts the agent while it is speaking. Default 1 keeps the agent responsive. Higher values make the agent harder to interrupt. 0 interrupts on any caller sound, including background noise."
                     },
                     "transferMode": {
                         "type": "string",
