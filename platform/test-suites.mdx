@@ -75,6 +75,26 @@ Preparing a suggestion takes time, particularly for agents with long prompts, so
 
 Because the request never waits for preparation, this pattern is unaffected by how long a suggestion takes. If you would rather not poll, omit `wait=0` and the request waits up to 105 seconds and returns the suggestion directly when it is ready in time; if your client gives up first, simply repeat the request and the finished suggestion comes back immediately.
 
+### One Suggestion for a Whole Run
+
+When several tests fail in the same run, requesting a fix per attempt produces separate prompts that do not know about each other, and applying one can undo another. Instead, request one suggestion for the run:
+
+```
+POST /v1/test-suites/{id}/runs/{runId}/suggest-fix
+GET  /v1/test-suites/{id}/runs/{runId}/suggest-fix
+```
+
+This analyzes every failed attempt in the run together and returns a single corrected prompt that addresses all of them at once, so failures that share a root cause get one coherent edit. The job, polling, and `wait=0` semantics are identical to the per-attempt endpoint, and the result has the same fields plus:
+
+- `result.perAttempt` — one entry per failed attempt (`attemptId`, `testCaseName`, `analysis`) explaining why that test failed and which part of the edit addresses it.
+- `result.skippedAttemptIds` — present only on very large runs: the run's oldest failures beyond the most recent 12, which were not analyzed.
+
+The run must be finished before requesting a suggestion, and it must contain at least one failed attempt.
+
+### Knowing When a Suggestion Is Out of Date
+
+Every `ready` response includes a `stale` boolean next to `status` and `result`. It is `false` when the agent's prompt is still the one the suggestion was written against, and `true` if the prompt has changed since, in which case saving `result.suggestedPrompt` would overwrite those newer edits. When `stale` is `true`, request a fresh suggestion instead of applying the old one. This applies to both the per-attempt and the run-level endpoints.
+
 ## Creating a Test Suite
 
 ### From the Dashboard

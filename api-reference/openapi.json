@@ -4420,6 +4420,127 @@
                     }
                 }
             }
+        },
+        "/test-suites/{id}/runs/{runId}/suggest-fix": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "Test suite ID",
+                    "schema": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                {
+                    "name": "runId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Test run ID",
+                    "schema": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            ],
+            "post": {
+                "summary": "Suggest a Fix for a Run",
+                "description": "Ask for one prompt change that would make every failed test in a run pass.\n\nRequesting a fix per attempt produces separate prompts that do not know about each other, and applying one can undo another. This endpoint analyzes all of the run's failed attempts together and returns a single corrected prompt with a per-attempt breakdown, so failures that share a root cause get one coherent edit.\n\nThe wait, polling, and reuse behavior is identical to the per-attempt Suggest a Fix: the request waits up to 105 seconds, `wait=0` returns `status: running` immediately for polling with Get Suggested Fix for a Run, asking again joins a preparation already in progress, and a suggestion prepared within the last 10 minutes is returned instantly.\n\nThe run must be finished and must contain at least one failed attempt. On runs with more than 12 failures, the most recent 12 are analyzed and the rest are listed in `result.skippedAttemptIds`.",
+                "operationId": "suggestRunFix",
+                "tags": [
+                    "Test Suites"
+                ],
+                "parameters": [
+                    {
+                        "name": "wait",
+                        "in": "query",
+                        "required": false,
+                        "description": "Set to `0` to return immediately instead of waiting for the suggestion.",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "0"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The suggestion, when it was ready in time. The suggestion fields are also present at the top level of `data`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RunSuggestedFix"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "The suggestion is being prepared. Poll Get Suggested Fix for a Run until `status` is `ready`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RunSuggestedFix"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The run has not finished yet, or it has no failed attempts to analyze"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "get": {
+                "summary": "Get Suggested Fix for a Run",
+                "description": "Fetch the run-level suggestion. Poll this every couple of seconds after requesting one: `status` stays `running` while it is being prepared and becomes `ready` when `result` holds the suggestion. `failed` means it could not be prepared; request a new one.",
+                "operationId": "getRunSuggestedFix",
+                "tags": [
+                    "Test Suites"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current state of the suggestion",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RunSuggestedFix"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The run has not finished yet, or it has no failed attempts to analyze"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
         }
     },
     "webhooks": {
@@ -7486,6 +7607,91 @@
                             "currentPrompt": { "type": "string", "description": "The agent prompt the suggestion was written against, for comparison" },
                             "rubricIssues": { "type": "array", "items": { "type": "string" }, "description": "Problems found in the test's pass criteria, if any" }
                         }
+                    },
+                    "stale": {
+                        "type": "boolean",
+                        "description": "Present when `status` is `ready`. `true` means the agent's prompt has changed since this suggestion was written, so saving `suggestedPrompt` would overwrite those newer edits; request a fresh suggestion instead."
+                    }
+                }
+            },
+            "RunSuggestedFix": {
+                "type": "object",
+                "description": "A proposed prompt change covering every failed attempt in a test run.",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "idle",
+                            "running",
+                            "ready",
+                            "failed"
+                        ],
+                        "description": "`idle` = none requested for this run. `running` = being prepared. `ready` = `result` holds the suggestion. `failed` = could not be prepared, request another."
+                    },
+                    "result": {
+                        "type": "object",
+                        "nullable": true,
+                        "description": "The suggestion. Present when `status` is `ready`, otherwise null.",
+                        "properties": {
+                            "analysis": {
+                                "type": "string",
+                                "description": "Overall diagnosis across the run's failures, leading with a shared root cause when there is one"
+                            },
+                            "changesSummary": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "Plain-language summary of what was changed"
+                            },
+                            "suggestedPrompt": {
+                                "type": "string",
+                                "description": "The complete corrected prompt, ready to save to the agent"
+                            },
+                            "currentPrompt": {
+                                "type": "string",
+                                "description": "The agent prompt the suggestion was written against, for comparison"
+                            },
+                            "rubricIssues": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "Problems found in the test's pass criteria, if any"
+                            },
+                            "perAttempt": {
+                                "type": "array",
+                                "description": "One entry per failed attempt analyzed, in the order the attempts ran",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "attemptId": {
+                                            "type": "string",
+                                            "description": "The failed attempt"
+                                        },
+                                        "testCaseName": {
+                                            "type": "string",
+                                            "description": "Name of the test that failed"
+                                        },
+                                        "analysis": {
+                                            "type": "string",
+                                            "description": "Why this test failed and which part of the edit addresses it"
+                                        }
+                                    }
+                                }
+                            },
+                            "skippedAttemptIds": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "Present only on very large runs: the oldest failed attempts beyond the most recent 12, which were not analyzed"
+                            }
+                        }
+                    },
+                    "stale": {
+                        "type": "boolean",
+                        "description": "Present when `status` is `ready`. `true` means the agent's prompt has changed since this suggestion was written, so saving `suggestedPrompt` would overwrite those newer edits; request a fresh suggestion instead."
                     }
                 }
             },
