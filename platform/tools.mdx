@@ -303,7 +303,7 @@ Block All Interruptions applies to all agent speech globally. In [Conversation F
 
 Callers naturally say things like "okay", "yeah", or "uh-huh" while listening. By default, these brief acknowledgments do not interrupt the agent, so it finishes its sentence smoothly instead of stopping mid-thought. Anything beyond a brief acknowledgment, such as "wait", "stop", a question, or "okay but wait", interrupts the agent immediately. When the agent is not speaking, acknowledgment words behave like any other reply.
 
-This is enabled by default with a recommended list that covers common acknowledgments. You can customize it per agent:
+This is enabled by default with a recommended list that covers common acknowledgments and adapts to the agent's language setting (for example, Spanish agents also recognize "ajá" and "claro"). You can customize it per agent:
 
 - **Custom word list**: replace the recommended list with your own words or short phrases, for example to cover another language.
 - **Disable**: turn the toggle off (or set `interruptionIgnoreWords` to `[]` via API) so every caller utterance can interrupt.
@@ -320,6 +320,8 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 ### Interruption Word Count
 
 Controls how many words a caller must say before the agent stops talking. The default of 1 keeps the agent responsive to any real interjection. Raise it to make the agent harder to interrupt, or set it to 0 to stop the agent on any caller sound, including background noise.
+
+Urgent phrases such as "stop", "wait", and "hold on" always interrupt the agent immediately, regardless of this setting.
 
 ```bash
 curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
