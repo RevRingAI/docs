@@ -4724,6 +4724,11 @@
                                         "nullable": true,
                                         "description": "URL to call recording"
                                     },
+                                    "recordingOffsetSeconds": {
+                                        "type": "number",
+                                        "nullable": true,
+                                        "description": "Seconds between the transcript clock's zero and the recording's first audio; aligns transcript timestamps with playback"
+                                    },
                                     "hangupCause": {
                                         "type": "string",
                                         "nullable": true,
@@ -6656,6 +6661,11 @@
                         "type": "string",
                         "nullable": true,
                         "description": "URL to call recording (available after call ends)"
+                    },
+                    "recordingOffsetSeconds": {
+                        "type": "number",
+                        "nullable": true,
+                        "description": "Seconds between the transcript clock's zero and the recording's first audio. Add transcript timestamps to this value to align them with recording playback. Available after the call ends; null on older calls."
                     },
                     "hangupCause": {
                         "type": "string",
