@@ -307,8 +307,11 @@ Variables can be set at multiple levels. More specific values override broader o
 
 1. **Default variables** on the test suite — apply to all test calls
 2. **Per-test-case variables** — override suite defaults for a specific test
+3. **Run variables** — passed when starting a run, override both for that run only
 
-This is useful for testing different caller scenarios:
+During a test they are merged over the agent's own default variables, your pre-call webhook still runs as well (its payload includes `isTestCall: true`), and the prompt renders exactly as it would on a real call.
+
+Per-test-case variables are useful for testing different caller scenarios:
 
 ```json
 {
@@ -321,6 +324,22 @@ This is useful for testing different caller scenarios:
   }
 }
 ```
+
+Run variables let you supply values at the moment you start a run, without editing the suite or its tests — for example when the values come from your own application:
+
+```bash
+POST /v1/test-suites/{id}/runs
+{
+  "variables": {
+    "customer_name": "Jordan Alvarez",
+    "claim_type": "auto"
+  }
+}
+```
+
+### Seeing What a Run Ran With
+
+Every attempt records the variables it ran with (the merged result of suite defaults, test case variables, and run variables) in its `variables` field, visible on the run's attempts via `GET /v1/test-suites/{id}/runs/{runId}`. The snapshot is taken when the run starts, so it stays inspectable even after the suite or its tests are edited. Attempts from before this field existed show `null`.
 
 ## Best Practices
 

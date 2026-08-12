@@ -7774,6 +7774,12 @@
                         "items": {
                             "$ref": "#/components/schemas/TestAttempt"
                         }
+                    },
+                    "variables": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true,
+                        "description": "Variable overrides passed when the run was started, if any."
                     }
                 },
                 "required": [
@@ -7805,6 +7811,11 @@
                         "type": "array",
                         "items": { "type": "string" },
                         "description": "Run only these test cases instead of the entire suite (for example, to re-run just the tests that failed). Omit to run the whole suite. IDs that do not belong to the suite are ignored; if none match, the request is rejected."
+                    },
+                    "variables": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "description": "Variable overrides for this run only. Merged over the suite's `defaultVariables` and each test case's `variables` (run values win) for every attempt, then rendered into the agent's prompt exactly as on a real call. Use this to supply values at the moment you start a run without editing the suite or its tests."
                     }
                 }
             },
@@ -7874,6 +7885,12 @@
                     "createdAt": {
                         "type": "string",
                         "format": "date-time"
+                    },
+                    "variables": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true,
+                        "description": "The variables this attempt ran with: suite `defaultVariables`, overridden by the test case's `variables`, overridden by the run's `variables`. Snapshotted when the run starts, so it stays inspectable after the suite or tests are edited. Null on attempts from before this field existed."
                     }
                 },
                 "required": [
