@@ -113,6 +113,24 @@ Hi {{customer_name}}, this is Alex calling from Acme Corp regarding your appoint
 
 <Note>
 Unlike inbound calls where leaving first message empty makes sense, outbound calls should almost always include a first message to properly introduce the purpose of the call.
+
+### When the Phone Is Still Ringing
+
+Some carrier routes report a call as answered before the person has actually picked up, occasionally by 15 seconds or more. Anything the agent says in that window is spoken into a ringing phone, and the person hears nothing or only the tail of the opening. Two settings control this, and both default to current behavior so existing agents are unchanged.
+
+**Pause before speaking.** Set `firstMessageDelayMs` to wait that many milliseconds after the call is reported answered before the opening is spoken. Tune it to the route: start around 2000 to 3000 and adjust. If the person speaks during the pause, the opening is skipped and the agent simply replies to them, so the two never talk over each other.
+
+```json
+{ "firstMessageDelayMs": 2500 }
+```
+
+**Let the caller speak first.** Set `startSpeaker` to `"user"` and the agent stays silent until the person says something, then opens the conversation from its prompt. Nothing is spoken during ringing at all. The re-engagement prompt is held as well, so the silence is genuine rather than a short delay.
+
+```json
+{ "startSpeaker": "user" }
+```
+
+Use the pause when you want the agent to open the call but slightly later, and `startSpeaker` when you would rather the person open it. A third option needs no settings at all: keep the opening to a short line such as "Hi, is this Alex?" so that little is lost if part of it is missed.
 </Note>
 
 ### Separate Inbound and Outbound Openings

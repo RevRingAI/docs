@@ -5370,6 +5370,22 @@
                         "nullable": true,
                         "description": "Optional outbound-specific opening. On outbound calls it is spoken instead of firstMessage; null or empty means firstMessage is used for both directions. Supports {{variables}}."
                     },
+                    "firstMessageDelayMs": {
+                        "type": "integer",
+                        "nullable": true,
+                        "minimum": 0,
+                        "maximum": 15000,
+                        "description": "Milliseconds to wait after the call is reported answered before the opening is spoken. Null or 0 speaks it immediately. Useful on routes that report a call answered while the phone is still ringing. If the caller speaks during the pause the opening is skipped."
+                    },
+                    "startSpeaker": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "agent",
+                            "user"
+                        ],
+                        "description": "Who opens the conversation. `agent` (default) speaks the opening. `user` keeps the agent silent, including the re-engagement prompt, until the caller speaks."
+                    },
                     "firstMessageMode": {
                         "type": "string",
                         "enum": ["static", "dynamic"],
