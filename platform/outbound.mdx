@@ -194,6 +194,10 @@ Voicemail detection is particularly useful for outbound calling to avoid wasting
 For high-volume outbound campaigns, choose "Hangup" to minimize costs and focus agent time on live conversations.
 </Tip>
 
+### When Nobody Speaks
+
+Some voicemail systems answer without any greeting the agent can hear, so there is nothing for voicemail detection to key on. The platform closes these calls automatically: if nobody has spoken by the third re-engagement attempt (and the call is at least 20 seconds old), the agent says a short sign-off and ends the call with hangup cause `SILENCE_TIMEOUT`. This applies only while the other side has said nothing at all. Once a person has spoken, the agent stays patient through quiet stretches and keeps re-engaging normally.
+
 ## Call Pacing and Concurrency
 
 ### Understanding Concurrency Limits
