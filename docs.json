@@ -64,6 +64,14 @@
             ]
           },
           {
+            "group": "Agent Versions",
+            "pages": [
+              "api-reference/agents/list-revisions",
+              "api-reference/agents/get-revision",
+              "api-reference/agents/restore-revision"
+            ]
+          },
+          {
             "group": "Agent Phone Numbers",
             "pages": [
               "api-reference/agents/list-phone-numbers",
