@@ -182,10 +182,13 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
       "holdMusicEnabled": true,
       "summaryPrompt": "Focus on the customer's main concern and any account details mentioned.",
       "introMessage": "You're now connected. They're up to speed on your request.",
-      "continueRecordingAfterTransfer": false
+      "continueRecordingAfterTransfer": false,
+      "dialTimeoutSeconds": 75
     }
   }'
 ```
+
+**If nobody answers**: the agent lets the destination ring for `dialTimeoutSeconds` seconds (10 to 300, default 75), then tells the caller it could not connect and continues the conversation. The caller can ask to try again, or the conversation can fall through to another route. Raise the timeout for teams that take longer to pick up; lower it to fail over to a backup route faster.
 
 <Note>
 Warm transfer is also available as a node type in [Conversation Flows](/platform/conversation-flows), where you can configure hold and summary settings per-node.

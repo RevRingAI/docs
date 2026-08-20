@@ -6580,6 +6580,12 @@
                 ],
                 "default": "agent",
                 "description": "Caller ID presented to the warm transfer recipient. \"agent\" (default) shows the agent's own number for the call. \"original_caller\" shows the customer's number. A warm transfer places a new outbound call over your own trunk, so sending a caller ID you do not own depends on your telephony provider; many support it (often as a per-trunk ANI override option) and some require it to be enabled first. If your provider rejects or replaces it, or the caller withheld their number, the agent's number is presented instead and the transfer still completes."
+              },
+              "dialTimeoutSeconds": {
+                "type": "integer",
+                "minimum": 10,
+                "maximum": 300,
+                "description": "Seconds to let the transfer destination ring before the assistant gives up, tells the caller, and continues the conversation. Omit for the platform default of 75. Raise it for destinations that answer slowly; lower it to fail over faster."
               }
             }
           },
@@ -6936,6 +6942,12 @@
                 ],
                 "default": "agent",
                 "description": "Caller ID presented to the warm transfer recipient. \"agent\" (default) shows the agent's own number for the call. \"original_caller\" shows the customer's number. A warm transfer places a new outbound call over your own trunk, so sending a caller ID you do not own depends on your telephony provider; many support it (often as a per-trunk ANI override option) and some require it to be enabled first. If your provider rejects or replaces it, or the caller withheld their number, the agent's number is presented instead and the transfer still completes."
+              },
+              "dialTimeoutSeconds": {
+                "type": "integer",
+                "minimum": 10,
+                "maximum": 300,
+                "description": "Seconds to let the transfer destination ring before the assistant gives up, tells the caller, and continues the conversation. Omit for the platform default of 75. Raise it for destinations that answer slowly; lower it to fail over faster."
               }
             }
           },
@@ -7289,6 +7301,12 @@
                 ],
                 "default": "agent",
                 "description": "Caller ID presented to the warm transfer recipient. \"agent\" (default) shows the agent's own number for the call. \"original_caller\" shows the customer's number. A warm transfer places a new outbound call over your own trunk, so sending a caller ID you do not own depends on your telephony provider; many support it (often as a per-trunk ANI override option) and some require it to be enabled first. If your provider rejects or replaces it, or the caller withheld their number, the agent's number is presented instead and the transfer still completes."
+              },
+              "dialTimeoutSeconds": {
+                "type": "integer",
+                "minimum": 10,
+                "maximum": 300,
+                "description": "Seconds to let the transfer destination ring before the assistant gives up, tells the caller, and continues the conversation. Omit for the platform default of 75. Raise it for destinations that answer slowly; lower it to fail over faster."
               }
             }
           },
