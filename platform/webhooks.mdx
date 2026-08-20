@@ -263,6 +263,8 @@ After a call ends, RevRing sends a POST request with complete call details:
     },
     {
       "at": 18.242,
+      "startedAt": 16.104,
+      "durationMs": 328,
       "seq": 2,
       "role": "tool",
       "tool": {
@@ -350,6 +352,18 @@ After a call ends, RevRing sends a POST request with complete call details:
 <Note>
 The example above shows both a custom tool (`check_order_status`) and a system tool (`end_call`). When a call is transferred using `transfer_to_number`, the transcript will contain a similar tool entry with `name: "transfer_to_number"` and `args` containing `to_number`.
 </Note>
+
+**Tool timing fields**
+
+Custom tool entries carry how long your webhook took to respond, so you can measure tool latency yourself from the transcript, with no need to ask support:
+
+| Field | Meaning |
+|-------|---------|
+| `startedAt` | Seconds from the start of the call to the moment the tool began running |
+| `durationMs` | Milliseconds the tool took to return, measured server side. Present on both successful and failed executions |
+| `at` | When the entry was written to the transcript. Tool entries are written once the turn finishes, so `at` can be later than `startedAt`. Use `startedAt` and `durationMs` for timing questions |
+
+The same timing is shown on each tool card in the call transcript in the dashboard.
 
 <Note>
 For complete field descriptions and additional examples, see the [Post-Call Webhook API Reference](/api-reference/webhooks/post-call).
