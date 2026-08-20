@@ -6392,6 +6392,18 @@
                   "type": "string",
                   "pattern": "^[0-9*#w]+$",
                   "description": "Optional touch-tone digits dialed after the call connects, to reach an extension behind a phone menu (e.g. \"123#\"). Allowed: 0-9, *, #, and w for a 0.5s pause. Warm transfers only."
+                },
+                "dialTimeoutSeconds": {
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 300,
+                  "description": "Per-route override of how long this destination may ring before the attempt is abandoned. Omit to inherit warmTransferConfig.dialTimeoutSeconds."
+                },
+                "waitForHumanSeconds": {
+                  "type": "integer",
+                  "minimum": 15,
+                  "maximum": 600,
+                  "description": "Per-route override of how long to wait after this destination answers for a person to come on the line. Omit to inherit warmTransferConfig.waitForHumanSeconds."
                 }
               }
             }
@@ -6586,6 +6598,12 @@
                 "minimum": 10,
                 "maximum": 300,
                 "description": "Seconds to let the transfer destination ring before the assistant gives up, tells the caller, and continues the conversation. Omit for the platform default of 75. Raise it for destinations that answer slowly; lower it to fail over faster."
+              },
+              "waitForHumanSeconds": {
+                "type": "integer",
+                "minimum": 15,
+                "maximum": 600,
+                "description": "Seconds to wait after the destination answers for a person to actually come on the line. Covers unattended queues and hold systems that pick up but never hand over. On expiry the assistant ends the attempt, tells the caller, and continues the conversation. Omit for the platform default of 120."
               }
             }
           },
@@ -6775,6 +6793,18 @@
                   "type": "string",
                   "pattern": "^[0-9*#w]+$",
                   "description": "Optional touch-tone digits dialed after the call connects, to reach an extension behind a phone menu (e.g. \"123#\"). Allowed: 0-9, *, #, and w for a 0.5s pause. Warm transfers only."
+                },
+                "dialTimeoutSeconds": {
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 300,
+                  "description": "Per-route override of how long this destination may ring before the attempt is abandoned. Omit to inherit warmTransferConfig.dialTimeoutSeconds."
+                },
+                "waitForHumanSeconds": {
+                  "type": "integer",
+                  "minimum": 15,
+                  "maximum": 600,
+                  "description": "Per-route override of how long to wait after this destination answers for a person to come on the line. Omit to inherit warmTransferConfig.waitForHumanSeconds."
                 }
               },
               "required": [
@@ -6948,6 +6978,12 @@
                 "minimum": 10,
                 "maximum": 300,
                 "description": "Seconds to let the transfer destination ring before the assistant gives up, tells the caller, and continues the conversation. Omit for the platform default of 75. Raise it for destinations that answer slowly; lower it to fail over faster."
+              },
+              "waitForHumanSeconds": {
+                "type": "integer",
+                "minimum": 15,
+                "maximum": 600,
+                "description": "Seconds to wait after the destination answers for a person to actually come on the line. Covers unattended queues and hold systems that pick up but never hand over. On expiry the assistant ends the attempt, tells the caller, and continues the conversation. Omit for the platform default of 120."
               }
             }
           },
@@ -7139,6 +7175,18 @@
                   "type": "string",
                   "pattern": "^[0-9*#w]+$",
                   "description": "Optional touch-tone digits dialed after the call connects, to reach an extension behind a phone menu (e.g. \"123#\"). Allowed: 0-9, *, #, and w for a 0.5s pause. Warm transfers only."
+                },
+                "dialTimeoutSeconds": {
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 300,
+                  "description": "Per-route override of how long this destination may ring before the attempt is abandoned. Omit to inherit warmTransferConfig.dialTimeoutSeconds."
+                },
+                "waitForHumanSeconds": {
+                  "type": "integer",
+                  "minimum": 15,
+                  "maximum": 600,
+                  "description": "Per-route override of how long to wait after this destination answers for a person to come on the line. Omit to inherit warmTransferConfig.waitForHumanSeconds."
                 }
               },
               "required": [
@@ -7307,6 +7355,12 @@
                 "minimum": 10,
                 "maximum": 300,
                 "description": "Seconds to let the transfer destination ring before the assistant gives up, tells the caller, and continues the conversation. Omit for the platform default of 75. Raise it for destinations that answer slowly; lower it to fail over faster."
+              },
+              "waitForHumanSeconds": {
+                "type": "integer",
+                "minimum": 15,
+                "maximum": 600,
+                "description": "Seconds to wait after the destination answers for a person to actually come on the line. Covers unattended queues and hold systems that pick up but never hand over. On expiry the assistant ends the attempt, tells the caller, and continues the conversation. Omit for the platform default of 120."
               }
             }
           },

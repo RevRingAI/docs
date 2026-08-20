@@ -130,6 +130,8 @@ Warm transfer is configured with the following settings:
 | **Intro Message** | Spoken after the human agent accepts, heard by both parties (e.g., "You're now connected. They're up to speed on your request.") Max 500 characters. |
 | **Continue Recording After Handoff** | Keep recording after the agent hands off, so the recording also includes the human agent and caller conversation. |
 | **Caller ID Shown to Recipient** | Which number the transfer recipient sees. `agent` (default) shows the agent's own number for the call. `original_caller` shows the customer's number, so the recipient sees who is on the line. |
+| **No Answer Timeout** | How long the destination may ring before the attempt is abandoned. 10 to 300 seconds, default 75. |
+| **Wait for a Person** | How long to wait after the destination answers for a person to actually come on the line. Covers queues and hold systems that pick up but never hand over. 15 to 600 seconds, default 120. |
 
 <Note>
 **Presenting the original caller's number**: a warm transfer places a new outbound call to the recipient over your own trunk, so `callerIdMode: "original_caller"` sends a caller ID your account does not own. Support for this is set by your telephony provider, not by RevRing. Many providers allow it, often as a per-trunk option named something like ANI override or caller ID passthrough, and some require it to be enabled before it takes effect. Others only permit caller IDs you own or have verified in advance. If the caller withheld their number, or it is not a usable phone number, the agent's number is presented instead. If your provider only permits owned or verified caller IDs, the provider refuses the dial and the transfer attempt fails, so confirm support with your provider before enabling this option on a live agent.
@@ -183,12 +185,24 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
       "summaryPrompt": "Focus on the customer's main concern and any account details mentioned.",
       "introMessage": "You're now connected. They're up to speed on your request.",
       "continueRecordingAfterTransfer": false,
-      "dialTimeoutSeconds": 75
+      "dialTimeoutSeconds": 75,
+      "waitForHumanSeconds": 120
     }
   }'
 ```
 
 **If nobody answers**: the agent lets the destination ring for `dialTimeoutSeconds` seconds (10 to 300, default 75), then tells the caller it could not connect and continues the conversation. The caller can ask to try again, or the conversation can fall through to another route. Raise the timeout for teams that take longer to pick up; lower it to fail over to a backup route faster.
+
+**If the line answers but nobody comes on**: some destinations pick up into a queue, a hold system, or an unattended handset. The agent waits `waitForHumanSeconds` (15 to 600, default 120) for a person to speak. If nobody does, it ends the attempt, releases that leg, tells the caller the destination answered but no one came on the line, and continues the conversation. Raise it for queues that routinely hold callers for several minutes.
+
+Both timeouts can also be set per route, which is useful when one agent transfers to both a fast internal desk and a slow queue line:
+
+```json
+"transferRoutes": [
+  { "to_number": "+12025550123", "condition": "Billing questions", "mode": "warm", "dialTimeoutSeconds": 30 },
+  { "to_number": "+12025550199", "condition": "Claims queue", "mode": "warm", "dialTimeoutSeconds": 120, "waitForHumanSeconds": 300 }
+]
+```
 
 <Note>
 Warm transfer is also available as a node type in [Conversation Flows](/platform/conversation-flows), where you can configure hold and summary settings per-node.
