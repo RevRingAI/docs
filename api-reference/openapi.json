@@ -6969,6 +6969,11 @@
                         ],
                         "description": "Language model tier the call ran on, fixed at call start. null for calls placed before model tiers existed (billed at the standard rate)."
                     },
+                    "voiceId": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Voice the call ran, fixed at call start: the per-call override if one was sent, otherwise the agent's voice at the time. null for calls placed before this was recorded."
+                    },
                     "postCallWebhookStatus": {
                         "type": "string",
                         "nullable": true,
@@ -7047,6 +7052,10 @@
                         "type": "string",
                         "enum": ["hangup", "leave_message"],
                         "description": "Override the agent's voicemail behavior for this call only. 'leave_message' leaves the agent's configured voicemail when an answering machine is detected; 'hangup' ends the call without leaving a message. Omit to use the agent's saved setting. The agent must have voicemail detection enabled for this to take effect. Useful for multi-attempt outreach where only the final attempt should leave a voicemail."
+                    },
+                    "voiceId": {
+                        "type": "string",
+                        "description": "Override the agent's voice for this call only. Takes a voice id from GET /voices (a system voice or one owned by your organization). Lets one agent speak with different voices per call - for example rotating across a set of voices, or matching the voice to what you know about the person being called - without editing the agent between calls. The agent's saved voice is unchanged and its backup-voice behavior still applies. An unknown or unusable voice id is rejected with 400 voice_not_found."
                     }
                 },
                 "required": [
