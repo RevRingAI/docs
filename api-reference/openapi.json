@@ -4156,6 +4156,10 @@
                 "parameters": [
                     { "name": "wait", "in": "query", "required": false, "description": "Set to `0` to return immediately instead of waiting for the suggestion.", "schema": { "type": "string", "enum": ["0"] } }
                 ],
+                "requestBody": {
+                    "required": false,
+                    "content": { "application/json": { "schema": { "type": "object", "properties": { "callbackUrl": { "type": "string", "description": "Optional URL to notify when the suggestion finishes. We POST the completed job there (event `test.suggestion.completed`, with the same fields as the GET response), so you can stop polling. One delivery attempt, 8 second timeout." } } } } }
+                },
                 "responses": {
                     "200": {
                         "description": "The suggestion, when it was ready in time. The suggestion fields are also present at the top level of `data`.",
@@ -4594,6 +4598,10 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": false,
+                    "content": { "application/json": { "schema": { "type": "object", "properties": { "callbackUrl": { "type": "string", "description": "Optional URL to notify when the suggestion finishes. We POST the completed job there (event `test.suggestion.completed`, with the same fields as the GET response), so you can stop polling. One delivery attempt, 8 second timeout." } } } } }
+                },
                 "responses": {
                     "200": {
                         "description": "The suggestion, when it was ready in time. The suggestion fields are also present at the top level of `data`.",
@@ -7865,12 +7873,26 @@
                             "changesSummary": { "type": "array", "items": { "type": "string" }, "description": "Plain-language summary of what was changed" },
                             "suggestedPrompt": { "type": "string", "description": "The complete corrected prompt, ready to save to the agent" },
                             "currentPrompt": { "type": "string", "description": "The agent prompt the suggestion was written against, for comparison" },
-                            "rubricIssues": { "type": "array", "items": { "type": "string" }, "description": "Problems found in the test's pass criteria, if any" }
+                            "rubricIssues": { "type": "array", "items": { "type": "string" }, "description": "Problems found in the test's pass criteria, if any" },
+                            "edits": { "type": "array", "items": { "type": "object", "properties": { "find": { "type": "string" }, "replace": { "type": "string" } } }, "description": "The targeted edits that turn `currentPrompt` into `suggestedPrompt`, for rendering a diff. Usually present; absent when the suggestion was produced as a full rewrite, so always treat `suggestedPrompt` as the source of truth" }
                         }
                     },
                     "stale": {
                         "type": "boolean",
                         "description": "Present when `status` is `ready`. `true` means the agent's prompt has changed since this suggestion was written, so saving `suggestedPrompt` would overwrite those newer edits; request a fresh suggestion instead."
+                    },
+                    "stage": {
+                        "type": "string",
+                        "enum": ["analyzing", "writing"],
+                        "description": "Present while `status` is `running`: `analyzing` while the failure is being read, `writing` once the corrected output is being produced."
+                    },
+                    "progress": {
+                        "type": "object",
+                        "description": "Present while `status` is `running`, once writing begins.",
+                        "properties": {
+                            "outputChars": { "type": "integer", "description": "Characters of output produced so far" },
+                            "promptChars": { "type": "integer", "description": "Size of the prompt under edit, for scale" }
+                        }
                     }
                 }
             },
@@ -7946,12 +7968,36 @@
                                     "type": "string"
                                 },
                                 "description": "Present only on very large runs: the oldest failed attempts beyond the most recent 12, which were not analyzed"
+                            },
+                            "edits": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "find": { "type": "string" },
+                                        "replace": { "type": "string" }
+                                    }
+                                },
+                                "description": "The targeted edits that turn `currentPrompt` into `suggestedPrompt`, for rendering a diff. Usually present; absent when the suggestion was produced as a full rewrite, so always treat `suggestedPrompt` as the source of truth"
                             }
                         }
                     },
                     "stale": {
                         "type": "boolean",
                         "description": "Present when `status` is `ready`. `true` means the agent's prompt has changed since this suggestion was written, so saving `suggestedPrompt` would overwrite those newer edits; request a fresh suggestion instead."
+                    },
+                    "stage": {
+                        "type": "string",
+                        "enum": ["analyzing", "writing"],
+                        "description": "Present while `status` is `running`: `analyzing` while the failures are being read, `writing` once the corrected output is being produced."
+                    },
+                    "progress": {
+                        "type": "object",
+                        "description": "Present while `status` is `running`, once writing begins.",
+                        "properties": {
+                            "outputChars": { "type": "integer", "description": "Characters of output produced so far" },
+                            "promptChars": { "type": "integer", "description": "Size of the prompt under edit, for scale" }
+                        }
                     }
                 }
             },
