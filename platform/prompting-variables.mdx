@@ -329,6 +329,41 @@ Set your agent's timezone to match your business location or primary customer ba
 The `{{current_time}}` variable is formatted in a human-readable format like "Wednesday, November 26, 2025 at 8:30:00 PM EST" to make it easy for the AI to understand and communicate naturally.
 </Note>
 
+## Boosting Recognition of Names and Custom Terms
+
+Speech recognition can struggle with uncommon personal names, brand names, and industry-specific terms. You can boost recognition accuracy for terms that matter on a call in two ways:
+
+### Automatic name boosting
+
+Any call variable whose key contains `name` (for example `first_name`, `last_name`, `company_name`, `attorney_name`) is automatically used to improve recognition when the caller says that name. No setup is needed beyond passing the variables you already use.
+
+### The `stt_keyterms` variable
+
+For full control, set the reserved variable `stt_keyterms` to a comma-separated list of terms to boost:
+
+```json
+{
+  "variables": {
+    "first_name": "Theresa",
+    "last_name": "O'Neill",
+    "stt_keyterms": "Zantac, Krause and Kinsman, AFFF exposure"
+  }
+}
+```
+
+You can set it anywhere variables are set: agent default variables, the create-call request, or your pre-call webhook response, so the boost list can be personalized per call.
+
+Guidelines:
+
+- Keep terms short: single words or short phrases up to about 4 words work best.
+- Boost only terms that are likely to be spoken and are hard to recognize (unusual names, product names, case types). Avoid boosting common words.
+- Up to 50 terms are applied per call. Automatic name variables and `stt_keyterms` are combined and de-duplicated.
+- Like any variable, `stt_keyterms` is also visible to the agent as context, which helps it spell and repeat the terms correctly.
+
+<Tip>
+If callers report the agent mishearing a specific name or product, add it to `stt_keyterms` on the agent's default variables and it will apply to every call for that agent.
+</Tip>
+
 ## Best Practices
 
 <Tip>
