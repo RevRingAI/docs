@@ -337,6 +337,19 @@ Speech recognition can struggle with uncommon personal names, brand names, and i
 
 Any call variable whose key contains `name` (for example `first_name`, `last_name`, `company_name`, `attorney_name`) is automatically used to improve recognition when the caller says that name. No setup is needed beyond passing the variables you already use.
 
+### The agent `sttKeyterms` setting
+
+Set boosted terms once on the agent and they apply to every call:
+
+- In the dashboard: the "Boosted Terms" field in the agent's settings.
+- In the API: the `sttKeyterms` array on create or update agent requests.
+
+```json
+{
+  "sttKeyterms": ["Xylera", "Acme Corporation", "Krzysztof Wozniak"]
+}
+```
+
 ### The `stt_keyterms` variable
 
 For full control, set the reserved variable `stt_keyterms` to a comma-separated list of terms to boost:
@@ -357,7 +370,7 @@ Guidelines:
 
 - Keep terms short: single words or short phrases up to about 4 words work best.
 - Boost only terms that are likely to be spoken and are hard to recognize (unusual names, product names, case types). Avoid boosting common words.
-- Up to 50 terms are applied per call. Automatic name variables and `stt_keyterms` are combined and de-duplicated.
+- Up to 50 terms are applied per call. The agent `sttKeyterms` setting, the `stt_keyterms` variable, and automatic name variables are combined and de-duplicated.
 - Like any variable, `stt_keyterms` is also visible to the agent as context, which helps it spell and repeat the terms correctly.
 
 <Tip>
