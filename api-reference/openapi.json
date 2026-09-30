@@ -467,6 +467,336 @@
         }
       }
     },
+    "/voices/studio/library": {
+      "get": {
+        "summary": "Search Studio Library",
+        "description": "Search the Studio library of premium voices. Results are display-only; add one to your organization with Add Studio Voice. Calls that use a Studio voice are billed an additional 2 cents per minute.",
+        "operationId": "searchStudioLibrary",
+        "tags": [
+          "Voices"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Free-text search over name and style (1 to 100 characters)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "description": "Language code (e.g. 'en')",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "female",
+                "male",
+                "neutral"
+              ]
+            }
+          },
+          {
+            "name": "age",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "young",
+                "middle_aged",
+                "old"
+              ]
+            }
+          },
+          {
+            "name": "accent",
+            "in": "query",
+            "required": false,
+            "description": "Accent (e.g. 'american', 'british')",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "useCase",
+            "in": "query",
+            "required": false,
+            "description": "Best-fit use (e.g. 'conversational')",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Zero-based page number",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching Studio voices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/StudioLibraryVoice"
+                      }
+                    },
+                    "hasMore": {
+                      "type": "boolean",
+                      "description": "Whether another page follows"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Studio voices are not enabled for your organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "not_enabled"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/studio/library/{voiceId}/preview": {
+      "parameters": [
+        {
+          "name": "voiceId",
+          "in": "path",
+          "required": true,
+          "description": "Studio library voice ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Preview Studio Voice",
+        "description": "Get a short spoken preview of a Studio library voice as an MP3, before adding it. Optionally provide your own text.",
+        "operationId": "previewStudioVoice",
+        "tags": [
+          "Voices"
+        ],
+        "parameters": [
+          {
+            "name": "text",
+            "in": "query",
+            "required": false,
+            "description": "Text to speak in the preview (up to 200 characters). Defaults to the voice's sample.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An MP3 audio preview",
+            "content": {
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Studio voices are not enabled for your organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "not_enabled"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/voices/studio": {
+      "post": {
+        "summary": "Add Studio Voice",
+        "description": "Add a Studio library voice to your organization's voices. The returned voice `id` is used like any other voice (an agent's `voiceId`, or a per-call `voiceId`). Adding the same library voice again returns the existing voice. Calls that use a Studio voice are billed an additional 2 cents per minute.",
+        "operationId": "addStudioVoice",
+        "tags": [
+          "Voices"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "voiceId"
+                ],
+                "properties": {
+                  "voiceId": {
+                    "type": "string",
+                    "description": "Studio library voice ID from Search Studio Library"
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "description": "Name to show for the voice (1 to 80 characters). Defaults to the library name."
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Language code (e.g. 'en'). Defaults to the library voice's language."
+                  },
+                  "gender": {
+                    "type": "string",
+                    "description": "'female' or 'male', when known"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The voice, now available to your organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Voice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body, or the organization's voice limit was reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "voice_limit"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Studio voices are not enabled for your organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "not_enabled"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "That Studio voice is not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "not_found"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/messages": {
       "get": {
         "summary": "List Messages",
@@ -2263,7 +2593,7 @@
             "$ref": "#/components/responses/NotFoundError"
           },
           "409": {
-            "description": "Conflict \u2014 a uniqueness constraint was violated while creating the copy",
+            "description": "Conflict — a uniqueness constraint was violated while creating the copy",
             "content": {
               "application/json": {
                 "schema": {
@@ -5677,7 +6007,15 @@
           },
           "source": {
             "type": "string",
-            "description": "Origin of the voice: 'system' for built-in voices, or 'cloned' / 'designed' for your organization's custom voices"
+            "description": "Origin of the voice: 'system' for built-in voices, 'cloned' / 'designed' for your organization's custom voices, or 'studio' for a Studio voice added from the Studio library"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "studio"
+            ],
+            "description": "Voice tier. 'studio' voices are premium voices with the most natural delivery; calls that use one are billed an additional 2 cents per minute on top of the call's regular rate."
           },
           "status": {
             "type": "string",
@@ -7944,6 +8282,16 @@
             "nullable": true,
             "description": "Voice the call ran, fixed at call start: the per-call override if one was sent, otherwise the agent's voice at the time. null for calls placed before this was recorded."
           },
+          "voiceTier": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "standard",
+              "studio",
+              null
+            ],
+            "description": "Tier of the voice the call ran on, fixed at call start. 'studio' calls are billed an additional 2 cents per minute. null for calls placed before voice tiers existed (billed at the regular rate)."
+          },
           "postCallWebhookStatus": {
             "type": "string",
             "nullable": true,
@@ -9411,6 +9759,59 @@
           "pageSize",
           "total",
           "hasNextPage"
+        ]
+      },
+      "StudioLibraryVoice": {
+        "type": "object",
+        "description": "A voice in the Studio library. It is not yet one of your organization's voices: add it with Add Studio Voice, then use the returned voice `id` as an agent's `voiceId`.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Studio library voice ID (pass to Add Studio Voice or Preview Studio Voice)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Voice name"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Short description of the voice"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true,
+            "description": "'female', 'male' or 'neutral', when known"
+          },
+          "age": {
+            "type": "string",
+            "nullable": true,
+            "description": "'young', 'middle_aged' or 'old', when known"
+          },
+          "accent": {
+            "type": "string",
+            "nullable": true,
+            "description": "Accent, when known (e.g. 'american')"
+          },
+          "language": {
+            "type": "string",
+            "nullable": true,
+            "description": "Language code the voice speaks (e.g. 'en')"
+          },
+          "useCase": {
+            "type": "string",
+            "nullable": true,
+            "description": "Best-fit use, when known (e.g. 'conversational')"
+          },
+          "descriptive": {
+            "type": "string",
+            "nullable": true,
+            "description": "One-word style label, when known (e.g. 'warm')"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ]
       }
     }

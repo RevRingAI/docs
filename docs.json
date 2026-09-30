@@ -152,6 +152,9 @@
               "api-reference/voices/preview",
               "api-reference/voices/create",
               "api-reference/voices/design",
+              "api-reference/voices/studio-library",
+              "api-reference/voices/studio-preview",
+              "api-reference/voices/studio-add",
               "api-reference/voices/rename",
               "api-reference/voices/delete"
             ]
