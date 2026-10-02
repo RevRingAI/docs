@@ -8171,7 +8171,7 @@
           },
           "fromNumber": {
             "type": "string",
-            "description": "Caller's number (E.164). For web widget calls, the visitor's anonymous ID in the form visitor:<id>."
+            "description": "Caller's number (E.164). `anonymous` when the caller withheld their caller ID on an inbound call. For web widget calls, the visitor's anonymous ID in the form visitor:<id>."
           },
           "toNumber": {
             "type": "string",
