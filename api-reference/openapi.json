@@ -8006,6 +8006,15 @@
           "sendRawRequestBody": {
             "type": "boolean",
             "description": "When true, sends tool arguments directly as the request body instead of the default wrapper"
+          },
+          "responseMode": {
+            "type": "string",
+            "enum": [
+              "sync",
+              "async"
+            ],
+            "default": "sync",
+            "description": "How the agent treats the webhook call. `sync`: the agent waits for your webhook's response (up to the tool timeout) and can use it in the conversation. `async`: the agent acknowledges the tool call immediately and keeps the conversation going while your webhook is delivered in the background; the response is not used. Use `async` for side effects such as logging, CRM updates or notifications."
           }
         },
         "required": [
@@ -8066,6 +8075,15 @@
           "sendRawRequestBody": {
             "type": "boolean",
             "description": "When true, sends tool arguments directly as the request body instead of the default wrapper"
+          },
+          "responseMode": {
+            "type": "string",
+            "enum": [
+              "sync",
+              "async"
+            ],
+            "default": "sync",
+            "description": "How the agent treats the webhook call. `sync`: the agent waits for your webhook's response (up to the tool timeout) and can use it in the conversation. `async`: the agent acknowledges the tool call immediately and keeps the conversation going while your webhook is delivered in the background; the response is not used. Use `async` for side effects such as logging, CRM updates or notifications."
           }
         },
         "required": [
@@ -8123,6 +8141,15 @@
           "sendRawRequestBody": {
             "type": "boolean",
             "description": "When true, sends tool arguments directly as the request body instead of the default wrapper"
+          },
+          "responseMode": {
+            "type": "string",
+            "enum": [
+              "sync",
+              "async"
+            ],
+            "default": "sync",
+            "description": "How the agent treats the webhook call. `sync`: the agent waits for your webhook's response (up to the tool timeout) and can use it in the conversation. `async`: the agent acknowledges the tool call immediately and keeps the conversation going while your webhook is delivered in the background; the response is not used. Use `async` for side effects such as logging, CRM updates or notifications."
           }
         }
       },
