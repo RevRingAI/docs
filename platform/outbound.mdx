@@ -113,6 +113,7 @@ Hi {{customer_name}}, this is Alex calling from Acme Corp regarding your appoint
 
 <Note>
 Unlike inbound calls where leaving first message empty makes sense, outbound calls should almost always include a first message to properly introduce the purpose of the call.
+</Note>
 
 ### When the Phone Is Still Ringing
 
@@ -130,8 +131,39 @@ Some carrier routes report a call as answered before the person has actually pic
 { "startSpeaker": "user" }
 ```
 
+**If the person never speaks.** When the caller speaks first, set `beginAfterUserSilenceMs` and the agent opens the call itself once the person has said nothing for that many milliseconds (500 to 60000). If they speak first, the agent replies to them as usual. With a static first message the agent speaks it; otherwise it generates its opening from the prompt. Leave it unset to keep waiting. Keep it shorter than the silence end call timeout, otherwise a silent call ends before the agent speaks.
+
+```json
+{ "startSpeaker": "user", "beginAfterUserSilenceMs": 4000 }
+```
+
 Use the pause when you want the agent to open the call but slightly later, and `startSpeaker` when you would rather the person open it. A third option needs no settings at all: keep the opening to a short line such as "Hi, is this Alex?" so that little is lost if part of it is missed.
-</Note>
+
+### Different Opening Settings for Outbound Calls
+
+An agent that handles both directions can open each one differently: greet inbound callers straight away, but wait for the person to say "Hello?" on calls it places. `startSpeakerOutbound` and `firstMessageDelayMsOutbound` apply to outbound calls only. Left unset, outbound calls use `startSpeaker` and `firstMessageDelayMs` like every other call, so existing agents are unchanged. In the dashboard, tick **Use different opening settings for outbound calls** on the **Overview** tab.
+
+```json
+{
+  "startSpeaker": "agent",
+  "startSpeakerOutbound": "user",
+  "beginAfterUserSilenceMs": 4000
+}
+```
+
+### Per-Call Opening Overrides
+
+`POST /v1/calls` accepts `startSpeaker`, `firstMessageDelayMs` and `beginAfterUserSilenceMs` to change how a single call opens, for example a longer pause for a list known to answer late, without editing the agent. For each setting, a value sent with the call takes precedence over the agent's outbound setting, which takes precedence over its general setting. The agent's saved settings are unchanged.
+
+```json
+{
+  "agentId": "agent_123",
+  "toNumber": "+15551234567",
+  "fromNumber": "+15557654321",
+  "startSpeaker": "user",
+  "beginAfterUserSilenceMs": 3000
+}
+```
 
 ### Separate Inbound and Outbound Openings
 

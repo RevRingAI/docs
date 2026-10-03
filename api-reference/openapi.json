@@ -7291,6 +7291,29 @@
             ],
             "description": "Who opens the conversation. `agent` (default) speaks the opening. `user` keeps the agent silent, including the re-engagement prompt, until the caller speaks."
           },
+          "startSpeakerOutbound": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "agent",
+              "user"
+            ],
+            "description": "`startSpeaker` for outbound calls only. Null (default) uses `startSpeaker` for every call. Inbound and web calls always use `startSpeaker`."
+          },
+          "firstMessageDelayMsOutbound": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 15000,
+            "description": "`firstMessageDelayMs` for outbound calls only. Null (default) uses `firstMessageDelayMs` for every call. 0 is a real value: no pause on outbound calls."
+          },
+          "beginAfterUserSilenceMs": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 500,
+            "maximum": 60000,
+            "description": "For calls where the caller speaks first (`startSpeaker` or `startSpeakerOutbound` set to `user`): if the caller has said nothing after this many milliseconds, the agent speaks its opening. If the caller speaks first, the agent replies to them as usual. Null (default) keeps waiting. Keep it shorter than `silenceEndCallTimeoutSeconds`, otherwise a silent call ends before the agent speaks."
+          },
           "firstMessageMode": {
             "type": "string",
             "enum": [
@@ -7753,6 +7776,45 @@
             "nullable": true,
             "description": "Optional outbound-specific opening. On outbound calls it is spoken instead of firstMessage; null or empty means firstMessage is used for both directions. Supports {{variables}}."
           },
+          "startSpeaker": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "agent",
+              "user"
+            ],
+            "description": "Who opens the conversation. `agent` (default) speaks the opening. `user` keeps the agent silent, including the re-engagement prompt, until the caller speaks (see `beginAfterUserSilenceMs`)."
+          },
+          "firstMessageDelayMs": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 15000,
+            "description": "Milliseconds to wait after the call is reported answered before the opening is spoken. Null or 0 speaks it immediately. Useful on routes that report a call answered while the phone is still ringing. If the caller speaks during the pause the opening is skipped."
+          },
+          "startSpeakerOutbound": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "agent",
+              "user"
+            ],
+            "description": "`startSpeaker` for outbound calls only. Null (default) uses `startSpeaker` for every call. Inbound and web calls always use `startSpeaker`."
+          },
+          "firstMessageDelayMsOutbound": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 15000,
+            "description": "`firstMessageDelayMs` for outbound calls only. Null (default) uses `firstMessageDelayMs` for every call. 0 is a real value: no pause on outbound calls."
+          },
+          "beginAfterUserSilenceMs": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 500,
+            "maximum": 60000,
+            "description": "For calls where the caller speaks first (`startSpeaker` or `startSpeakerOutbound` set to `user`): if the caller has said nothing after this many milliseconds, the agent speaks its opening. If the caller speaks first, the agent replies to them as usual. Null (default) keeps waiting. Keep it shorter than `silenceEndCallTimeoutSeconds`, otherwise a silent call ends before the agent speaks."
+          },
           "firstMessageMode": {
             "type": "string",
             "enum": [
@@ -8169,6 +8231,45 @@
             "maxLength": 4000,
             "nullable": true,
             "description": "Optional outbound-specific opening. On outbound calls it is spoken instead of firstMessage; null or empty means firstMessage is used for both directions. Supports {{variables}}."
+          },
+          "startSpeaker": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "agent",
+              "user"
+            ],
+            "description": "Who opens the conversation. `agent` (default) speaks the opening. `user` keeps the agent silent, including the re-engagement prompt, until the caller speaks (see `beginAfterUserSilenceMs`)."
+          },
+          "firstMessageDelayMs": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 15000,
+            "description": "Milliseconds to wait after the call is reported answered before the opening is spoken. Null or 0 speaks it immediately. Useful on routes that report a call answered while the phone is still ringing. If the caller speaks during the pause the opening is skipped."
+          },
+          "startSpeakerOutbound": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "agent",
+              "user"
+            ],
+            "description": "`startSpeaker` for outbound calls only. Null (default) uses `startSpeaker` for every call. Inbound and web calls always use `startSpeaker`."
+          },
+          "firstMessageDelayMsOutbound": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 15000,
+            "description": "`firstMessageDelayMs` for outbound calls only. Null (default) uses `firstMessageDelayMs` for every call. 0 is a real value: no pause on outbound calls."
+          },
+          "beginAfterUserSilenceMs": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 500,
+            "maximum": 60000,
+            "description": "For calls where the caller speaks first (`startSpeaker` or `startSpeakerOutbound` set to `user`): if the caller has said nothing after this many milliseconds, the agent speaks its opening. If the caller speaks first, the agent replies to them as usual. Null (default) keeps waiting. Keep it shorter than `silenceEndCallTimeoutSeconds`, otherwise a silent call ends before the agent speaks."
           },
           "firstMessageMode": {
             "type": "string",
@@ -9118,6 +9219,26 @@
           "voiceId": {
             "type": "string",
             "description": "Override the agent's voice for this call only. Takes a voice id from GET /voices (a system voice or one owned by your organization). Lets one agent speak with different voices per call - for example rotating across a set of voices, or matching the voice to what you know about the person being called - without editing the agent between calls. The agent's saved voice is unchanged and its backup-voice behavior still applies. An unknown or unusable voice id is rejected with 400 voice_not_found."
+          },
+          "startSpeaker": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "user"
+            ],
+            "description": "Override who opens the conversation for this call only. Takes precedence over the agent's `startSpeakerOutbound` and `startSpeaker`. The agent's saved settings are unchanged."
+          },
+          "firstMessageDelayMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 15000,
+            "description": "Override the pause before the agent speaks for this call only, in milliseconds. 0 means no pause. Takes precedence over the agent's `firstMessageDelayMsOutbound` and `firstMessageDelayMs`."
+          },
+          "beginAfterUserSilenceMs": {
+            "type": "integer",
+            "minimum": 500,
+            "maximum": 60000,
+            "description": "Override `beginAfterUserSilenceMs` for this call only: when the caller speaks first and stays silent this many milliseconds, the agent speaks its opening."
           },
           "environment": {
             "type": "string",
