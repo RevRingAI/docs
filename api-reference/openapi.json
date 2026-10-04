@@ -2636,6 +2636,188 @@
         }
       }
     },
+    "/agents/{id}/environments": {
+      "get": {
+        "summary": "List Agent Environments",
+        "description": "Environments this agent can run calls in. `production` is always first and reflects the published version. See the Versions and Publishing guide.",
+        "tags": [
+          "Agents"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Environments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AgentEnvironment"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/agents/{id}/environments/{name}": {
+      "put": {
+        "summary": "Create or Update Environment",
+        "description": "Creates the environment when the name is new, otherwise updates the fields you send. Up to 10 environments per agent. `production` cannot be edited here (409 environment_builtin): publish instead. A `revision` must exist in the agent's version history.",
+        "tags": [
+          "Agents"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,31}$"
+            },
+            "description": "Environment name (slug). Immutable once created"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentEnvironmentUpsert"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Environment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AgentEnvironment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_environment_name | invalid_body | revision_not_found | environment_limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "description": "environment_builtin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Environment",
+        "description": "Removes the environment. Refused while inbound numbers are still bound to it (409 environment_in_use): move them first. `production` cannot be deleted.",
+        "tags": [
+          "Agents"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,31}$"
+            },
+            "description": "Environment name (slug). Immutable once created"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "description": "environment_builtin | environment_in_use",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/agents/{id}/duplicate": {
       "parameters": [
         {
@@ -2873,6 +3055,72 @@
           },
           "402": {
             "$ref": "#/components/responses/BillingInactiveError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Phone Number",
+        "description": "Changes which environment inbound calls on this number run on. Send null for production.",
+        "tags": [
+          "Agents"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "environment"
+                ],
+                "properties": {
+                  "environment": {
+                    "type": "string",
+                    "nullable": true,
+                    "pattern": "^[a-z][a-z0-9-]{0,31}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Phone number",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AgentPhoneNumber"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_body | environment_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
@@ -8183,6 +8431,11 @@
             "pattern": "^\\+[1-9]\\d{1,14}$",
             "description": "Phone number in E.164 format"
           },
+          "environment": {
+            "type": "string",
+            "nullable": true,
+            "description": "Agent environment inbound calls on this number run on; null means production (see Versions and Publishing)"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -8206,6 +8459,12 @@
             "type": "string",
             "pattern": "^\\+[1-9]\\d{1,14}$",
             "description": "Phone number in E.164 format"
+          },
+          "environment": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^[a-z][a-z0-9-]{0,31}$",
+            "description": "Environment to bind the number to. Omit for production. Must exist on the agent (400 environment_not_found otherwise)"
           }
         },
         "required": [
@@ -10308,6 +10567,76 @@
               "description": "The caller asked to be called back"
             }
           ]
+        }
+      },
+      "AgentEnvironment": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Slug. `production` is built in: it is the published version and changes through POST /agents/{id}/publish"
+          },
+          "revision": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Version calls in this environment run on; null means the saved draft"
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Variable defaults that override the agent's defaultVariables on calls in this environment"
+          },
+          "builtin": {
+            "type": "boolean",
+            "description": "true for production"
+          },
+          "phoneNumbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Inbound numbers bound to this environment"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "revision",
+          "variables",
+          "builtin",
+          "phoneNumbers"
+        ]
+      },
+      "AgentEnvironmentUpsert": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Version to run on. null = the saved draft. Omit to leave unchanged on update"
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Variable defaults for this environment. Omit to leave unchanged on update"
+          }
+        },
+        "example": {
+          "revision": 12,
+          "variables": {
+            "tone": "formal",
+            "region": "EU"
+          }
         }
       }
     }

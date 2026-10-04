@@ -70,7 +70,10 @@
               "api-reference/agents/list-revisions",
               "api-reference/agents/get-revision",
               "api-reference/agents/restore-revision",
-              "api-reference/agents/publish"
+              "api-reference/agents/publish",
+              "api-reference/agents/list-environments",
+              "api-reference/agents/upsert-environment",
+              "api-reference/agents/delete-environment"
             ]
           },
           {
@@ -78,7 +81,8 @@
             "pages": [
               "api-reference/agents/list-phone-numbers",
               "api-reference/agents/add-phone-number",
-              "api-reference/agents/remove-phone-number"
+              "api-reference/agents/remove-phone-number",
+              "api-reference/agents/update-phone-number"
             ]
           },
           {

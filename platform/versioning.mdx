@@ -86,6 +86,32 @@ Phone numbers, the SIP trunk, knowledge base links and the agent's active/disabl
 
 ## Environments
 
-Environments let one agent serve more than one audience without duplicating it: for example `staging` pinned to a newer version with its own variable defaults, while `production` stays on the published version. Inbound numbers, the web widget and `POST /calls` (`environment`) can each target an environment. `production` is the published version and always exists.
+Environments let one agent serve more than one audience without duplicating it: for example `staging` pinned to a newer version with its own variable defaults, while `production` stays on the published version.
 
-Environments are being rolled out; `environment` on `POST /calls` is already validated (unknown names are refused with `environment_not_found` before anything is dialed), and call records carry the environment they ran in.
+- `production` always exists. It is the published version and changes through publishing.
+- A named environment pins a **version** (or the saved draft, with `revision: null`) and carries **variable defaults** that override the agent's on calls in that environment. Up to 10 per agent.
+- Names are lowercase slugs and cannot be renamed.
+
+```json
+PUT /v1/agents/{id}/environments/staging
+{ "revision": 14, "variables": { "tone": "formal", "region": "EU" } }
+```
+
+### What runs in an environment
+
+| Entry point | How to choose the environment |
+|-------------|-------------------------------|
+| Outbound call | `environment` on `POST /calls` (omit for production) |
+| Inbound number | `environment` on the number (`POST /agents/{id}/phone-numbers` or `PATCH /agents/{id}/phone-numbers/{phoneId}`) |
+| Web widget | `environment` in the agent's widget config |
+| Chat and voice tests | Always the draft |
+
+Unknown names are refused on `POST /calls` with `environment_not_found` before anything is dialed. A number or widget bound to an environment that was later deleted falls back to production rather than failing the caller. Deleting an environment is refused while numbers are still bound to it.
+
+Every call record and post-call webhook carries `environment` (`null` for production) next to `agentRevision`.
+
+See [List Agent Environments](/api-reference/agents/list-environments), [Create or Update Environment](/api-reference/agents/upsert-environment) and [Delete Environment](/api-reference/agents/delete-environment).
+
+<Tip>
+A common setup: keep `production` on manual publishing, point `staging` at the draft (`revision: null`) and bind a spare inbound number to `staging`. Call that number to hear the draft on a real phone; publish when it sounds right.
+</Tip>
