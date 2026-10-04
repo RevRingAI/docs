@@ -6527,7 +6527,7 @@
           "proxy": {
             "type": "string",
             "nullable": true,
-            "description": "SIP proxy server address"
+            "description": "Carrier host the SIP INVITE is sent to: a hostname or IPv4 address with an optional :port (for example my-trunk.pstn.twilio.com or sip.telnyx.com:5060). No URL scheme or sip: prefix"
           },
           "cloud": {
             "type": "object",
@@ -6581,7 +6581,8 @@
           },
           "proxy": {
             "type": "string",
-            "description": "SIP proxy server address (required)"
+            "description": "Carrier host the SIP INVITE is sent to (required): a hostname or IPv4 address with an optional :port, for example my-trunk.pstn.twilio.com. No URL scheme or sip: prefix. The host must resolve in DNS; a typo is refused with 400 sip_trunk_proxy_unresolvable instead of creating a trunk that can never place a call",
+            "example": "my-trunk.pstn.twilio.com"
           },
           "cloud": {
             "type": "object",
