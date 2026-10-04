@@ -5809,6 +5809,30 @@
                     "nullable": true,
                     "description": "AI-generated call summary"
                   },
+                  "extraction": {
+                    "type": "object",
+                    "nullable": true,
+                    "additionalProperties": {
+                      "nullable": true,
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        }
+                      ]
+                    },
+                    "description": "Structured fields extracted after the call, keyed by the field names in the agent's postCallExtraction config. A field that was not stated on the call is null. null when the agent has no extraction configured or the call had no caller speech",
+                    "example": {
+                      "callback_requested": true,
+                      "preferred_day": "Tuesday",
+                      "budget": 450000
+                    }
+                  },
                   "metrics": {
                     "type": "object",
                     "nullable": true,
@@ -6827,6 +6851,15 @@
             "nullable": true,
             "description": "Webhook URL called after call ends with transcript and recording"
           },
+          "postCallExtraction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PostCallExtractionConfig"
+              }
+            ],
+            "nullable": true,
+            "description": "Fields to extract from the transcript after every call (see PostCallExtractionConfig). null = off"
+          },
           "endCallEnabled": {
             "type": "boolean",
             "description": "Allow agent to end the call"
@@ -7252,6 +7285,15 @@
             "format": "uri",
             "description": "Webhook URL called after call ends (optional)"
           },
+          "postCallExtraction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PostCallExtractionConfig"
+              }
+            ],
+            "nullable": true,
+            "description": "Fields to extract from the transcript after every call (see PostCallExtractionConfig). null = off"
+          },
           "endCallEnabled": {
             "type": "boolean",
             "description": "Allow agent to end calls"
@@ -7653,6 +7695,15 @@
             "format": "uri",
             "nullable": true,
             "description": "Webhook URL called after call ends (optional)"
+          },
+          "postCallExtraction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PostCallExtractionConfig"
+              }
+            ],
+            "nullable": true,
+            "description": "Fields to extract from the transcript after every call (see PostCallExtractionConfig). null = off"
           },
           "endCallEnabled": {
             "type": "boolean",
@@ -8292,6 +8343,30 @@
             "type": "string",
             "nullable": true,
             "description": "AI-generated summary"
+          },
+          "extraction": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "description": "Structured fields extracted after the call, keyed by the field names in the agent's postCallExtraction config. A field that was not stated on the call is null. null when the agent has no extraction configured or the call had no caller speech",
+            "example": {
+              "callback_requested": true,
+              "preferred_day": "Tuesday",
+              "budget": 450000
+            }
           },
           "metrics": {
             "type": "object",
@@ -9867,6 +9942,86 @@
           "id",
           "name"
         ]
+      },
+      "PostCallExtractionConfig": {
+        "type": "object",
+        "nullable": true,
+        "description": "Structured data to extract from the transcript after every call. Up to 20 fields; the result is stored on the call as `extraction` and included in the post-call webhook. Set to null to turn off.",
+        "required": [
+          "fields"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "description",
+                "type"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+                  "description": "Key in the extraction result. Letters, digits and underscores, starting with a letter (max 64)"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "description": "What to extract, written for the model: for example \"The caller's preferred callback day\""
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "enum"
+                  ],
+                  "description": "Value type. Anything not stated on the call comes back as null"
+                },
+                "values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "description": "Allowed values when type is `enum` (required for enum, not allowed otherwise)"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "fields": [
+            {
+              "name": "callback_requested",
+              "description": "Did the caller ask to be called back?",
+              "type": "boolean"
+            },
+            {
+              "name": "preferred_day",
+              "description": "Day of the week the caller prefers for the callback",
+              "type": "enum",
+              "values": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ]
+            },
+            {
+              "name": "budget",
+              "description": "Budget the caller mentioned, in dollars",
+              "type": "number"
+            }
+          ]
+        }
       }
     }
   }

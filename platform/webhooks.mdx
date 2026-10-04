@@ -312,6 +312,11 @@ After a call ends, RevRing sends a POST request with complete call details:
     }
   ],
   "summary": "Customer inquired about their order status. Agent checked the order and confirmed it has been shipped with tracking number provided.",
+  "extraction": {
+    "order_number": "A1234",
+    "callback_requested": false,
+    "sentiment": "positive"
+  },
   "metrics": {
     "llm_prompt_tokens": 7585,
     "stt_audio_duration": 58.65,
@@ -346,6 +351,7 @@ After a call ends, RevRing sends a POST request with complete call details:
 - `hangupCause`: Reason call ended. Common values include `USER_ENDED`, `END_CALL_TOOL`, `SILENCE_TIMEOUT`, `MAX_DURATION`, `VOICEMAIL_DETECTED`
 - `transcript`: Complete conversation with timestamps and tool invocations (both custom tools and system tools like `end_call`, `transfer_to_number`)
 - `summary`: AI-generated summary of the call
+- `extraction`: Structured fields pulled from the transcript, as configured in the agent's `postCallExtraction` (see [Post-call data extraction](#post-call-data-extraction)); `null` when not configured
 - `metrics`: Token usage and audio duration metrics
 - `durationSeconds`: Total call duration (null if never answered)
 
@@ -368,6 +374,58 @@ The same timing is shown on each tool card in the call transcript in the dashboa
 <Note>
 For complete field descriptions and additional examples, see the [Post-Call Webhook API Reference](/api-reference/webhooks/post-call).
 </Note>
+
+### Post-call data extraction
+
+Define the fields you want pulled out of every conversation and the platform fills them in from the transcript after each call. The result lands on the call record as `extraction` (`GET /calls/{id}`) and in the post-call webhook, so your systems get typed values instead of parsing the summary.
+
+Configure it on the agent with `postCallExtraction`:
+
+```json
+PATCH /v1/agents/{id}
+{
+  "postCallExtraction": {
+    "fields": [
+      { "name": "callback_requested", "type": "boolean", "description": "Did the caller ask to be called back?" },
+      { "name": "preferred_day", "type": "enum", "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "description": "Day of the week the caller prefers for the callback" },
+      { "name": "budget", "type": "number", "description": "Budget the caller mentioned, in dollars" },
+      { "name": "notes", "type": "string", "description": "Anything else the caller asked for" }
+    ]
+  }
+}
+```
+
+Each field has:
+
+| Property | Meaning |
+|----------|---------|
+| `name` | Key in the result. Letters, digits and underscores, starting with a letter. Unique per agent |
+| `type` | `string`, `number`, `boolean` or `enum` |
+| `values` | The allowed values, for `enum` fields only |
+| `description` | What to extract, written the way you would brief a person. The clearer it is, the better the result |
+
+How it behaves:
+
+- Up to 20 fields per agent. Set `postCallExtraction` to `null` to turn it off.
+- Values come only from what was said on the call. A field that was not stated, or was unclear, is `null`, never guessed.
+- Every configured field is present in the result, so your handler can rely on the keys.
+- Extraction runs after the call ends, alongside the summary, and is skipped for calls with no caller speech (unanswered dials, dead lines). Those calls carry `extraction: null`.
+- The result is included in the same post-call webhook delivery. No extra request to make.
+
+A matching result for the config above:
+
+```json
+"extraction": {
+  "callback_requested": true,
+  "preferred_day": "Tuesday",
+  "budget": 450000,
+  "notes": null
+}
+```
+
+<Tip>
+Keep descriptions specific. "The caller's budget in dollars" extracts better than "budget", and enum fields with a short list of values give you clean data for routing and reporting.
+</Tip>
 
 ### Response Expectations
 
