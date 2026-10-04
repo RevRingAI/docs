@@ -9248,6 +9248,41 @@
           "activeCalls": {
             "type": "integer",
             "description": "Current active calls (not affected by filters)"
+          },
+          "evaluation": {
+            "type": "object",
+            "description": "Post-call evaluation outcomes over the range, under the same agent filter. Empty when no call in the range was evaluated",
+            "properties": {
+              "evaluatedCalls": {
+                "type": "integer",
+                "description": "Calls in the range that carry an evaluation"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "pass": {
+                      "type": "integer"
+                    },
+                    "fail": {
+                      "type": "integer"
+                    },
+                    "unknown": {
+                      "type": "integer"
+                    },
+                    "passRate": {
+                      "type": "number",
+                      "nullable": true,
+                      "description": "pass / (pass + fail), 0 to 1; null when every call was unknown"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "required": [
