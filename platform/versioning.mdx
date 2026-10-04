@@ -32,8 +32,8 @@ When several people work on the same agent, or you want to prepare a change and 
 
 | State | What it is | Who sees it |
 |-------|------------|-------------|
-| Draft | The configuration as saved in the dashboard or by `PATCH /agents/{id}` | Editors, chat and voice tests |
-| Published | The version calls run on | Callers, inbound numbers, the web widget |
+| Draft | The configuration as saved in the dashboard or by `PATCH /agents/{id}` | Editors, chat and voice tests, text channels (SMS and web chat replies) |
+| Published | The version calls run on | Callers: outbound calls, inbound numbers, web widget calls |
 
 While you edit, calls keep using the published version. When the draft is ready, **Publish** makes it live for new calls (calls already in progress are not changed).
 
@@ -74,7 +74,11 @@ See [Publish Agent](/api-reference/agents/publish).
 
 ### Testing before you publish
 
-Chat tests, voice tests and the dashboard test panel always run the **draft**. That is the point of manual publishing: test the change, then publish it. Real calls, inbound numbers and the web widget use the published version.
+Chat tests, voice tests and the dashboard test panel always run the **draft**. That is the point of manual publishing: test the change, then publish it. Real calls, inbound numbers and web widget calls use the published version.
+
+<Note>
+Text replies (SMS and web chat) currently use the saved agent in both modes. Publishing for text channels is on the roadmap; until then, treat text prompt changes as live on save.
+</Note>
 
 ### Which version a call ran on
 
