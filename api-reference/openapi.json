@@ -5833,6 +5833,42 @@
                       "budget": 450000
                     }
                   },
+                  "evaluation": {
+                    "type": "object",
+                    "nullable": true,
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "enum": [
+                            "pass",
+                            "fail",
+                            "unknown"
+                          ]
+                        },
+                        "rationale": {
+                          "type": "string",
+                          "description": "One sentence citing what in the call decided the result"
+                        }
+                      },
+                      "required": [
+                        "result",
+                        "rationale"
+                      ]
+                    },
+                    "description": "Per-criterion verdicts after the call, keyed by the criterion names in the agent's postCallEvaluation config. unknown means the transcript did not settle it. null when the agent has no evaluation configured or the call had no caller speech",
+                    "example": {
+                      "appointment_confirmed": {
+                        "result": "pass",
+                        "rationale": "The caller agreed to Tuesday at 10am and the agent confirmed it."
+                      },
+                      "callback_requested": {
+                        "result": "unknown",
+                        "rationale": "A callback was never discussed."
+                      }
+                    }
+                  },
                   "metrics": {
                     "type": "object",
                     "nullable": true,
@@ -6860,6 +6896,15 @@
             "nullable": true,
             "description": "Fields to extract from the transcript after every call (see PostCallExtractionConfig). null = off"
           },
+          "postCallEvaluation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PostCallEvaluationConfig"
+              }
+            ],
+            "nullable": true,
+            "description": "Success criteria judged after every call (see PostCallEvaluationConfig). null = off"
+          },
           "endCallEnabled": {
             "type": "boolean",
             "description": "Allow agent to end the call"
@@ -7294,6 +7339,15 @@
             "nullable": true,
             "description": "Fields to extract from the transcript after every call (see PostCallExtractionConfig). null = off"
           },
+          "postCallEvaluation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PostCallEvaluationConfig"
+              }
+            ],
+            "nullable": true,
+            "description": "Success criteria judged after every call (see PostCallEvaluationConfig). null = off"
+          },
           "endCallEnabled": {
             "type": "boolean",
             "description": "Allow agent to end calls"
@@ -7704,6 +7758,15 @@
             ],
             "nullable": true,
             "description": "Fields to extract from the transcript after every call (see PostCallExtractionConfig). null = off"
+          },
+          "postCallEvaluation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PostCallEvaluationConfig"
+              }
+            ],
+            "nullable": true,
+            "description": "Success criteria judged after every call (see PostCallEvaluationConfig). null = off"
           },
           "endCallEnabled": {
             "type": "boolean",
@@ -8366,6 +8429,42 @@
               "callback_requested": true,
               "preferred_day": "Tuesday",
               "budget": 450000
+            }
+          },
+          "evaluation": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "string",
+                  "enum": [
+                    "pass",
+                    "fail",
+                    "unknown"
+                  ]
+                },
+                "rationale": {
+                  "type": "string",
+                  "description": "One sentence citing what in the call decided the result"
+                }
+              },
+              "required": [
+                "result",
+                "rationale"
+              ]
+            },
+            "description": "Per-criterion verdicts after the call, keyed by the criterion names in the agent's postCallEvaluation config. unknown means the transcript did not settle it. null when the agent has no evaluation configured or the call had no caller speech",
+            "example": {
+              "appointment_confirmed": {
+                "result": "pass",
+                "rationale": "The caller agreed to Tuesday at 10am and the agent confirmed it."
+              },
+              "callback_requested": {
+                "result": "unknown",
+                "rationale": "A callback was never discussed."
+              }
             }
           },
           "metrics": {
@@ -10019,6 +10118,52 @@
               "name": "budget",
               "description": "Budget the caller mentioned, in dollars",
               "type": "number"
+            }
+          ]
+        }
+      },
+      "PostCallEvaluationConfig": {
+        "type": "object",
+        "nullable": true,
+        "description": "Success criteria judged from the transcript after every call. Up to 10; each is answered pass, fail or unknown with a one-sentence rationale, stored on the call as `evaluation` and included in the post-call webhook. Set to null to turn off.",
+        "required": [
+          "criteria"
+        ],
+        "properties": {
+          "criteria": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "description"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+                  "description": "Key in the evaluation result. Letters, digits and underscores, starting with a letter (max 64)"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 1000,
+                  "description": "The criterion in plain language, for example \"The caller confirmed the appointment date and time\""
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "criteria": [
+            {
+              "name": "appointment_confirmed",
+              "description": "The caller confirmed an appointment date and time"
+            },
+            {
+              "name": "callback_requested",
+              "description": "The caller asked to be called back"
             }
           ]
         }

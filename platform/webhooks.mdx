@@ -317,6 +317,9 @@ After a call ends, RevRing sends a POST request with complete call details:
     "callback_requested": false,
     "sentiment": "positive"
   },
+  "evaluation": {
+    "order_status_given": { "result": "pass", "rationale": "The agent confirmed the order shipped and gave the tracking number." }
+  },
   "metrics": {
     "llm_prompt_tokens": 7585,
     "stt_audio_duration": 58.65,
@@ -352,6 +355,7 @@ After a call ends, RevRing sends a POST request with complete call details:
 - `transcript`: Complete conversation with timestamps and tool invocations (both custom tools and system tools like `end_call`, `transfer_to_number`)
 - `summary`: AI-generated summary of the call
 - `extraction`: Structured fields pulled from the transcript, as configured in the agent's `postCallExtraction` (see [Post-call data extraction](#post-call-data-extraction)); `null` when not configured
+- `evaluation`: Pass/fail/unknown verdicts for the agent's `postCallEvaluation` criteria, each with a rationale (see [Post-call evaluation](#post-call-evaluation)); `null` when not configured
 - `metrics`: Token usage and audio duration metrics
 - `durationSeconds`: Total call duration (null if never answered)
 
@@ -425,6 +429,47 @@ A matching result for the config above:
 
 <Tip>
 Keep descriptions specific. "The caller's budget in dollars" extracts better than "budget", and enum fields with a short list of values give you clean data for routing and reporting.
+</Tip>
+
+### Post-call evaluation
+
+Write the outcomes you care about in plain language and every call is judged against them after it ends. Each criterion comes back as `pass`, `fail` or `unknown` with a one-sentence rationale, on the call record as `evaluation` (`GET /calls/{id}`) and in the post-call webhook. Use it for success rates, QA sampling and routing follow-ups.
+
+Configure it on the agent with `postCallEvaluation`:
+
+```json
+PATCH /v1/agents/{id}
+{
+  "postCallEvaluation": {
+    "criteria": [
+      { "name": "appointment_confirmed", "description": "The caller confirmed an appointment date and time" },
+      { "name": "objection_handled", "description": "If the caller raised a concern about price, the agent addressed it before moving on" },
+      { "name": "callback_requested", "description": "The caller asked to be called back" }
+    ]
+  }
+}
+```
+
+How it behaves:
+
+- Up to 10 criteria per agent. Set `postCallEvaluation` to `null` to turn it off.
+- `pass` and `fail` are only given when the transcript clearly settles the criterion. Anything the call never reached, or that ended before it was settled, is `unknown`, so your success rate is never inflated or deflated by guesses.
+- Every criterion is present in the result, so your handler can rely on the keys.
+- Runs after the call ends, alongside the summary and extraction, and is skipped for calls with no caller speech. Those calls carry `evaluation: null`.
+- Included in the same post-call webhook delivery.
+
+A matching result:
+
+```json
+"evaluation": {
+  "appointment_confirmed": { "result": "pass", "rationale": "The caller agreed to Tuesday at 10am and the agent confirmed it." },
+  "objection_handled": { "result": "unknown", "rationale": "The caller never raised a concern about price." },
+  "callback_requested": { "result": "fail", "rationale": "The caller said not to call again." }
+}
+```
+
+<Tip>
+State each criterion as a single observable outcome. "The caller confirmed an appointment date and time" judges cleanly; "the call went well" does not. Conditional criteria work too: "If the caller asked about pricing, the agent quoted the monthly price".
 </Tip>
 
 ### Response Expectations
