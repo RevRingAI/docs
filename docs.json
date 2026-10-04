@@ -37,7 +37,8 @@
               "platform/webrtc",
               "platform/messaging",
               "platform/two-way-messaging",
-              "platform/web-widget"
+              "platform/web-widget",
+              "platform/versioning"
             ]
           }
         ]
@@ -68,7 +69,8 @@
             "pages": [
               "api-reference/agents/list-revisions",
               "api-reference/agents/get-revision",
-              "api-reference/agents/restore-revision"
+              "api-reference/agents/restore-revision",
+              "api-reference/agents/publish"
             ]
           },
           {

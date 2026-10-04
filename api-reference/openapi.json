@@ -2547,6 +2547,95 @@
         }
       }
     },
+    "/agents/{id}/publish": {
+      "post": {
+        "summary": "Publish Agent",
+        "description": "Make a version live for new calls. With an empty body the current saved draft becomes the live version and is recorded as a `published` entry in the version history (who published, when). With `{ \"revision\": N }` an existing version becomes live without changing the draft. In `auto` publish mode every save is already live, so this only records a version. In `manual` mode calls keep using the published version until you publish again.",
+        "tags": [
+          "Agents"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Existing version to make live. Omit to publish the current draft"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Live version updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "revision": {
+                          "type": "integer",
+                          "description": "Version calls now run on"
+                        },
+                        "publishMode": {
+                          "type": "string",
+                          "enum": [
+                            "auto",
+                            "manual"
+                          ]
+                        },
+                        "unchanged": {
+                          "type": "boolean",
+                          "description": "true when nothing new was written: the draft was already live, or an existing version was selected"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The version could not be applied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "restore_invalid",
+                        "restore_failed"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
     "/agents/{id}/duplicate": {
       "parameters": [
         {
@@ -5869,6 +5958,16 @@
                       }
                     }
                   },
+                  "agentRevision": {
+                    "type": "integer",
+                    "nullable": true,
+                    "description": "Agent version the call ran on; null for auto publish mode"
+                  },
+                  "environment": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Agent environment the call ran in; null means production"
+                  },
                   "metrics": {
                     "type": "object",
                     "nullable": true,
@@ -6906,6 +7005,25 @@
             "nullable": true,
             "description": "Success criteria judged after every call (see PostCallEvaluationConfig). null = off"
           },
+          "publishMode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "manual"
+            ],
+            "default": "auto",
+            "description": "How changes go live. `auto`: every save is used by the next call. `manual`: calls keep using the published version until you publish again (POST /agents/{id}/publish)"
+          },
+          "publishedRevision": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Version calls run on in manual mode; null when nothing has been published yet (the saved draft runs)"
+          },
+          "hasUnpublishedChanges": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Manual mode only: true when the saved draft differs from the published version. null in auto mode and on list responses"
+          },
           "endCallEnabled": {
             "type": "boolean",
             "description": "Allow agent to end the call"
@@ -7769,6 +7887,14 @@
             "nullable": true,
             "description": "Success criteria judged after every call (see PostCallEvaluationConfig). null = off"
           },
+          "publishMode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "manual"
+            ],
+            "description": "Switching to `manual` publishes the current draft at once; switching back to `auto` clears the published version and every save is live again"
+          },
           "endCallEnabled": {
             "type": "boolean",
             "description": "Allow agent to end calls"
@@ -8468,6 +8594,16 @@
               }
             }
           },
+          "agentRevision": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Agent version the call ran on. null for agents in auto publish mode (the agent as saved) and for calls made before publishing existed"
+          },
+          "environment": {
+            "type": "string",
+            "nullable": true,
+            "description": "Agent environment the call ran in; null means production"
+          },
           "metrics": {
             "type": "object",
             "nullable": true,
@@ -8606,6 +8742,11 @@
           "voiceId": {
             "type": "string",
             "description": "Override the agent's voice for this call only. Takes a voice id from GET /voices (a system voice or one owned by your organization). Lets one agent speak with different voices per call - for example rotating across a set of voices, or matching the voice to what you know about the person being called - without editing the agent between calls. The agent's saved voice is unchanged and its backup-voice behavior still applies. An unknown or unusable voice id is rejected with 400 voice_not_found."
+          },
+          "environment": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,31}$",
+            "description": "Agent environment to run this call on. Omit for production: the published version in manual publish mode, the agent as saved otherwise. Unknown names are refused with 400 environment_not_found before anything is dialed"
           }
         },
         "required": [

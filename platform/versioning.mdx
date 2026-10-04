@@ -1,0 +1,91 @@
+---
+title: 'Versions and Publishing'
+description: 'Every change to an agent is recorded, restorable, and attributable. Choose whether saves go live at once or wait for you to publish.'
+---
+
+## Version history
+
+Every write to an agent creates a version automatically. There is no "save a version" step to remember: a prompt edit, a custom tool change, a phone number added or removed, a restore, all of them land in the history with:
+
+- **Who** made the change (the dashboard user's email, or the API key name)
+- **What** changed (the list of fields, with before/after values on the version detail)
+- **When**
+- A full snapshot of the configuration at that point
+
+The history survives agent deletion, so a deleted agent's final configuration is still readable.
+
+See the [List Agent Versions](/api-reference/agents/list-revisions) and [Get Agent Version](/api-reference/agents/get-revision) references. In the dashboard, open the agent and use the **History** tab.
+
+## Restoring a version
+
+Restoring applies a version's configuration back onto the agent through the same validation as a normal save, and records the restore as its own version, so the state you had before stays in the history.
+
+Restore never changes phone numbers or knowledge base links (live routing and knowledge lifecycle are kept as they are), and references to a trunk, messaging connection or folder that no longer exist are skipped and reported.
+
+See [Restore Agent Version](/api-reference/agents/restore-revision).
+
+## Publishing
+
+By default **every save goes live**: the next call uses whatever is saved. That is the right default for a single builder iterating quickly.
+
+When several people work on the same agent, or you want to prepare a change and release it deliberately, switch the agent to **manual publishing**. The agent then has two states:
+
+| State | What it is | Who sees it |
+|-------|------------|-------------|
+| Draft | The configuration as saved in the dashboard or by `PATCH /agents/{id}` | Editors, chat and voice tests |
+| Published | The version calls run on | Callers, inbound numbers, the web widget |
+
+While you edit, calls keep using the published version. When the draft is ready, **Publish** makes it live for new calls (calls already in progress are not changed).
+
+### Switching modes
+
+```json
+PATCH /v1/agents/{id}
+{ "publishMode": "manual" }
+```
+
+Switching to manual publishes the current draft at once, so the agent never silently runs an older state. Switching back to `auto` clears the published version and every save is live again.
+
+The agent carries three fields for this:
+
+- `publishMode`: `auto` or `manual`
+- `publishedRevision`: the version calls run on (manual mode); `null` when nothing is published yet, in which case the draft runs
+- `hasUnpublishedChanges`: manual mode only, `true` when the draft differs from the published version (on `GET /agents/{id}`; the dashboard shows it as a badge next to the Publish button)
+
+### Publishing
+
+```json
+POST /v1/agents/{id}/publish
+{}
+```
+
+Publishes the current draft. The response carries the version calls now run on. Publishing is recorded in the history as a `published` version with the actor, so "who put this live?" is always answerable. Publishing a draft that is already live is a no-op.
+
+To make an earlier version live without touching the draft:
+
+```json
+POST /v1/agents/{id}/publish
+{ "revision": 12 }
+```
+
+This is the fastest rollback: the draft keeps your in-progress work, and calls go back to version 12 immediately.
+
+See [Publish Agent](/api-reference/agents/publish).
+
+### Testing before you publish
+
+Chat tests, voice tests and the dashboard test panel always run the **draft**. That is the point of manual publishing: test the change, then publish it. Real calls, inbound numbers and the web widget use the published version.
+
+### Which version a call ran on
+
+Every call record and post-call webhook carries `agentRevision`, the version the call ran on (`null` for agents in auto mode). When a caller reports "the agent said X", that number tells you exactly which configuration was live, and the version detail shows the prompt it ran with.
+
+<Note>
+Phone numbers, the SIP trunk, knowledge base links and the agent's active/disabled status are infrastructure, not configuration: they are always live, whatever version is published. Adding a number to an agent in manual mode takes effect at once.
+</Note>
+
+## Environments
+
+Environments let one agent serve more than one audience without duplicating it: for example `staging` pinned to a newer version with its own variable defaults, while `production` stays on the published version. Inbound numbers, the web widget and `POST /calls` (`environment`) can each target an environment. `production` is the published version and always exists.
+
+Environments are being rolled out; `environment` on `POST /calls` is already validated (unknown names are refused with `environment_not_found` before anything is dialed), and call records carry the environment they ran in.
