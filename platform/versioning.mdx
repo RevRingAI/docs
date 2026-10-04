@@ -32,8 +32,8 @@ When several people work on the same agent, or you want to prepare a change and 
 
 | State | What it is | Who sees it |
 |-------|------------|-------------|
-| Draft | The configuration as saved in the dashboard or by `PATCH /agents/{id}` | Editors, chat and voice tests, text channels (SMS and web chat replies) |
-| Published | The version calls run on | Callers: outbound calls, inbound numbers, web widget calls |
+| Draft | The configuration as saved in the dashboard or by `PATCH /agents/{id}` | Editors, chat and voice tests |
+| Published | The version conversations run on | Callers and texters: outbound calls, inbound numbers, the web widget (calls and chat), SMS replies |
 
 While you edit, calls keep using the published version. When the draft is ready, **Publish** makes it live for new calls (calls already in progress are not changed).
 
@@ -74,11 +74,7 @@ See [Publish Agent](/api-reference/agents/publish).
 
 ### Testing before you publish
 
-Chat tests, voice tests and the dashboard test panel always run the **draft**. That is the point of manual publishing: test the change, then publish it. Real calls, inbound numbers and web widget calls use the published version.
-
-<Note>
-Text replies (SMS and web chat) currently use the saved agent in both modes. Publishing for text channels is on the roadmap; until then, treat text prompt changes as live on save.
-</Note>
+Chat tests, voice tests and the dashboard test panel always run the **draft**. That is the point of manual publishing: test the change, then publish it. Real calls, inbound numbers, the web widget and SMS replies use the published version (prompt, SMS and web-chat prompts, variables, custom tools, voice and conversation settings).
 
 ### Which version a call ran on
 
@@ -107,7 +103,8 @@ PUT /v1/agents/{id}/environments/staging
 |-------------|-------------------------------|
 | Outbound call | `environment` on `POST /calls` (omit for production) |
 | Inbound number | `environment` on the number (`POST /agents/{id}/phone-numbers` or `PATCH /agents/{id}/phone-numbers/{phoneId}`) |
-| Web widget | `environment` in the agent's widget config |
+| Web widget (calls and chat) | `environment` in the agent's widget config |
+| SMS replies | Production |
 | Chat and voice tests | Always the draft |
 
 Unknown names are refused on `POST /calls` with `environment_not_found` before anything is dialed. A number or widget bound to an environment that was later deleted falls back to production rather than failing the caller. Deleting an environment is refused while numbers are still bound to it.
