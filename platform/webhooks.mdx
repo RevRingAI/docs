@@ -508,6 +508,29 @@ Pass rates per criterion over any date range are in the [analytics overview](/ap
 State each criterion as a single observable outcome. "The caller confirmed an appointment date and time" judges cleanly; "the call went well" does not. Conditional criteria work too: "If the caller asked about pricing, the agent quoted the monthly price".
 </Tip>
 
+### Call started event
+
+To also hear when a call connects, set the agent's `webhookEvents` to `["call.started"]`. The post-call webhook URL then receives, once per answered call:
+
+```json
+{
+  "event": "call.started",
+  "call": {
+    "id": "a1b2c3d4-...",
+    "agentId": "cm...",
+    "agentName": "Front Desk",
+    "direction": "OUTBOUND",
+    "fromNumber": "+14155550100",
+    "toNumber": "+14155550123",
+    "variables": { "first_name": "Ana" },
+    "campaignId": null,
+    "startedAt": "2026-10-05T22:03:56.005Z"
+  }
+}
+```
+
+The post-call payload itself has no `event` field, so a handler can tell the two apart. With the Retell compatibility format the event is Retell's `call_started`. Started events are sent once and are not retried.
+
 ### Compatibility formats
 
 Moving from another voice platform? Set the agent's `postCallWebhookFormat` and the post-call webhook is sent in that platform's payload shape, so the handler you already run keeps working while you switch. Agents created by the [importer](/platform/importing-agents) get this set for you.

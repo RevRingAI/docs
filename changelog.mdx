@@ -5,6 +5,9 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 
 ## October 5, 2026
 
+### Call started event
+Set `webhookEvents: ["call.started"]` on an agent to get a webhook when each call connects, in RevRing's shape or Retell's `call_started`. [Guide](/platform/webhooks#call-started-event)
+
 ### Route inbound calls from your pre-call webhook
 The pre-call webhook's answer can now pick the agent or environment for the call, override the opening line, voice or prompt, or reject the call. Retell and ElevenLabs inbound webhook answers work unchanged. [Guide](/platform/webhooks#route-personalize-or-reject-the-call)
 

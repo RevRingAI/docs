@@ -8982,6 +8982,16 @@
             "default": "revring",
             "description": "Payload shape of the post-call webhook. `retell` sends Retell's `call_ended` and `call_analyzed` events; `elevenlabs` sends `post_call_transcription` (or `call_initiation_failure` for dials that never connected). See [compatibility formats](/platform/webhooks#compatibility-formats)."
           },
+          "webhookEvents": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "call.started"
+              ]
+            },
+            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects."
+          },
           "postCallExtraction": {
             "allOf": [
               {
@@ -9493,6 +9503,16 @@
             "default": "revring",
             "description": "Payload shape of the post-call webhook. `retell` sends Retell's `call_ended` and `call_analyzed` events; `elevenlabs` sends `post_call_transcription` (or `call_initiation_failure` for dials that never connected). See [compatibility formats](/platform/webhooks#compatibility-formats)."
           },
+          "webhookEvents": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "call.started"
+              ]
+            },
+            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects."
+          },
           "postCallExtraction": {
             "allOf": [
               {
@@ -9961,6 +9981,16 @@
             ],
             "default": "revring",
             "description": "Payload shape of the post-call webhook. `retell` sends Retell's `call_ended` and `call_analyzed` events; `elevenlabs` sends `post_call_transcription` (or `call_initiation_failure` for dials that never connected). See [compatibility formats](/platform/webhooks#compatibility-formats)."
+          },
+          "webhookEvents": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "call.started"
+              ]
+            },
+            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects."
           },
           "postCallExtraction": {
             "allOf": [
