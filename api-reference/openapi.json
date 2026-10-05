@@ -7616,6 +7616,152 @@
           }
         }
       }
+    },
+    "/test-suites/{id}/tests/from-call": {
+      "post": {
+        "summary": "Create Test From Call",
+        "tags": [
+          "Test Suites"
+        ],
+        "description": "Draft a test case from a real call: the caller's side becomes the script and the call's failed success criteria (or `focus`) the scoring rubric. The call's variables are replayed. Saved to the suite unless `save` is false.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Test suite ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "callId"
+                ],
+                "properties": {
+                  "callId": {
+                    "type": "string"
+                  },
+                  "focus": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "description": "What the test should check; defaults to the call's failed criteria"
+                  },
+                  "save": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Test created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "saved": {
+                          "type": "boolean"
+                        },
+                        "test": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Draft (save: false)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "saved": {
+                          "type": "boolean"
+                        },
+                        "test": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "script": {
+                              "type": "string"
+                            },
+                            "scoringRubric": {
+                              "type": "string"
+                            },
+                            "variables": {
+                              "type": "object",
+                              "nullable": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "call_has_no_conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "suite_not_found or call_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {

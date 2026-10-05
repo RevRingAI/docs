@@ -5,6 +5,9 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 
 ## October 5, 2026
 
+### Create a test from a real call
+One click on a call (or `POST /v1/test-suites/{id}/tests/from-call`) turns it into a test case: the caller's side becomes the script, the failed success criteria the rubric. [Guide](/platform/test-suites#from-a-real-call)
+
 ### Call started event
 Set `webhookEvents: ["call.started"]` on an agent to get a webhook when each call connects, in RevRing's shape or Retell's `call_started`. [Guide](/platform/webhooks#call-started-event)
 
