@@ -236,6 +236,9 @@
             "pages": [
               "api-reference/webhooks/pre-call",
               "api-reference/webhooks/post-call",
+              "api-reference/webhooks/signing-secret",
+              "api-reference/webhooks/signing-state",
+              "api-reference/webhooks/signing-disable",
               "api-reference/webhooks/message-received"
             ]
           }

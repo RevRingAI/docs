@@ -592,8 +592,62 @@ def process_call(call):
 
 ### Verify Webhook Sources
 
-**HMAC Signature Verification:**
-Contact RevRing support to set up HMAC signature verification for your webhooks. This ensures requests are authentic and coming from RevRing.
+**Signature verification (recommended):**
+Turn on webhook signing for your organization and verify every request. One secret signs every webhook RevRing sends you: pre-call, post-call and message received.
+
+1. Create a secret (the full value is returned only by this call; store it with your other secrets):
+
+```bash
+curl -X POST https://api.revring.ai/v1/webhooks/signing-secret -H "x-api-key: $REVRING_API_KEY"
+# { "data": { "secret": "whsec_...", "enabled": true, "last4": "a1b2" } }
+```
+
+2. From then on each webhook carries two headers:
+
+| Header | Value |
+|--------|-------|
+| `X-RevRing-Timestamp` | Unix time in seconds when the request was signed |
+| `X-RevRing-Signature` | `v1=` followed by hex HMAC-SHA256 of `"{timestamp}.{raw body}"` using your secret |
+
+3. Verify on the raw request body, before parsing JSON, and reject timestamps older than a few minutes:
+
+```javascript
+import crypto from "node:crypto";
+
+function verifyRevRingSignature(rawBody, headers, secret, toleranceSeconds = 300) {
+  const timestamp = Number(headers["x-revring-timestamp"]);
+  const signature = headers["x-revring-signature"] || "";
+  if (!Number.isFinite(timestamp) || Math.abs(Date.now() / 1000 - timestamp) > toleranceSeconds) return false;
+  const expected = "v1=" + crypto.createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
+  return expected.length === signature.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+}
+
+// Express: keep the raw body for verification
+app.post("/webhooks/post-call", express.raw({ type: "application/json" }), (req, res) => {
+  if (!verifyRevRingSignature(req.body.toString("utf8"), req.headers, process.env.REVRING_WEBHOOK_SECRET)) {
+    return res.status(401).end();
+  }
+  const call = JSON.parse(req.body.toString("utf8"));
+  // ...
+  res.status(200).end();
+});
+```
+
+```python
+import hmac, hashlib, time
+
+def verify_revring_signature(raw_body: bytes, headers, secret: str, tolerance_seconds: int = 300) -> bool:
+    try:
+        timestamp = int(headers.get("X-RevRing-Timestamp", ""))
+    except ValueError:
+        return False
+    if abs(time.time() - timestamp) > tolerance_seconds:
+        return False
+    expected = "v1=" + hmac.new(secret.encode(), f"{timestamp}.".encode() + raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, headers.get("X-RevRing-Signature", ""))
+```
+
+Rotate with the same `POST` (the new secret is live within a minute; verify against both during the switch), check the state with `GET`, and turn signing off with `DELETE`. See the [signing secret reference](/api-reference/webhooks/signing-secret).
 
 **Request Validation:**
 Implement validation to ensure webhook requests contain expected fields and structure.

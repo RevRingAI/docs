@@ -64,6 +64,10 @@
     {
       "name": "Voices",
       "description": "Browse the voices available to your organization for agent speech"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Webhook delivery settings for your organization"
     }
   ],
   "paths": {
@@ -5899,6 +5903,114 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/webhooks/signing-secret": {
+      "get": {
+        "summary": "Get Webhook Signing State",
+        "description": "Whether webhooks sent to your organization are signed, and the last four characters of the live secret.",
+        "tags": [
+          "Webhooks"
+        ],
+        "responses": {
+          "200": {
+            "description": "State",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "description": "Whether outbound webhooks are signed"
+                        },
+                        "last4": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Last four characters of the live secret"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create or Rotate Webhook Signing Secret",
+        "description": "Creates the signing secret, or replaces it. Every webhook RevRing sends your organization (pre-call, post-call, message received) is then signed with `X-RevRing-Signature` (see the Webhooks guide for verification). The full secret is returned only by this call. After a rotation the new secret is live within a minute.",
+        "tags": [
+          "Webhooks"
+        ],
+        "responses": {
+          "201": {
+            "description": "Secret created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "secret": {
+                          "type": "string",
+                          "description": "The full secret. Returned only by this call; store it with your other secrets"
+                        },
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "last4": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Disable Webhook Signing",
+        "description": "Removes the secret; webhooks are sent unsigned again.",
+        "tags": [
+          "Webhooks"
+        ],
+        "responses": {
+          "200": {
+            "description": "Disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "description": "Whether outbound webhooks are signed"
+                        },
+                        "last4": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Last four characters of the live secret"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
