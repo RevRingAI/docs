@@ -10126,6 +10126,11 @@
             "nullable": true,
             "description": "How this run executed; null on runs created before test types existed (voice)"
           },
+          "environment": {
+            "type": "string",
+            "nullable": true,
+            "description": "Version the target ran on: null = the saved draft, production = the published version, else the environment name"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -10217,6 +10222,11 @@
               "type": "string"
             },
             "description": "Run only these test cases instead of the entire suite (for example, to re-run just the tests that failed). Omit to run the whole suite. IDs that do not belong to the suite are ignored; if none match, the request is rejected."
+          },
+          "environment": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,31}$",
+            "description": "Which version of the target agent to test. Omit for the saved draft (test before you publish). `production` tests the published version; any other name tests that environment (400 environment_not_found if it does not exist). See Versions and Publishing"
           },
           "variables": {
             "type": "object",

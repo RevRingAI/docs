@@ -74,7 +74,7 @@ See [Publish Agent](/api-reference/agents/publish).
 
 ### Testing before you publish
 
-Chat tests, voice tests and the dashboard test panel always run the **draft**. That is the point of manual publishing: test the change, then publish it. Real calls, inbound numbers, the web widget and SMS replies use the published version (prompt, SMS and web-chat prompts, variables, custom tools, voice and conversation settings).
+Chat tests, voice tests and the dashboard test panel run the **draft** by default. That is the point of manual publishing: test the change, then publish it. To check what callers get today, start a run with `"environment": "production"` (or an environment name) on `POST /test-suites/{id}/runs`. Real calls, inbound numbers, the web widget and SMS replies use the published version (prompt, SMS and web-chat prompts, variables, custom tools, voice and conversation settings).
 
 ### Which version a call ran on
 
@@ -105,7 +105,7 @@ PUT /v1/agents/{id}/environments/staging
 | Inbound number | `environment` on the number (`POST /agents/{id}/phone-numbers` or `PATCH /agents/{id}/phone-numbers/{phoneId}`) |
 | Web widget (calls and chat) | `environment` in the agent's widget config |
 | SMS replies | Production |
-| Chat and voice tests | Always the draft |
+| Chat, text and voice tests | The draft by default; `environment` on the run (`production` or a name) to test a live version |
 
 Unknown names are refused on `POST /calls` with `environment_not_found` before anything is dialed. A number or widget bound to an environment that was later deleted falls back to production rather than failing the caller. Deleting an environment is refused while numbers are still bound to it.
 
