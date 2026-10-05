@@ -61,7 +61,7 @@ When an inbound call arrives, RevRing sends a POST request to your webhook:
 
 ### Response Format
 
-Your webhook must respond within 3 seconds with a JSON object containing variables:
+Your webhook must respond within 5 seconds (aim for well under one: the caller is waiting in silence) with a JSON object containing variables:
 
 ```json
 {
@@ -79,6 +79,39 @@ These variables will be available in the agent's prompt and first message using 
 
 <Note>
 Variables you return can override system variables like `{{current_time}}` and `{{timezone}}` if needed. However, system variables (`{{direction}}`, `{{user_number}}`, `{{agent_number}}`, `{{current_time}}`, `{{timezone}}`, `{{language}}`) are automatically provided and don't need to be set via webhook.
+</Note>
+
+### Route, personalize or reject the call
+
+The response can also decide how the call runs. Every field is optional:
+
+```json
+{
+  "variables": { "customer_name": "John Smith" },
+  "agentId": "cm_spanish_support_agent",
+  "environment": "staging",
+  "overrides": {
+    "firstMessage": "Hi John, welcome back.",
+    "voiceId": "revring-maya",
+    "promptAppend": "This caller has an open claim. Offer to check its status first."
+  }
+}
+```
+
+| Field | Effect |
+|-------|--------|
+| `agentId` | Run the call on another agent in your organization (for example by language, region or customer tier) |
+| `environment` | Run the agent's version for this [environment](/platform/versioning) |
+| `overrides.firstMessage` | Opening line for this call |
+| `overrides.voiceId` | Voice for this call (an id from [List Voices](/api-reference/voices/list)) |
+| `overrides.promptAppend` | Text added to the end of the prompt for this call |
+| `overrides.prompt` | Replace the prompt for this call |
+| `reject` | `true` or `{ "reason": "..." }`: the call is not answered by the agent; it is recorded as FAILED with the reason |
+
+If the agent or environment you name does not exist, the call runs on the dialed agent as usual, so a mistake in your webhook never drops a caller.
+
+<Note>
+Moving from another platform? A Retell inbound webhook answer (`{ "call_inbound": { "override_agent_id", "dynamic_variables" } }`) and an ElevenLabs conversation initiation answer (`dynamic_variables`, `conversation_config_override.agent.first_message` and `.prompt.prompt`) work as they are. A Retell agent id resolves to the agent you [imported](/platform/importing-agents) from it.
 </Note>
 
 ### Using Variables in Agent Configuration

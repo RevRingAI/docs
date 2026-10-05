@@ -5,6 +5,9 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 
 ## October 5, 2026
 
+### Route inbound calls from your pre-call webhook
+The pre-call webhook's answer can now pick the agent or environment for the call, override the opening line, voice or prompt, or reject the call. Retell and ElevenLabs inbound webhook answers work unchanged. [Guide](/platform/webhooks#route-personalize-or-reject-the-call)
+
 ### Manage RevRing from Claude, Cursor and VS Code
 A management MCP server at `https://api.revring.ai/v1/mcp` lets AI tools list and edit agents, place and end calls, and read transcripts and results with your API key. [Guide](/mcp-server)
 
