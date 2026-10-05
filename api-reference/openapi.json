@@ -4685,7 +4685,7 @@
       ],
       "post": {
         "summary": "Add Source",
-        "description": "Add a source to a knowledge base. Supports three source types:\n- **Text**: Send JSON with `sourceType: \"text\"`, `displayName`, and `content`\n- **URL**: Send JSON with `sourceType: \"url\"` and `originalUrl`\n- **File**: Send `multipart/form-data` with a `file` field (max 20MB)\n\nMaximum of 10 sources per knowledge base. Sources are processed asynchronously.",
+        "description": "Add a source to a knowledge base. Supports three source types:\n- **Text**: Send JSON with `sourceType: \"text\"`, `displayName`, and `content`\n- **URL**: Send JSON with `sourceType: \"url\"` and `originalUrl`\n- **File**: Send `multipart/form-data` with a `file` field (max 20MB)\n\nMaximum of 50 sources per knowledge base. Sources are processed asynchronously.",
         "operationId": "addKnowledgeBaseSource",
         "tags": [
           "Knowledge Bases"
