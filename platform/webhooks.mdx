@@ -491,12 +491,11 @@ RevRing does not require any specific response body. Simply acknowledge receipt:
 
 ### Error Handling
 
-If your webhook fails (4xx/5xx status) or times out:
+If your webhook fails (non-2xx status), can't be reached, or times out:
 
-- The webhook is marked as `failed` in the call record
-- RevRing does not automatically retry failed webhooks
-- You can check `postCallWebhookStatus` in the call object to see delivery status
-- Implement your own retry logic by querying failed calls via the API if needed
+- The delivery is retried automatically 1, 5 and 30 minutes later (see Retries above); `postCallWebhookStatus` is `retrying` meanwhile
+- After the last retry it is marked `failed` in the call record
+- To backfill anything that ended `failed` (for example after a long outage on your side), list recent calls with `GET /calls` and check `postCallWebhookStatus`
 
 **Webhook Status Values:**
 - `sent`: Delivered successfully
