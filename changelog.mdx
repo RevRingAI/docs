@@ -5,6 +5,9 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 
 ## October 5, 2026
 
+### Manage RevRing from Claude, Cursor and VS Code
+A management MCP server at `https://api.revring.ai/v1/mcp` lets AI tools list and edit agents, place and end calls, and read transcripts and results with your API key. [Guide](/mcp-server)
+
 ### Keep your webhook handler when you switch
 Set `postCallWebhookFormat` to `retell` or `elevenlabs` and the post-call webhook arrives in that platform's payload shape, filled from the RevRing call record. The importer sets it automatically. [Guide](/platform/webhooks#compatibility-formats)
 
