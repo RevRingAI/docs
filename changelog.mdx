@@ -12,7 +12,7 @@ Set `postCallWebhookFormat` to `retell` or `elevenlabs` and the post-call webhoo
 The limit per knowledge base is now 50 sources (was 10).
 
 ### Campaigns
-Call a contact list with one agent. Calling windows follow each contact's own time zone, retries happen automatically by outcome (no answer, busy, voicemail, declined, failed), new calls are paced to suit your carrier, numbers on your do-not-call list are never dialed, and a CSV export carries every contact's outcome with extraction and evaluation columns. Campaign calls carry `campaignId` on the call record and in the post-call webhook. [Guide](/platform/campaigns)
+Call a contact list with one agent. Contacts without a time zone are called in the local time of their number's area code, and `voicemailStrategy: "last_attempt"` leaves a voicemail only on the final attempt. Calling windows follow each contact's own time zone, retries happen automatically by outcome (no answer, busy, voicemail, declined, failed), new calls are paced to suit your carrier, numbers on your do-not-call list are never dialed, and a CSV export carries every contact's outcome with extraction and evaluation columns. Campaign calls carry `campaignId` on the call record and in the post-call webhook. [Guide](/platform/campaigns)
 
 ### Import agents from Retell AI and ElevenLabs
 Bring existing voice agents over with your API key for the other platform. A dry run reports how every setting carries over (prompt, opening, variables, tools, transfers, voicemail, knowledge, post-call analysis) and what is left to you; importing creates the agents with their tools and knowledge bases, and importing again updates them. [Guide](/platform/importing-agents)

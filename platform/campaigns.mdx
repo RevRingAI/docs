@@ -34,10 +34,11 @@ Without `"start": true` the campaign is created as a draft; start it with `POST 
 | Setting | Meaning | Default |
 |---------|---------|---------|
 | `fromNumber` | Caller ID. Must be a number on the agent's SIP trunk | Required |
-| `callingWindow` | `start` and `end` (24h `HH:MM`), `days` (0 = Sunday), and `timezone`. A contact's own `timezone` wins over the campaign's | Any time |
+| `callingWindow` | `start` and `end` (24h `HH:MM`), `days` (0 = Sunday), and `timezone`. Each contact is called in its own local time: its `timezone` when you give one, otherwise the zone of its number's area code, otherwise the window's `timezone` | Any time |
 | `retryPolicy` | `maxAttempts` (1 to 10), `retryDelayMinutes`, and which outcomes to retry | One attempt, no retries |
 | `maxConcurrency` | Most calls this campaign runs at once | Your plan's concurrency |
 | `callsPerSecond` | New calls started per second (0.1 to 10). Many carriers allow 1 per second per trunk | 1 |
+| `voicemailStrategy` | `agent`: the agent's voicemail setting on every attempt. `last_attempt`: earlier attempts that reach voicemail hang up and are retried; the message is left only on the final attempt | `agent` |
 | `environment` | [Environment](/platform/versioning) the agent runs on | Production |
 | `startAt` | Don't dial before this time | Immediately |
 
@@ -56,6 +57,8 @@ When a call ends, the contact gets an `outcome`:
 | `declined` | The call was rejected |
 | `failed` | The call could not be placed |
 | `do_not_call` | The number is on your do-not-call list; it was not dialed |
+
+With `voicemailStrategy: "last_attempt"`, voicemail is always retried until the last attempt, which leaves the agent's voicemail message once.
 
 If the outcome is in `retryOn` and the contact has attempts left, it waits `retryDelayMinutes` and is called again, still only inside the calling window. Otherwise the contact is `completed` (answered, voicemail, or an outcome you don't retry) or `exhausted` (retries used up).
 

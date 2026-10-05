@@ -6552,7 +6552,7 @@
                         },
                         "timezone": {
                           "type": "string",
-                          "description": "IANA time zone used for this contact's calling window"
+                          "description": "IANA time zone used for this contact's calling window; inferred from the number when omitted"
                         }
                       }
                     },
@@ -6561,6 +6561,14 @@
                   "start": {
                     "type": "boolean",
                     "default": false
+                  },
+                  "voicemailStrategy": {
+                    "type": "string",
+                    "enum": [
+                      "agent",
+                      "last_attempt"
+                    ],
+                    "default": "agent"
                   }
                 }
               }
@@ -6885,6 +6893,14 @@
                   "defaultVariables": {
                     "type": "object",
                     "additionalProperties": true
+                  },
+                  "voicemailStrategy": {
+                    "type": "string",
+                    "enum": [
+                      "agent",
+                      "last_attempt"
+                    ],
+                    "default": "agent"
                   }
                 }
               }
@@ -7028,7 +7044,7 @@
                         },
                         "timezone": {
                           "type": "string",
-                          "description": "IANA time zone used for this contact's calling window"
+                          "description": "IANA time zone used for this contact's calling window; inferred from the number when omitted"
                         }
                       }
                     },
@@ -12864,6 +12880,15 @@
             "minimum": 0.1,
             "maximum": 10,
             "default": 1
+          },
+          "voicemailStrategy": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "last_attempt"
+            ],
+            "default": "agent",
+            "description": "`last_attempt`: hang up on voicemail and retry; leave the message only on the final attempt"
           },
           "defaultVariables": {
             "type": "object",
