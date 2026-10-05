@@ -1,0 +1,121 @@
+---
+title: 'Import Agents'
+description: 'Bring your voice agents over from Retell AI or ElevenLabs in minutes: prompt, opening, tools, transfers, voicemail, knowledge and post-call analysis, with a report of every setting.'
+---
+
+Moving an agent from another platform should not mean rebuilding it by hand. The importer reads your agents from **Retell AI** or **ElevenLabs Agents** with your API key for that platform, shows you exactly how each setting carries over, and creates the agents here when you are ready.
+
+## How it works
+
+<Steps>
+  <Step title="List your agents">
+    `POST /imports/agents` with the source platform and your API key for it returns the agents on that account.
+  </Step>
+  <Step title="Dry run">
+    `POST /imports` with the agent IDs returns a report for each agent. Nothing is created yet.
+  </Step>
+  <Step title="Import">
+    Send the same request with `"dryRun": false`. The agents are created with their custom tools and knowledge bases, and the report lists what to check before switching traffic.
+  </Step>
+</Steps>
+
+```bash
+curl -X POST https://api.revring.ai/v1/imports \
+  -H "x-api-key: $REVRING_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source": "elevenlabs",
+    "apiKey": "<your ElevenLabs API key>",
+    "agentIds": ["agent_4201k6x9pq3rfe8tvb2mzk7d5wya"],
+    "dryRun": true
+  }'
+```
+
+<Note>
+Your source API key is used only for read-only requests to that platform during the import request. It is never stored, logged, or returned. A key with read access to agents, tools, knowledge base and voices is enough.
+</Note>
+
+ElevenLabs agents that live in a data-residency region are read from that region: pass `"region": "eu"`, `"in"`, `"sg"` or `"us"`.
+
+## The report
+
+Every source setting that is set gets one line, so nothing is dropped silently:
+
+| Status | Meaning |
+|--------|---------|
+| `mapped` | Carries over with the same meaning |
+| `approximated` | Carried over to the closest equivalent. Worth a look before going live |
+| `unsupported` | No equivalent yet. Not imported |
+| `manual` | Needs a step from you, such as pasting a secret header value |
+
+Each agent also gets a `checklist` of the steps left to you, and a `status`: `ready` or `ready_with_gaps` on a dry run, `imported` or `imported_with_gaps` after importing, `blocked` when the agent cannot be imported (see below), or `failed`.
+
+```json
+{
+  "data": {
+    "platform": "elevenlabs",
+    "dryRun": true,
+    "agents": [
+      {
+        "source": { "platform": "elevenlabs", "agentId": "agent_4201k6...", "name": "Acme Outbound SDR" },
+        "status": "ready_with_gaps",
+        "voice": { "status": "mapped", "source": "21m00Tcm4TlvDq8ikWAM", "detail": "Studio voice \"Rachel\"" },
+        "customTools": [{ "name": "book_demo", "webhookUrl": "https://api.acme-crm.example.com/v1/demos" }],
+        "knowledgeBases": [{ "name": "Acme Outbound SDR knowledge", "sources": 2 }],
+        "counts": { "mapped": 31, "approximated": 6, "unsupported": 5, "manual": 3 },
+        "fields": [
+          { "field": "conversation_config.agent.first_message", "status": "mapped", "target": "firstMessage" },
+          { "field": "conversation_config.agent.prompt.llm", "status": "approximated", "target": "llmModel", "detail": "source model \"gpt-4.1\" runs on the Max tier" },
+          { "field": "tools.book_demo.request_headers.X-Api-Key", "status": "manual", "target": "customTools.headers", "detail": "secret header values cannot be exported; paste the value" }
+        ],
+        "checklist": [
+          "tools.book_demo.request_headers.X-Api-Key: secret header values cannot be exported; paste the value",
+          "Phone numbers: connect your numbers or SIP trunk and assign them to this agent."
+        ]
+      }
+    ],
+    "summary": { "agents": 1, "ready": 1, "blocked": 0, "imported": 0, "failed": 0 }
+  }
+}
+```
+
+## What carries over
+
+| Area | Retell AI | ElevenLabs Agents |
+|------|-----------|-------------------|
+| Prompt | Single prompt. Multi-prompt agents are combined into one prompt with a section per stage | System prompt |
+| Opening | Begin message, who speaks first, delay, wait-for-caller silence | First message (empty means the agent waits for the caller) |
+| Variables | Default dynamic variables. `{{current_calendar}}` becomes `{{current_time}}` | Dynamic variable placeholders. `{{system__caller_id}}` becomes `{{user_number}}`, `{{system__called_number}}` becomes `{{agent_number}}`, `{{system__time_utc}}` becomes `{{current_time}}` |
+| Model | Mapped to the Standard or Max tier, with temperature | Mapped to the Standard or Max tier, with temperature and reasoning effort |
+| Speech | Language, speed, volume, interruption sensitivity, boosted keywords, noise cancellation, time zone | Language, speed, stability, keywords, interruption ignore words, time zone |
+| Timing | Silence hang-up, maximum duration, reminder timeout | Turn timeout, silence hang-up, maximum duration |
+| Tools | End call, transfer (fixed numbers, cold or warm with hold music, whisper, intro, caller ID and timeouts), press digit, custom webhook tools | End call, transfer to number (phone destinations, extension digits), keypad tones, voicemail detection, webhook tools (body, query and fixed values) |
+| Voicemail | Hang up or leave a message | Leave a message or hang up |
+| Analysis | Custom analysis fields become [extraction](/platform/webhooks) fields; call successful becomes an evaluation criterion; user sentiment becomes an extraction field | Data collection becomes extraction fields; evaluation criteria carry over |
+| Knowledge | Knowledge bases with URL, text and document sources, plus retrieval settings | URL, text and file documents, plus retrieval settings |
+| Webhook | Post-call webhook URL | Conversation initiation webhook becomes the pre-call webhook |
+
+**Voices.** The importer picks the matching Studio voice when one is available, and otherwise the closest voice by language and gender. Preview the voice before going live. No platform lets you export a cloned voice, so clone it again from a recording you own.
+
+**Webhook payloads.** Post-call webhooks use RevRing's [payload format](/platform/webhooks). Update your handler's field names before you switch traffic.
+
+**Custom tool requests.** ElevenLabs webhook tools are imported with **Send Raw Request Body** on, so your endpoint receives the same body shape. Retell tools send the arguments under `arguments` instead of `args`; update the handler or turn on Send Raw Request Body.
+
+## Not imported (yet)
+
+- **Blocked agents:** agents that run on your own language model server (custom LLM), and Retell Conversation Flow agents. ElevenLabs workflows import the main agent prompt only.
+- **Secrets:** secret header values and OAuth connections cannot be exported from the source. The tool is created with the header name and an empty value for you to fill in.
+- **Phone numbers:** connect your carrier numbers or SIP trunk after importing and assign them to the agent. See [Telephony](/platform/telephony).
+- Other unsupported settings, such as pronunciation dictionaries or ambient sound, are listed in the report with the reason.
+
+## Importing again
+
+Importing an agent you already imported **updates** the agent it created instead of making a copy: settings are re-applied, custom tools with the same name are updated, and knowledge bases already linked are left in place. Use this to pick up source changes while you test side by side.
+
+## Limits
+
+- Up to 25 agents per dry run, and up to 10 per import request.
+- Knowledge bases hold up to 10 sources each; larger sets are split across several knowledge bases linked to the agent.
+- Custom tool calls time out after 8 seconds. Longer source timeouts are reported.
+
+See [Import Agents](/api-reference/imports/import) and [List Source Agents](/api-reference/imports/list-agents) in the API reference.

@@ -6116,6 +6116,297 @@
           }
         }
       }
+    },
+    "/imports/agents": {
+      "post": {
+        "summary": "List Source Agents",
+        "description": "List the voice agents on your Retell AI or ElevenLabs account, to choose which to import.",
+        "tags": [
+          "Imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source",
+                  "apiKey"
+                ],
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "retell",
+                      "elevenlabs"
+                    ],
+                    "description": "Platform the agents are on"
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Your API key for the source platform. Used for read-only requests during this request only; never stored, logged or returned."
+                  },
+                  "region": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "us",
+                      "eu",
+                      "in",
+                      "sg"
+                    ],
+                    "description": "ElevenLabs only: the data-residency region the agents live in. Default `default`."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agents on the source account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "agents": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_body, or invalid_source_key: the source platform rejected the API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "source_rate_limited: the source platform is rate limiting; retry in a minute",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "source_unavailable: the source platform did not answer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/imports": {
+      "post": {
+        "summary": "Import Agents",
+        "description": "Import agents from Retell AI or ElevenLabs Agents. A dry run (the default) returns a per-setting report and creates nothing. With `dryRun: false` the agents are created with their custom tools and knowledge bases. Importing an agent again updates the agent it created before.",
+        "tags": [
+          "Imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source",
+                  "apiKey",
+                  "agentIds"
+                ],
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "retell",
+                      "elevenlabs"
+                    ],
+                    "description": "Platform the agents are on"
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Your API key for the source platform. Used for read-only requests during this request only; never stored, logged or returned."
+                  },
+                  "region": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "us",
+                      "eu",
+                      "in",
+                      "sg"
+                    ],
+                    "description": "ElevenLabs only: the data-residency region the agents live in. Default `default`."
+                  },
+                  "agentIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "maxItems": 25,
+                    "description": "Source agent IDs. Up to 25 on a dry run, up to 10 when importing."
+                  },
+                  "dryRun": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Report only; create nothing"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dry run report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ImportReport"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Import report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ImportReport"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_body, or invalid_source_key: the source platform rejected the API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "source_rate_limited: the source platform is rate limiting; retry in a minute",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "source_unavailable: the source platform did not answer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -11021,6 +11312,206 @@
           "variables": {
             "tone": "formal",
             "region": "EU"
+          }
+        }
+      },
+      "ImportReport": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "retell",
+              "elevenlabs"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "agents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "platform": {
+                      "type": "string"
+                    },
+                    "agentId": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "ready",
+                    "ready_with_gaps",
+                    "blocked",
+                    "imported",
+                    "imported_with_gaps",
+                    "failed"
+                  ]
+                },
+                "blockedReason": {
+                  "type": "string",
+                  "description": "Why the agent cannot be imported (status `blocked`)"
+                },
+                "error": {
+                  "type": "string",
+                  "description": "Error code (status `failed`)"
+                },
+                "agent": {
+                  "type": "object",
+                  "description": "The RevRing agent created or updated. On a dry run, present when a previous import would be updated.",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "created",
+                        "updated"
+                      ]
+                    }
+                  }
+                },
+                "voice": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "mapped",
+                        "approximated",
+                        "unsupported",
+                        "manual"
+                      ]
+                    },
+                    "source": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "target": {
+                      "type": "string",
+                      "description": "RevRing voice ID"
+                    },
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "customTools": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "webhookUrl": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "knowledgeBases": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "sources": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "counts": {
+                  "type": "object",
+                  "properties": {
+                    "mapped": {
+                      "type": "integer"
+                    },
+                    "approximated": {
+                      "type": "integer"
+                    },
+                    "unsupported": {
+                      "type": "integer"
+                    },
+                    "manual": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "field": {
+                        "type": "string",
+                        "description": "Source setting path"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "mapped",
+                          "approximated",
+                          "unsupported",
+                          "manual"
+                        ]
+                      },
+                      "target": {
+                        "type": "string",
+                        "description": "RevRing setting it maps to, when there is one"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "checklist": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Steps left to you before switching traffic"
+                }
+              }
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "agents": {
+                "type": "integer"
+              },
+              "ready": {
+                "type": "integer"
+              },
+              "blocked": {
+                "type": "integer"
+              },
+              "imported": {
+                "type": "integer"
+              },
+              "failed": {
+                "type": "integer"
+              }
+            }
           }
         }
       }

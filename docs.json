@@ -39,7 +39,8 @@
               "platform/messaging",
               "platform/two-way-messaging",
               "platform/web-widget",
-              "platform/versioning"
+              "platform/versioning",
+              "platform/importing-agents"
             ]
           }
         ]
@@ -110,6 +111,13 @@
               "api-reference/agent-folders/create",
               "api-reference/agent-folders/update",
               "api-reference/agent-folders/delete"
+            ]
+          },
+          {
+            "group": "Imports",
+            "pages": [
+              "api-reference/imports/list-agents",
+              "api-reference/imports/import"
             ]
           },
           {
