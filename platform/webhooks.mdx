@@ -475,6 +475,20 @@ Pass rates per criterion over any date range are in the [analytics overview](/ap
 State each criterion as a single observable outcome. "The caller confirmed an appointment date and time" judges cleanly; "the call went well" does not. Conditional criteria work too: "If the caller asked about pricing, the agent quoted the monthly price".
 </Tip>
 
+### Compatibility formats
+
+Moving from another voice platform? Set the agent's `postCallWebhookFormat` and the post-call webhook is sent in that platform's payload shape, so the handler you already run keeps working while you switch. Agents created by the [importer](/platform/importing-agents) get this set for you.
+
+| `postCallWebhookFormat` | What your endpoint receives |
+|---|---|
+| `revring` (default) | The RevRing payload above |
+| `retell` | Retell AI's `call_ended` event, then `call_analyzed` with `call_analysis` (`call_summary`, `in_voicemail`, `user_sentiment`, `call_successful`, `custom_analysis_data`). Timestamps and durations in milliseconds, `transcript`, `transcript_object` and `transcript_with_tool_calls`, `disconnection_reason` |
+| `elevenlabs` | ElevenLabs Agents' `post_call_transcription` (`data.transcript`, `data.metadata` in seconds, `data.analysis` with `evaluation_criteria_results`, `data_collection_results`, `call_successful` and `transcript_summary`), or `call_initiation_failure` for an outbound call that never connected |
+
+The values come from the call record: extraction fields become Retell's `custom_analysis_data` or ElevenLabs' `data_collection_results`, evaluation criteria become `call_successful` (and ElevenLabs' `evaluation_criteria_results`), and an extraction field named `user_sentiment` fills Retell's `user_sentiment`. Fields that only exist on the other platform, such as costs or per-word timings, are not sent.
+
+Deliveries are signed with RevRing's `X-RevRing-Signature` header, not the other platform's signature, so replace your signature check (see [Verify webhook sources](#verify-webhook-sources)). Retries work as described below.
+
 ### Response Expectations
 
 Your webhook should:

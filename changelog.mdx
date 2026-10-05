@@ -5,6 +5,9 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 
 ## October 5, 2026
 
+### Keep your webhook handler when you switch
+Set `postCallWebhookFormat` to `retell` or `elevenlabs` and the post-call webhook arrives in that platform's payload shape, filled from the RevRing call record. The importer sets it automatically. [Guide](/platform/webhooks#compatibility-formats)
+
 ### Knowledge bases hold 50 sources
 The limit per knowledge base is now 50 sources (was 10).
 
