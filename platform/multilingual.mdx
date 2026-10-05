@@ -4,31 +4,30 @@ description: 'Build AI voice agents that speak multiple languages'
 icon: 'language'
 ---
 
-RevRing supports AI voice agents in 20+ languages, enabling you to serve customers globally with natural-sounding voices in their native language.
+RevRing agents speak and understand 20 languages, plus a multilingual mode for callers who switch languages, with 300+ voices.
 
 ## Supported Languages
 
-RevRing offers 300+ voices across the following languages:
+The agent's `language` setting chooses how the agent listens and speaks:
 
-- **English** (en)
-- **Spanish** (es)
-- **Italian** (it)
-- **German** (de)
-- **Portuguese** (pt)
-- **Turkish** (tr)
-- **Japanese** (ja)
-- **Hindi** (hi)
-- **Dutch** (nl)
-- **Chinese** (zh)
-- **Greek** (el)
-- **Ukrainian** (uk)
-- **Arabic** (ar)
-- **Danish** (da)
-- **Estonian** (et)
-- **Finnish** (fi)
-- **Norwegian** (nb, no)
-- **Swedish** (sv)
-- **Vietnamese** (vi)
+| Language | Code | Language | Code |
+|----------|------|----------|------|
+| English | `en` | Arabic | `ar` |
+| Spanish | `es` | Russian | `ru` |
+| French | `fr` | Polish | `pl` |
+| Chinese | `zh` | Dutch | `nl` |
+| Korean | `ko` | Hindi | `hi-IN` |
+| Japanese | `ja` | Bengali | `bn-IN` |
+| German | `de` | Tamil | `ta-IN` |
+| Italian | `it` | Telugu | `te-IN` |
+| Portuguese | `pt` | Gujarati | `gu-IN` |
+| Multilingual | `multi` | Kannada, Marathi | `kn-IN`, `mr-IN` |
+
+### Multilingual mode
+
+With `"language": "multi"` the agent understands callers speaking English, Spanish, French, German, Italian, Portuguese, Dutch, Russian, Hindi or Japanese, including callers who switch mid-call, and replies in the language the caller speaks. Tell the agent how to choose in the prompt, for example: *"Reply in the language the caller uses. If they switch to Spanish, continue in Spanish."* Pick a voice that sounds natural in every language you expect.
+
+Voices are also available in Turkish, Greek, Ukrainian, Danish, Estonian, Finnish, Norwegian, Swedish and Vietnamese; preview them in the [Voice Library](https://dashboard.revring.ai/app/agents/voices).
 
 <Note>
 **Voice Flexibility:** Any voice can be used with any language setting. For example, you can use a Spanish-labeled voice on an English-language agent to achieve a Spanish accent, or mix and match voices and languages to create the exact speaking style you need.
@@ -198,5 +197,5 @@ curl -X POST https://api.revring.ai/v1/agents \
    - Voice: Rafael
 
 <Tip>
-For businesses serving multiple language markets, create separate agents for each language rather than trying to make a single agent multilingual. This ensures the best voice quality and conversation experience.
+For callers who switch languages mid-call, use multilingual mode. For a market that speaks one language, a dedicated agent in that language with a native voice gives the best quality.
 </Tip>
