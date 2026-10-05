@@ -1,0 +1,29 @@
+---
+title: "What's New"
+description: 'Platform changes that affect how you build with RevRing, newest first.'
+---
+
+## October 5, 2026
+
+### Webhook signing
+Every webhook RevRing sends (pre-call, post-call, message received) can now be signed. Create a secret with `POST /v1/webhooks/signing-secret` and verify the `X-RevRing-Signature` header on the raw body. Opt-in per organization; nothing changes until you create a secret. [Guide](/platform/webhooks#verify-webhook-sources)
+
+### Test runs against a live version
+Test runs use the saved draft by default. Pass `environment` (`production` or an environment name) on `POST /test-suites/{id}/runs` to test the version callers get. [Guide](/platform/versioning#testing-before-you-publish)
+
+## October 4, 2026
+
+### Drafts, publishing and environments
+Agents can now be edited without going live. Switch an agent to manual publishing (`publishMode: "manual"`), edit the draft, test it, and publish when ready; earlier versions can be made live in one call. Named environments pin a version with their own variable defaults and can be bound to inbound numbers, the web widget and `POST /calls`. Every call record carries the version it ran on. [Guide](/platform/versioning)
+
+### Post-call data extraction
+Define typed fields per agent (`postCallExtraction`) and get them filled from each conversation on the call record and in the post-call webhook as `extraction`. [Guide](/platform/webhooks#post-call-data-extraction)
+
+### Post-call evaluation
+Write success criteria per agent (`postCallEvaluation`) and every call is judged pass, fail or unknown with a one-sentence reason. Pass rates per criterion are on the analytics overview and the dashboard. [Guide](/platform/webhooks#post-call-evaluation)
+
+### SIP trunk address validation
+A trunk's proxy must now be a hostname or IP that resolves. Typos such as a misspelled carrier domain are refused when the trunk is created instead of producing a trunk that can never place a call. [Reference](/api-reference/sip-trunks/create)
+
+### Noise suppression for every agent
+Background noise and other voices on the caller's side are suppressed before the agent listens. On by default for all agents; turn it off per agent with `noiseCancellation: "off"`.

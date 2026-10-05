@@ -18,7 +18,8 @@
             "pages": [
               "index",
               "quickstart",
-              "mcp-server"
+              "mcp-server",
+              "changelog"
             ]
           },
           {
