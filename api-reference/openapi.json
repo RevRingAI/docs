@@ -9033,10 +9033,15 @@
             "nullable": true,
             "enum": [
               "sent",
+              "retrying",
               "failed",
-              null
+              "skipped"
             ],
-            "description": "Status of post-call webhook delivery"
+            "description": "Post-call webhook delivery: sent | retrying (another attempt is scheduled) | failed (after the last retry) | skipped (no webhook URL); null before delivery was attempted"
+          },
+          "postCallWebhookAttempts": {
+            "type": "integer",
+            "description": "Delivery attempts made so far (first send plus retries at 1m, 5m, 30m)"
           },
           "preCallWebhookStatus": {
             "type": "string",

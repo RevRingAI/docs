@@ -8,6 +8,9 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 ### Webhook signing
 Every webhook RevRing sends (pre-call, post-call, message received) can now be signed. Create a secret with `POST /v1/webhooks/signing-secret` and verify the `X-RevRing-Signature` header on the raw body. Opt-in per organization; nothing changes until you create a secret. [Guide](/platform/webhooks#verify-webhook-sources)
 
+### Webhook retries
+A post-call webhook that fails (connection error, timeout, non-2xx) is retried 1, 5 and 30 minutes later. Handlers should be idempotent on the call `id`. The outcome is on the call record as `postCallWebhookStatus` and `postCallWebhookAttempts`. [Guide](/platform/webhooks#response-expectations)
+
 ### Test runs against a live version
 Test runs use the saved draft by default. Pass `environment` (`production` or an environment name) on `POST /test-suites/{id}/runs` to test the version callers get. [Guide](/platform/versioning#testing-before-you-publish)
 

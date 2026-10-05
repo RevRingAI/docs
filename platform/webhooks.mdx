@@ -487,6 +487,8 @@ RevRing does not require any specific response body. Simply acknowledge receipt:
 { "received": true }
 ```
 
+**Retries:** a delivery that fails (connection error, timeout, or any non-2xx response) is retried three times, 1 minute, 5 minutes and 30 minutes later. Make your handler idempotent on the call `id`: a retry carries the same payload, and a slow handler that returned after our 30 second timeout may be retried even though it processed the call. The call record shows the outcome in `postCallWebhookStatus` (`sent`, `retrying`, `failed`) with `postCallWebhookAttempts`.
+
 ### Error Handling
 
 If your webhook fails (4xx/5xx status) or times out:
