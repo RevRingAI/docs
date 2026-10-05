@@ -10716,7 +10716,36 @@
           "metrics": {
             "type": "object",
             "nullable": true,
-            "description": "Call quality and performance metrics"
+            "description": "Usage measured during the call. Present once the call has ended; counters that do not apply are 0.",
+            "properties": {
+              "llm_prompt_tokens": {
+                "type": "number",
+                "description": "Language model input tokens across all turns"
+              },
+              "llm_prompt_cached_tokens": {
+                "type": "number",
+                "description": "Input tokens served from the prompt cache (included in llm_prompt_tokens)"
+              },
+              "llm_completion_tokens": {
+                "type": "number",
+                "description": "Language model output tokens across all turns"
+              },
+              "stt_audio_duration": {
+                "type": "number",
+                "description": "Seconds of caller audio transcribed"
+              },
+              "tts_audio_duration": {
+                "type": "number",
+                "description": "Seconds of agent speech synthesized"
+              },
+              "tts_characters_count": {
+                "type": "number",
+                "description": "Characters of agent speech synthesized"
+              }
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
           },
           "initiatedAt": {
             "type": "string",
