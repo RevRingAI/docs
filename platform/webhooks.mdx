@@ -356,6 +356,7 @@ After a call ends, RevRing sends a POST request with complete call details:
 - `summary`: AI-generated summary of the call
 - `extraction`: Structured fields pulled from the transcript, as configured in the agent's `postCallExtraction` (see [Post-call data extraction](#post-call-data-extraction)); `null` when not configured
 - `evaluation`: Pass/fail/unknown verdicts for the agent's `postCallEvaluation` criteria, each with a rationale (see [Post-call evaluation](#post-call-evaluation)); `null` when not configured
+- `campaignId`: The [campaign](/platform/campaigns) that placed the call; `null` for calls not placed by a campaign
 - `metrics`: Token usage and audio duration metrics
 - `durationSeconds`: Total call duration (null if never answered)
 

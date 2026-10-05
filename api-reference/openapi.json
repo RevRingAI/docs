@@ -6407,6 +6407,1199 @@
           }
         }
       }
+    },
+    "/campaigns": {
+      "post": {
+        "summary": "Create Campaign",
+        "description": "Create a campaign, optionally with contacts (up to 10,000) and optionally started at once with `start: true`. Duplicate numbers are skipped.",
+        "tags": [
+          "Campaigns"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "agentId",
+                  "fromNumber"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "fromNumber": {
+                    "type": "string",
+                    "description": "Caller ID; must be on the agent's SIP trunk"
+                  },
+                  "environment": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "startAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": true,
+                    "description": "Don't dial before this time"
+                  },
+                  "callingWindow": {
+                    "type": "object",
+                    "description": "Calling window. A contact's own timezone wins over the campaign's.",
+                    "properties": {
+                      "start": {
+                        "type": "string",
+                        "example": "09:00",
+                        "description": "24h HH:MM"
+                      },
+                      "end": {
+                        "type": "string",
+                        "example": "18:00",
+                        "description": "24h HH:MM (exclusive); may be earlier than start to cross midnight"
+                      },
+                      "days": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 6
+                        },
+                        "description": "0 = Sunday. Default Monday to Friday"
+                      },
+                      "timezone": {
+                        "type": "string",
+                        "example": "America/New_York"
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end",
+                      "timezone"
+                    ],
+                    "nullable": true
+                  },
+                  "retryPolicy": {
+                    "type": "object",
+                    "properties": {
+                      "maxAttempts": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10,
+                        "default": 3
+                      },
+                      "retryDelayMinutes": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10080,
+                        "default": 60
+                      },
+                      "retryOn": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "no_answer",
+                            "busy",
+                            "voicemail",
+                            "declined",
+                            "failed"
+                          ]
+                        },
+                        "default": [
+                          "no_answer",
+                          "busy",
+                          "failed"
+                        ]
+                      }
+                    },
+                    "nullable": true
+                  },
+                  "maxConcurrency": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "nullable": true
+                  },
+                  "callsPerSecond": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 10,
+                    "default": 1
+                  },
+                  "defaultVariables": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "agentId": {
+                    "type": "string"
+                  },
+                  "contacts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "toNumber"
+                      ],
+                      "properties": {
+                        "toNumber": {
+                          "type": "string",
+                          "description": "E.164"
+                        },
+                        "variables": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Passed to the call like Send Call variables"
+                        },
+                        "timezone": {
+                          "type": "string",
+                          "description": "IANA time zone used for this contact's calling window"
+                        }
+                      }
+                    },
+                    "maxItems": 10000
+                  },
+                  "start": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/Campaign"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "contactsAdded": {
+                              "type": "integer"
+                            },
+                            "duplicatesSkipped": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_body, agent_missing_trunk, from_number_not_on_trunk",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "agent_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List Campaigns",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "running",
+                "paused",
+                "completed",
+                "canceled"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Campaigns, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Campaign"
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "hasNextPage": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{id}": {
+      "get": {
+        "summary": "Get Campaign",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Campaign with progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Campaign"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Campaign",
+        "description": "Change settings of a campaign that is not completed or canceled. Takes effect on the next dial.",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "fromNumber": {
+                    "type": "string",
+                    "description": "Caller ID; must be on the agent's SIP trunk"
+                  },
+                  "environment": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "startAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": true,
+                    "description": "Don't dial before this time"
+                  },
+                  "callingWindow": {
+                    "type": "object",
+                    "description": "Calling window. A contact's own timezone wins over the campaign's.",
+                    "properties": {
+                      "start": {
+                        "type": "string",
+                        "example": "09:00",
+                        "description": "24h HH:MM"
+                      },
+                      "end": {
+                        "type": "string",
+                        "example": "18:00",
+                        "description": "24h HH:MM (exclusive); may be earlier than start to cross midnight"
+                      },
+                      "days": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 6
+                        },
+                        "description": "0 = Sunday. Default Monday to Friday"
+                      },
+                      "timezone": {
+                        "type": "string",
+                        "example": "America/New_York"
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end",
+                      "timezone"
+                    ],
+                    "nullable": true
+                  },
+                  "retryPolicy": {
+                    "type": "object",
+                    "properties": {
+                      "maxAttempts": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10,
+                        "default": 3
+                      },
+                      "retryDelayMinutes": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10080,
+                        "default": 60
+                      },
+                      "retryOn": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "no_answer",
+                            "busy",
+                            "voicemail",
+                            "declined",
+                            "failed"
+                          ]
+                        },
+                        "default": [
+                          "no_answer",
+                          "busy",
+                          "failed"
+                        ]
+                      }
+                    },
+                    "nullable": true
+                  },
+                  "maxConcurrency": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "nullable": true
+                  },
+                  "callsPerSecond": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 10,
+                    "default": 1
+                  },
+                  "defaultVariables": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Campaign"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "campaign_closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Campaign",
+        "description": "Delete a draft, completed or canceled campaign and its contacts. Cancel a running campaign first. Calls it placed are kept.",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "campaign_active",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{id}/contacts": {
+      "post": {
+        "summary": "Add Campaign Contacts",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "contacts"
+                ],
+                "properties": {
+                  "contacts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "toNumber"
+                      ],
+                      "properties": {
+                        "toNumber": {
+                          "type": "string",
+                          "description": "E.164"
+                        },
+                        "variables": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Passed to the call like Send Call variables"
+                        },
+                        "timezone": {
+                          "type": "string",
+                          "description": "IANA time zone used for this contact's calling window"
+                        }
+                      }
+                    },
+                    "maxItems": 10000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "contactsAdded": {
+                          "type": "integer"
+                        },
+                        "duplicatesSkipped": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "campaign_closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List Campaign Contacts",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contacts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CampaignContact"
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "hasNextPage": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{id}/start": {
+      "post": {
+        "summary": "Start Campaign",
+        "description": "Start a draft campaign or resume a paused one.",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Campaign",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Campaign"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "no_contacts, agent_missing_trunk, from_number_not_on_trunk",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "invalid_transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{id}/pause": {
+      "post": {
+        "summary": "Pause Campaign",
+        "description": "Stop new dials. Calls in progress finish and are recorded.",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Campaign",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Campaign"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "no_contacts, agent_missing_trunk, from_number_not_on_trunk",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "invalid_transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{id}/cancel": {
+      "post": {
+        "summary": "Cancel Campaign",
+        "description": "Stop for good; contacts not yet called become canceled.",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Campaign",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Campaign"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "no_contacts, agent_missing_trunk, from_number_not_on_trunk",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "invalid_transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{id}/export": {
+      "get": {
+        "summary": "Export Campaign Results",
+        "description": "CSV with one row per contact and its last call: status, outcome, attempts, duration, summary, recording, `var.*`, `extraction.*` and `evaluation.*` columns.",
+        "tags": [
+          "Campaigns"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/do-not-call": {
+      "get": {
+        "summary": "List Do-Not-Call Numbers",
+        "tags": [
+          "Do Not Call"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "e164": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add Do-Not-Call Numbers",
+        "description": "Campaigns never dial these numbers.",
+        "tags": [
+          "Do Not Call"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "numbers"
+                ],
+                "properties": {
+                  "numbers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 10000
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "added": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/do-not-call/{e164}": {
+      "delete": {
+        "summary": "Remove Do-Not-Call Number",
+        "tags": [
+          "Do Not Call"
+        ],
+        "parameters": [
+          {
+            "name": "e164",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "URL-encoded E.164 number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -9469,6 +10662,11 @@
             "nullable": true,
             "description": "Agent environment the call ran in; null means production"
           },
+          "campaignId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Campaign that placed the call; null otherwise"
+          },
           "metrics": {
             "type": "object",
             "nullable": true,
@@ -11512,6 +12710,232 @@
                 "type": "integer"
               }
             }
+          }
+        }
+      },
+      "Campaign": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "running",
+              "paused",
+              "completed",
+              "canceled"
+            ]
+          },
+          "agentId": {
+            "type": "string"
+          },
+          "agentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromNumber": {
+            "type": "string",
+            "description": "Caller ID; must be on the agent's SIP trunk"
+          },
+          "environment": {
+            "type": "string",
+            "nullable": true
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Don't dial before this time"
+          },
+          "callingWindow": {
+            "type": "object",
+            "description": "Calling window. A contact's own timezone wins over the campaign's.",
+            "properties": {
+              "start": {
+                "type": "string",
+                "example": "09:00",
+                "description": "24h HH:MM"
+              },
+              "end": {
+                "type": "string",
+                "example": "18:00",
+                "description": "24h HH:MM (exclusive); may be earlier than start to cross midnight"
+              },
+              "days": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                },
+                "description": "0 = Sunday. Default Monday to Friday"
+              },
+              "timezone": {
+                "type": "string",
+                "example": "America/New_York"
+              }
+            },
+            "required": [
+              "start",
+              "end",
+              "timezone"
+            ],
+            "nullable": true
+          },
+          "retryPolicy": {
+            "type": "object",
+            "properties": {
+              "maxAttempts": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "default": 3
+              },
+              "retryDelayMinutes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10080,
+                "default": 60
+              },
+              "retryOn": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "no_answer",
+                    "busy",
+                    "voicemail",
+                    "declined",
+                    "failed"
+                  ]
+                },
+                "default": [
+                  "no_answer",
+                  "busy",
+                  "failed"
+                ]
+              }
+            },
+            "nullable": true
+          },
+          "maxConcurrency": {
+            "type": "integer",
+            "minimum": 1,
+            "nullable": true
+          },
+          "callsPerSecond": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 10,
+            "default": 1
+          },
+          "defaultVariables": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "progress": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "done": {
+                "type": "integer"
+              },
+              "contacts": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "description": "Contacts per status"
+              },
+              "outcomes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "description": "Contacts per outcome"
+              }
+            }
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CampaignContact": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "toNumber": {
+            "type": "string"
+          },
+          "variables": {
+            "type": "object"
+          },
+          "timezone": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "dialing",
+              "retry_wait",
+              "completed",
+              "exhausted",
+              "skipped",
+              "canceled"
+            ]
+          },
+          "outcome": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "answered",
+              "voicemail",
+              "no_answer",
+              "busy",
+              "declined",
+              "failed",
+              "do_not_call",
+              null
+            ]
+          },
+          "attempts": {
+            "type": "integer"
+          },
+          "nextAttemptAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastCallId": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastAttemptAt": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

@@ -28,6 +28,7 @@
               "platform/telephony",
               "platform/inbound",
               "platform/outbound",
+              "platform/campaigns",
               "platform/prompting-variables",
               "platform/tools",
               "platform/multilingual",
@@ -140,6 +141,30 @@
               "api-reference/calls/send",
               "api-reference/calls/cancel",
               "api-reference/calls/end"
+            ]
+          },
+          {
+            "group": "Campaigns",
+            "pages": [
+              "api-reference/campaigns/create",
+              "api-reference/campaigns/list",
+              "api-reference/campaigns/get",
+              "api-reference/campaigns/update",
+              "api-reference/campaigns/delete",
+              "api-reference/campaigns/add-contacts",
+              "api-reference/campaigns/list-contacts",
+              "api-reference/campaigns/start",
+              "api-reference/campaigns/pause",
+              "api-reference/campaigns/cancel",
+              "api-reference/campaigns/export"
+            ]
+          },
+          {
+            "group": "Do Not Call",
+            "pages": [
+              "api-reference/do-not-call/list",
+              "api-reference/do-not-call/add",
+              "api-reference/do-not-call/remove"
             ]
           },
           {

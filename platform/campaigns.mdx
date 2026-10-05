@@ -1,0 +1,92 @@
+---
+title: 'Campaigns'
+description: 'Call a contact list with one agent: calling windows in each contact local time, automatic retries by outcome, pacing, a do-not-call list and a CSV of results.'
+---
+
+A campaign calls a list of contacts with one agent. RevRing dials inside the calling window you set, in each contact's own time zone when you provide one, retries the outcomes you choose (no answer, busy, voicemail, declined, failed), paces new calls so your carrier is not overwhelmed, never dials numbers on your do-not-call list, and gives you a CSV of every contact with the result of their last call.
+
+## Create and start a campaign
+
+```bash
+curl -X POST https://api.revring.ai/v1/campaigns \
+  -H "x-api-key: $REVRING_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "October renewals",
+    "agentId": "cmagent123",
+    "fromNumber": "+14155550100",
+    "callingWindow": { "start": "09:00", "end": "18:00", "days": [1, 2, 3, 4, 5], "timezone": "America/New_York" },
+    "retryPolicy": { "maxAttempts": 3, "retryDelayMinutes": 120, "retryOn": ["no_answer", "busy"] },
+    "maxConcurrency": 5,
+    "callsPerSecond": 1,
+    "contacts": [
+      { "toNumber": "+14155550123", "variables": { "first_name": "Ana", "renewal_date": "Oct 31" } },
+      { "toNumber": "+13125550188", "variables": { "first_name": "Sam" }, "timezone": "America/Chicago" }
+    ],
+    "start": true
+  }'
+```
+
+Each contact's `variables` are passed to the call exactly like `variables` on [Send Call](/api-reference/calls/send), merged over the campaign's `defaultVariables`. Use them in the prompt and opening line as `{{first_name}}`.
+
+Without `"start": true` the campaign is created as a draft; start it with `POST /campaigns/{id}/start`. Set `startAt` to hold dialing until a later time.
+
+| Setting | Meaning | Default |
+|---------|---------|---------|
+| `fromNumber` | Caller ID. Must be a number on the agent's SIP trunk | Required |
+| `callingWindow` | `start` and `end` (24h `HH:MM`), `days` (0 = Sunday), and `timezone`. A contact's own `timezone` wins over the campaign's | Any time |
+| `retryPolicy` | `maxAttempts` (1 to 10), `retryDelayMinutes`, and which outcomes to retry | One attempt, no retries |
+| `maxConcurrency` | Most calls this campaign runs at once | Your plan's concurrency |
+| `callsPerSecond` | New calls started per second (0.1 to 10). Many carriers allow 1 per second per trunk | 1 |
+| `environment` | [Environment](/platform/versioning) the agent runs on | Production |
+| `startAt` | Don't dial before this time | Immediately |
+
+Campaign calls share your organization's concurrency with everything else. Calls you place with [Send Call](/api-reference/calls/send) that are waiting in the queue go first.
+
+## Outcomes and retries
+
+When a call ends, the contact gets an `outcome`:
+
+| Outcome | When |
+|---------|------|
+| `answered` | Someone picked up and the conversation happened (including transferred calls) |
+| `voicemail` | Voicemail was detected; the agent's voicemail setting applied |
+| `no_answer` | It rang out, or nobody spoke |
+| `busy` | The line was busy |
+| `declined` | The call was rejected |
+| `failed` | The call could not be placed |
+| `do_not_call` | The number is on your do-not-call list; it was not dialed |
+
+If the outcome is in `retryOn` and the contact has attempts left, it waits `retryDelayMinutes` and is called again, still only inside the calling window. Otherwise the contact is `completed` (answered, voicemail, or an outcome you don't retry) or `exhausted` (retries used up).
+
+## Follow progress
+
+`GET /campaigns/{id}` returns `progress`: the number of contacts in each status and each outcome. `GET /campaigns/{id}/contacts` lists contacts with `status`, `outcome`, `attempts`, `nextAttemptAt` and `lastCallId`; filter with `status` or `outcome`.
+
+Every call a campaign places carries `campaignId` on the call record and in the [post-call webhook](/platform/webhooks), so your existing handler can tell campaign calls apart.
+
+The campaign completes on its own when every contact is settled.
+
+## Export results
+
+`GET /campaigns/{id}/export` returns a CSV with one row per contact: number, status, outcome, attempts, the last call's ID, status, duration, summary and recording, every contact variable (`var.*`), every [extraction](/platform/webhooks#post-call-data-extraction) field (`extraction.*`) and every [evaluation](/platform/webhooks#post-call-evaluation) result (`evaluation.*`).
+
+## Pause, resume, cancel
+
+- `POST /campaigns/{id}/pause` stops new dials. Calls in progress finish and their outcomes are recorded.
+- `POST /campaigns/{id}/start` resumes.
+- `POST /campaigns/{id}/cancel` stops the campaign for good. Contacts not yet called become `canceled`.
+
+Contacts can be added to a draft, running or paused campaign with `POST /campaigns/{id}/contacts` (up to 10,000 per request; numbers already in the campaign are skipped).
+
+## Do-not-call list
+
+Numbers on your organization's do-not-call list are never dialed by a campaign. They are marked `skipped` with outcome `do_not_call`.
+
+```bash
+curl -X POST https://api.revring.ai/v1/do-not-call \
+  -H "x-api-key: $REVRING_API_KEY" -H "Content-Type: application/json" \
+  -d '{ "numbers": ["+14155550123"], "reason": "asked not to be called" }'
+```
+
+List entries with `GET /do-not-call` and remove one with `DELETE /do-not-call/{e164}`.
