@@ -8956,6 +8956,16 @@
             "nullable": true,
             "description": "Webhook URL called after call ends with transcript and recording"
           },
+          "postCallWebhookFormat": {
+            "type": "string",
+            "enum": [
+              "revring",
+              "retell",
+              "elevenlabs"
+            ],
+            "default": "revring",
+            "description": "Payload shape of the post-call webhook. `retell` sends Retell's `call_ended` and `call_analyzed` events; `elevenlabs` sends `post_call_transcription` (or `call_initiation_failure` for dials that never connected). See [compatibility formats](/platform/webhooks#compatibility-formats)."
+          },
           "postCallExtraction": {
             "allOf": [
               {
@@ -9457,6 +9467,16 @@
             "format": "uri",
             "description": "Webhook URL called after call ends (optional)"
           },
+          "postCallWebhookFormat": {
+            "type": "string",
+            "enum": [
+              "revring",
+              "retell",
+              "elevenlabs"
+            ],
+            "default": "revring",
+            "description": "Payload shape of the post-call webhook. `retell` sends Retell's `call_ended` and `call_analyzed` events; `elevenlabs` sends `post_call_transcription` (or `call_initiation_failure` for dials that never connected). See [compatibility formats](/platform/webhooks#compatibility-formats)."
+          },
           "postCallExtraction": {
             "allOf": [
               {
@@ -9915,6 +9935,16 @@
             "format": "uri",
             "nullable": true,
             "description": "Webhook URL called after call ends (optional)"
+          },
+          "postCallWebhookFormat": {
+            "type": "string",
+            "enum": [
+              "revring",
+              "retell",
+              "elevenlabs"
+            ],
+            "default": "revring",
+            "description": "Payload shape of the post-call webhook. `retell` sends Retell's `call_ended` and `call_analyzed` events; `elevenlabs` sends `post_call_transcription` (or `call_initiation_failure` for dials that never connected). See [compatibility formats](/platform/webhooks#compatibility-formats)."
           },
           "postCallExtraction": {
             "allOf": [
