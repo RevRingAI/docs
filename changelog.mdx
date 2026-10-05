@@ -5,6 +5,15 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 
 ## October 5, 2026
 
+### End a live call from your server
+`POST /v1/calls/{id}/end` hangs up a call in progress immediately; it is recorded as `API_ENDED` and still gets its recording, summary and post-call webhook. Use it when your own logic decides the call should stop. [Reference](/api-reference/calls/end)
+
+### Concurrency headroom
+`GET /v1/analytics/active` now also returns `concurrency` (`active`, `limit`, `available`), counted exactly like the check behind `concurrency_limit`, so dialers can pace calls instead of retrying. [Reference](/api-reference/analytics/active)
+
+### Spoken text never reads a placeholder aloud
+If an opening line, voicemail message, hold or intro message references a `{{variable}}` that has no value on a call, the placeholder is dropped and the sentence tidied ("Hi {{first_name}}, this is Maya" becomes "Hi, this is Maya") instead of being read out.
+
 ### Webhook signing
 Every webhook RevRing sends (pre-call, post-call, message received) can now be signed. Create a secret with `POST /v1/webhooks/signing-secret` and verify the `X-RevRing-Signature` header on the raw body. Opt-in per organization; nothing changes until you create a secret. [Guide](/platform/webhooks#verify-webhook-sources)
 

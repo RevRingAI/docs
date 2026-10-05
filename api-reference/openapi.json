@@ -4055,7 +4055,7 @@
     "/analytics/active": {
       "get": {
         "summary": "Get Active Calls Count",
-        "description": "Get the current number of active (ongoing) calls. Not affected by date filters.",
+        "description": "Get the current number of active (ongoing) calls. Not affected by date filters. Also returns `concurrency`: `active` (calls dialing or connected), `limit` (your plan's concurrent calls) and `available`, counted exactly like the check that refuses new calls with 429 concurrency_limit, so a dialer can pace itself.",
         "operationId": "getActiveCalls",
         "tags": [
           "Analytics"
@@ -4074,6 +4074,20 @@
                         "activeCalls": {
                           "type": "integer",
                           "description": "Number of currently active calls"
+                        },
+                        "concurrency": {
+                          "type": "object",
+                          "properties": {
+                            "active": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            },
+                            "available": {
+                              "type": "integer"
+                            }
+                          }
                         }
                       },
                       "required": [
@@ -4161,6 +4175,94 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/calls/{id}/end": {
+      "post": {
+        "summary": "End Call",
+        "description": "Hang up a call that is in progress, immediately. The caller is disconnected, the call is recorded with hangupCause `API_ENDED`, and the recording, summary, post-call analysis and post-call webhook are produced as for any other call. Use it from your own logic, for example when your system decides the call reached voicemail or should stop.",
+        "tags": [
+          "Calls"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Optional note for your own records"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Ending",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "callId": {
+                          "type": "string"
+                        },
+                        "ending": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "call_not_active: the call is not in progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

@@ -130,7 +130,8 @@
               "api-reference/calls/get",
               "api-reference/calls/batch-get",
               "api-reference/calls/send",
-              "api-reference/calls/cancel"
+              "api-reference/calls/cancel",
+              "api-reference/calls/end"
             ]
           },
           {
