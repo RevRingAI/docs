@@ -10971,6 +10971,32 @@
             "type": "boolean",
             "default": false,
             "description": "After each call, detect a caller's request not to be called again; when they asked, the call shows `doNotCallRequested: true` and their number goes on your do-not-call list. See [Do-not-call list](/platform/campaigns#add-callers-who-ask-automatically)."
+          },
+          "inboundCallbacks": {
+            "type": "object",
+            "description": "Callback recognition: an inbound caller your account dialed within `windowDays` is treated as calling back. The call carries the outbound call's variables plus `is_callback`, `callback_call_id`, `last_call_time` and `last_call_outcome`, the agent is told how that call went, and it greets a returning caller (your `greeting`, or its first message adapted) instead of an opening written for calls it places. On by default. See [Callbacks](/platform/inbound#callbacks).",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Recognize callbacks. Default true."
+              },
+              "windowDays": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 90,
+                "nullable": true,
+                "description": "How many days back an outbound call counts. Default 30."
+              },
+              "greeting": {
+                "type": "string",
+                "maxLength": 4000,
+                "nullable": true,
+                "description": "Spoken word for word to returning callers, with `{{variables}}` filled in. Empty or null: the agent adapts its first message for them."
+              }
+            },
+            "required": [
+              "enabled"
+            ]
           }
         },
         "required": [
@@ -11507,6 +11533,33 @@
             "type": "boolean",
             "default": false,
             "description": "After each call, detect a caller's request not to be called again; when they asked, the call shows `doNotCallRequested: true` and their number goes on your do-not-call list. See [Do-not-call list](/platform/campaigns#add-callers-who-ask-automatically)."
+          },
+          "inboundCallbacks": {
+            "type": "object",
+            "nullable": true,
+            "description": "Callback recognition: an inbound caller your account dialed within `windowDays` is treated as calling back. The call carries the outbound call's variables plus `is_callback`, `callback_call_id`, `last_call_time` and `last_call_outcome`, the agent is told how that call went, and it greets a returning caller (your `greeting`, or its first message adapted) instead of an opening written for calls it places. On by default. See [Callbacks](/platform/inbound#callbacks).",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Recognize callbacks. Default true."
+              },
+              "windowDays": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 90,
+                "nullable": true,
+                "description": "How many days back an outbound call counts. Default 30."
+              },
+              "greeting": {
+                "type": "string",
+                "maxLength": 4000,
+                "nullable": true,
+                "description": "Spoken word for word to returning callers, with `{{variables}}` filled in. Empty or null: the agent adapts its first message for them."
+              }
+            },
+            "required": [
+              "enabled"
+            ]
           }
         },
         "required": [
@@ -12048,6 +12101,33 @@
             "type": "boolean",
             "default": false,
             "description": "After each call, detect a caller's request not to be called again; when they asked, the call shows `doNotCallRequested: true` and their number goes on your do-not-call list. See [Do-not-call list](/platform/campaigns#add-callers-who-ask-automatically)."
+          },
+          "inboundCallbacks": {
+            "type": "object",
+            "nullable": true,
+            "description": "Callback recognition: an inbound caller your account dialed within `windowDays` is treated as calling back. The call carries the outbound call's variables plus `is_callback`, `callback_call_id`, `last_call_time` and `last_call_outcome`, the agent is told how that call went, and it greets a returning caller (your `greeting`, or its first message adapted) instead of an opening written for calls it places. On by default. See [Callbacks](/platform/inbound#callbacks).",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Recognize callbacks. Default true."
+              },
+              "windowDays": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 90,
+                "nullable": true,
+                "description": "How many days back an outbound call counts. Default 30."
+              },
+              "greeting": {
+                "type": "string",
+                "maxLength": 4000,
+                "nullable": true,
+                "description": "Spoken word for word to returning callers, with `{{variables}}` filled in. Empty or null: the agent adapts its first message for them."
+              }
+            },
+            "required": [
+              "enabled"
+            ]
           }
         }
       },

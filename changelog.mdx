@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### Callbacks, recognized
+When someone you called in the last 30 days calls your agent's number back, the agent knows it is a callback: the outbound call's variables (their name, your lead ID) come with the call, the agent is told how that call went and what was said, and it greets a returning caller instead of repeating an opening written for calls it places. Callbacks carry `is_callback`, `callback_call_id`, `last_call_time` and `last_call_outcome`, and your pre-call webhook gets a `callback` object. On by default; tune it with `inboundCallbacks` (window and an optional callback greeting) or on the agent's **Numbers** tab. [Guide](/platform/inbound#callbacks)
+
 ### Do-not-call requests, handled automatically
 Turn on `doNotCallDetection` (or **Detect do-not-call requests** on an agent's Advanced tab): when a caller asks not to be called again, the call shows `doNotCallRequested: true`, the post-call webhook carries it, and their number joins your do-not-call list so campaigns never dial it. Declining an offer or asking for a call back later does not count. [Guide](/platform/campaigns#add-callers-who-ask-automatically)
 

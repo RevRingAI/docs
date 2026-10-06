@@ -58,6 +58,7 @@ When an inbound call arrives, RevRing sends a POST request to your webhook:
 - `fromNumber`: Caller's phone number (E.164 format)
 - `toNumber`: The number that was dialed
 - `dialedAgentId`: The agent ID when the call was routed directly to an agent (null if routed via phone number)
+- `callback`: Present only when the caller is returning a call your account placed in the callback window: `{ "callId", "calledAt", "outcome" }` (the outbound call, when it was placed, and `answered`, `voicemail`, `no_answer`, `busy` or `declined`). See [Callbacks](/platform/inbound#callbacks)
 
 ### Response Format
 
