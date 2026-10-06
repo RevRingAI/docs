@@ -633,7 +633,7 @@ Deliveries are signed with RevRing's `X-RevRing-Signature` header, not the other
 
 Your webhook should:
 - Respond with `200 OK` status code
-- Respond within 5 seconds
+- Respond within 30 seconds (a few seconds is better: acknowledge first, then process)
 - Handle the webhook asynchronously if processing takes time
 
 RevRing does not require any specific response body. Simply acknowledge receipt:
@@ -917,7 +917,7 @@ For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
 
 <AccordionGroup>
   <Accordion title="Webhook returns timeout">
-    - Ensure your webhook responds within 3 seconds (pre-call) or 5 seconds (post-call)
+    - Ensure your webhook responds within 5 seconds (pre-call; the caller is waiting) or 30 seconds (post-call)
     - Move slow operations (database writes, external API calls) to async background processing
     - Return acknowledgment immediately, then process in background
     - Check your server's response time and optimize slow queries
