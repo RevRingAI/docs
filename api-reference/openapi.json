@@ -1838,6 +1838,363 @@
         }
       }
     },
+    "/sip-trunks/connect/twilio/numbers": {
+      "post": {
+        "summary": "List Twilio Numbers",
+        "operationId": "listTwilioNumbers",
+        "tags": [
+          "SIP Trunks"
+        ],
+        "description": "Lists the phone numbers on a Twilio account and where each one routes today, so you can choose which to connect. Numbers already on a RevRing trunk are flagged.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "twilio"
+                ],
+                "properties": {
+                  "twilio": {
+                    "type": "object",
+                    "required": [
+                      "accountSid"
+                    ],
+                    "description": "Your Twilio account credentials. Used for this request only and never stored. Provide authToken, or apiKeySid with apiKeySecret.",
+                    "properties": {
+                      "accountSid": {
+                        "type": "string",
+                        "example": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "description": "Twilio Account SID (AC...)"
+                      },
+                      "authToken": {
+                        "type": "string",
+                        "description": "Twilio Auth Token"
+                      },
+                      "apiKeySid": {
+                        "type": "string",
+                        "description": "Twilio API key SID (SK...), instead of the Auth Token"
+                      },
+                      "apiKeySecret": {
+                        "type": "string",
+                        "description": "Secret of the API key"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The account's numbers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "e164": {
+                            "type": "string",
+                            "example": "+14155550123"
+                          },
+                          "friendlyName": {
+                            "type": "string"
+                          },
+                          "voice": {
+                            "type": "boolean",
+                            "description": "Whether the number can take voice calls"
+                          },
+                          "routing": {
+                            "type": "string",
+                            "enum": [
+                              "trunk",
+                              "application",
+                              "webhook",
+                              "none"
+                            ],
+                            "description": "Where the number's calls go today"
+                          },
+                          "routingDetail": {
+                            "type": "string",
+                            "example": "voice webhook example.com"
+                          },
+                          "onRevRing": {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              "this_organization",
+                              "another_organization",
+                              null
+                            ],
+                            "description": "Set when the number is already on a RevRing trunk"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body, or Twilio rejected the credentials (invalid_twilio_credentials)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Twilio could not be reached (twilio_unavailable)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sip-trunks/connect/twilio": {
+      "post": {
+        "summary": "Connect Twilio",
+        "operationId": "connectTwilio",
+        "tags": [
+          "SIP Trunks"
+        ],
+        "description": "Connects Twilio numbers in one step: creates an Elastic SIP trunk in your Twilio account with origination to sip.revring.ai and a fresh termination credential, moves the chosen numbers onto it, and creates the matching RevRing trunk. With agentId, the numbers are also assigned to that agent for inbound calls (and the trunk becomes its outbound trunk if it has none). If any step fails, everything created in Twilio is removed and your numbers keep their current routing.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "twilio",
+                  "numbers"
+                ],
+                "properties": {
+                  "twilio": {
+                    "type": "object",
+                    "required": [
+                      "accountSid"
+                    ],
+                    "description": "Your Twilio account credentials. Used for this request only and never stored. Provide authToken, or apiKeySid with apiKeySecret.",
+                    "properties": {
+                      "accountSid": {
+                        "type": "string",
+                        "example": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "description": "Twilio Account SID (AC...)"
+                      },
+                      "authToken": {
+                        "type": "string",
+                        "description": "Twilio Auth Token"
+                      },
+                      "apiKeySid": {
+                        "type": "string",
+                        "description": "Twilio API key SID (SK...), instead of the Auth Token"
+                      },
+                      "apiKeySecret": {
+                        "type": "string",
+                        "description": "Secret of the API key"
+                      }
+                    }
+                  },
+                  "numbers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "items": {
+                      "type": "string",
+                      "example": "+14155550123"
+                    },
+                    "description": "E.164 numbers on the Twilio account to connect"
+                  },
+                  "agentId": {
+                    "type": "string",
+                    "description": "Agent that answers these numbers"
+                  },
+                  "friendlyName": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "default": "Twilio (connected)",
+                    "description": "Name of the RevRing trunk"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "trunk": {
+                          "type": "object",
+                          "description": "The RevRing SIP trunk, as returned by Get SIP Trunk"
+                        },
+                        "twilio": {
+                          "type": "object",
+                          "properties": {
+                            "trunkSid": {
+                              "type": "string",
+                              "example": "TKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            },
+                            "domainName": {
+                              "type": "string",
+                              "example": "revring-ab12cd34ef.pstn.twilio.com"
+                            },
+                            "originationUri": {
+                              "type": "string",
+                              "example": "sip:sip.revring.ai"
+                            }
+                          }
+                        },
+                        "numbers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "e164": {
+                                "type": "string"
+                              },
+                              "previousRouting": {
+                                "type": "string",
+                                "example": "voice webhook example.com"
+                              }
+                            }
+                          }
+                        },
+                        "agent": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "numbers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body, a number that cannot take voice calls (number_not_voice_capable), or rejected credentials (invalid_twilio_credentials)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A number is not on this Twilio account (twilio_number_not_found), or agent_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A number is already on a RevRing trunk (number_in_use)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Twilio could not complete the setup; nothing was left behind in your account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/agents": {
       "get": {
         "summary": "List Agents",

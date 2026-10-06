@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 5, 2026
 
+### Connect Twilio in one step
+Bring Twilio numbers over with your Account SID and Auth Token: RevRing creates the Elastic SIP trunk, points it here, moves the numbers you pick and can assign them to an agent. From the dashboard (**SIP Trunks > Connect Twilio**) or `POST /v1/sip-trunks/connect/twilio`. [Guide](/platform/telephony#connect-twilio-in-one-step)
+
 ### Fix failing calls
 Build a test suite from an agent's recent calls that failed a success criterion and run it, in one step from the dashboard Overview or `POST /v1/test-suites/from-failing-calls`. Success criteria now count a skipped required action as `fail`; an outcome the call never reached stays `unknown`. [Guide](/platform/test-suites#fix-failing-calls)
 

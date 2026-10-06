@@ -33,6 +33,39 @@ This URI must be configured as the Origination destination in your telephony pro
 
 Twilio Elastic SIP Trunking is recommended for most users due to its reliability, global coverage, and pay-as-you-go pricing.
 
+### Connect Twilio in one step
+
+The fastest way to bring Twilio numbers to RevRing. You give your Account SID and Auth Token, pick the numbers, and RevRing does every step below for you: it creates the Elastic SIP trunk in your Twilio account, points origination at `sip.revring.ai`, creates the termination credential, moves the numbers onto the trunk, and adds the matching trunk here.
+
+1. Open [SIP Trunks](https://dashboard.revring.ai/app/sip-trunks) and select **Connect Twilio**
+2. Enter your **Account SID** and **Auth Token** (Twilio Console home page, Account Info) and select **Find my numbers**
+3. Pick the numbers to connect. Each one shows where its calls go today, and numbers already on RevRing cannot be picked again
+4. Optionally choose the agent that answers these numbers, then select **Connect**
+
+Calls to the connected numbers come to RevRing right away, and your agents can call out from them. Your Twilio credentials are used for this setup only and are not stored. If any step fails, everything created in your Twilio account is removed and your numbers keep their current routing.
+
+<Warning>
+Connecting a number moves its calls to RevRing. If the number answers calls somewhere else today (a voice webhook, a TwiML app or another SIP trunk), that setup stops receiving them.
+</Warning>
+
+From the API:
+
+```bash
+# 1. See the account's numbers and where each routes today
+curl -X POST https://api.revring.ai/v1/sip-trunks/connect/twilio/numbers \
+  -H "x-api-key: YOUR_API_KEY" -H "Content-Type: application/json" \
+  -d '{ "twilio": { "accountSid": "AC...", "authToken": "..." } }'
+
+# 2. Connect the ones you want, answered by an agent
+curl -X POST https://api.revring.ai/v1/sip-trunks/connect/twilio \
+  -H "x-api-key: YOUR_API_KEY" -H "Content-Type: application/json" \
+  -d '{ "twilio": { "accountSid": "AC...", "authToken": "..." }, "numbers": ["+14155550123"], "agentId": "cm..." }'
+```
+
+A Twilio API key (`apiKeySid` and `apiKeySecret`) works in place of the Auth Token. To disconnect later, delete the trunk here, then delete the trunk named **RevRing** under Elastic SIP Trunking in the Twilio Console; its numbers go back to the voice settings configured on each number.
+
+To set up the trunk yourself instead, follow the steps below.
+
 ### Prerequisites
 
 - Active Twilio account

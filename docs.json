@@ -129,7 +129,9 @@
               "api-reference/sip-trunks/list-available-numbers",
               "api-reference/sip-trunks/create",
               "api-reference/sip-trunks/update",
-              "api-reference/sip-trunks/delete"
+              "api-reference/sip-trunks/delete",
+              "api-reference/sip-trunks/list-twilio-numbers",
+              "api-reference/sip-trunks/connect-twilio"
             ]
           },
           {
