@@ -1,0 +1,52 @@
+---
+title: 'Contact Memory'
+description: 'Agents that remember each person they talk to, across calls'
+icon: 'brain'
+---
+
+With contact memory, your agents remember the people they talk to. After each call, what the person said that matters for next time is added to a short memory kept for their phone number. At the start of the next call, inbound or outbound, the agent knows it.
+
+A memory keeps durable facts:
+
+- the name the person goes by, and their language
+- what they want or are interested in
+- appointments, callbacks and other commitments, with their dates
+- concerns and objections
+- preferences, such as the best time to reach them
+- where things stand and what comes next
+
+It never keeps payment card numbers, bank details, passwords, ID numbers or verification codes. When a call contradicts the memory, the latest call wins (a rescheduled appointment replaces the old time), and everything else that is still true is kept. A memory is at most 2,000 characters.
+
+The agent treats the memory as background: it confirms anything important before relying on it and never reads it out.
+
+## Turn it on
+
+On the agent's **Numbers** tab, under **Contact memory**:
+
+- **Remember what each call taught** updates the memory after every call.
+- **Use the memory on calls** gives the agent the memory at the start of each call.
+
+Or with the API:
+
+```json
+"contactMemory": { "read": true, "update": true }
+```
+
+Both are off by default. Memory belongs to your account, so every agent that uses it shares what is known about a person: an inbound agent knows what your outbound agent learned.
+
+Memory is not written from test-suite calls, web widget visitors (they have their own [conversation memory](/platform/web-widget)) or callers without a phone number. Agents set to keep call metadata only never write it, and agents that redact personal data write it from the redacted conversation.
+
+## See, correct or erase a memory
+
+| Request | What it does |
+| --- | --- |
+| `GET /v1/contacts/memories` | Memories, newest first. `q` searches numbers and memory text |
+| `GET /v1/contacts/{phoneNumber}/memory` | One person's memory |
+| `PUT /v1/contacts/{phoneNumber}/memory` | Write or correct it: `{ "memory": "..." }` |
+| `DELETE /v1/contacts/{phoneNumber}/memory` | Erase it, for example when someone asks you to delete their data |
+
+`phoneNumber` is E.164, for example `+14155550123` (URL-encode the `+` as `%2B`).
+
+<Tip>
+[Callback recognition](/platform/inbound#callbacks) works without contact memory: a lead returning your call is always recognized from your last call to them. Contact memory adds what every earlier call taught.
+</Tip>

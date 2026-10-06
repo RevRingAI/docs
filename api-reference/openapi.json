@@ -72,6 +72,10 @@
     {
       "name": "Alerts",
       "description": "Alert rules on call metrics, delivered to a webhook or Slack"
+    },
+    {
+      "name": "Contacts",
+      "description": "What your agents remember about people"
     }
   ],
   "paths": {
@@ -9203,6 +9207,191 @@
           }
         }
       }
+    },
+    "/contacts/memories": {
+      "get": {
+        "summary": "List Contact Memories",
+        "description": "What your agents remember about people, newest first.",
+        "tags": [
+          "Contacts"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search phone numbers and memory text",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Memories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ContactMemory"
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contacts/{phoneNumber}/memory": {
+      "get": {
+        "summary": "Get Contact Memory",
+        "tags": [
+          "Contacts"
+        ],
+        "parameters": [
+          {
+            "name": "phoneNumber",
+            "in": "path",
+            "required": true,
+            "description": "E.164, URL-encoded (for example %2B14155550123)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The memory",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ContactMemory"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No memory for this number"
+          }
+        }
+      },
+      "put": {
+        "summary": "Set Contact Memory",
+        "description": "Write or correct what your agents remember about this person.",
+        "tags": [
+          "Contacts"
+        ],
+        "parameters": [
+          {
+            "name": "phoneNumber",
+            "in": "path",
+            "required": true,
+            "description": "E.164, URL-encoded (for example %2B14155550123)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "memory"
+                ],
+                "properties": {
+                  "memory": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The memory",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ContactMemory"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Contact Memory",
+        "description": "Your agents forget this person.",
+        "tags": [
+          "Contacts"
+        ],
+        "parameters": [
+          {
+            "name": "phoneNumber",
+            "in": "path",
+            "required": true,
+            "description": "E.164, URL-encoded (for example %2B14155550123)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erased"
+          },
+          "404": {
+            "description": "No memory for this number"
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -10997,6 +11186,9 @@
             "required": [
               "enabled"
             ]
+          },
+          "contactMemory": {
+            "$ref": "#/components/schemas/ContactMemorySettings"
           }
         },
         "required": [
@@ -11560,6 +11752,14 @@
             "required": [
               "enabled"
             ]
+          },
+          "contactMemory": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactMemorySettings"
+              }
+            ],
+            "nullable": true
           }
         },
         "required": [
@@ -12128,6 +12328,14 @@
             "required": [
               "enabled"
             ]
+          },
+          "contactMemory": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactMemorySettings"
+              }
+            ],
+            "nullable": true
           }
         }
       },
@@ -15404,6 +15612,48 @@
             }
           },
           "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ContactMemorySettings": {
+        "type": "object",
+        "description": "Contact memory: `update` adds what each call taught about the person to a memory kept for their phone number; `read` gives the agent that memory at the start of inbound and outbound calls. Both off by default. See [Contact memory](/platform/contact-memory).",
+        "properties": {
+          "read": {
+            "type": "boolean"
+          },
+          "update": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "read",
+          "update"
+        ]
+      },
+      "ContactMemory": {
+        "type": "object",
+        "properties": {
+          "phoneNumber": {
+            "type": "string",
+            "description": "E.164"
+          },
+          "memory": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "lastCallId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The call that last updated it (null when written through the API)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
             "type": "string",
             "format": "date-time"
           }

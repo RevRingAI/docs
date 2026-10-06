@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### Contact memory
+Agents can now remember the people they talk to. With `contactMemory` (or **Contact memory** on the agent's **Numbers** tab), each call adds what matters for next time to a short memory kept for the person's phone number: the name they go by, what they want, appointments with dates, concerns and next steps, never card numbers or IDs. The next call, inbound or outbound, starts with it. See, correct or erase memories with `/v1/contacts`. Off by default. [Guide](/platform/contact-memory)
+
 ### Callbacks, recognized
 When someone you called in the last 30 days calls your agent's number back, the agent knows it is a callback: the outbound call's variables (their name, your lead ID) come with the call, the agent is told how that call went and what was said, and it greets a returning caller instead of repeating an opening written for calls it places. Callbacks carry `is_callback`, `callback_call_id`, `last_call_time` and `last_call_outcome`, and your pre-call webhook gets a `callback` object. On by default; tune it with `inboundCallbacks` (window and an optional callback greeting) or on the agent's **Numbers** tab. [Guide](/platform/inbound#callbacks)
 

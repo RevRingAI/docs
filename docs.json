@@ -27,6 +27,7 @@
             "pages": [
               "platform/telephony",
               "platform/inbound",
+              "platform/contact-memory",
               "platform/outbound",
               "platform/campaigns",
               "platform/prompting-variables",
@@ -185,6 +186,15 @@
               "api-reference/do-not-call/list",
               "api-reference/do-not-call/add",
               "api-reference/do-not-call/remove"
+            ]
+          },
+          {
+            "group": "Contacts",
+            "pages": [
+              "api-reference/contacts/list-memories",
+              "api-reference/contacts/get-memory",
+              "api-reference/contacts/set-memory",
+              "api-reference/contacts/delete-memory"
             ]
           },
           {
