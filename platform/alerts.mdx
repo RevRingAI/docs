@@ -1,0 +1,87 @@
+---
+title: 'Alerts'
+description: 'Get a webhook or Slack message when failed calls, tool errors, negative sentiment or call volume cross a threshold.'
+icon: 'bell'
+---
+
+Alerts watch your calls and tell you when something needs attention: more calls failing than usual, a tool your agent depends on returning errors, callers getting frustrated, or call volume dropping to nothing. Each alert sends one message when it fires and one when it resolves.
+
+## Create an alert
+
+**Dashboard:** open **Alerts** in the sidebar and click **New alert**. Pick what to watch, which agent's calls (or all agents), the threshold and the time window, and where to send it.
+
+**API:**
+
+```bash
+curl -X POST https://api.revring.ai/v1/alert-rules \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Failed calls on the booking line",
+    "agentId": "AGENT_ID",
+    "metric": "call_failure_rate",
+    "comparator": "above",
+    "threshold": 20,
+    "windowMinutes": 60,
+    "minCalls": 10,
+    "webhookUrl": "https://example.com/revring-alerts",
+    "slackWebhookUrl": "https://hooks.slack.com/services/T000/B000/XXXX"
+  }'
+```
+
+| Field | Description |
+|-------|-------------|
+| `name` | Shown in notifications and the dashboard. |
+| `metric` | What to watch (see below). |
+| `agentId` | Only this agent's calls. Leave it out for all agents. |
+| `comparator` | `above` (default) or `below`. |
+| `threshold` | A percent from 0 to 100 for rates, or a number of calls for `call_count`. |
+| `windowMinutes` | The period looked at: `15`, `60` (default), `240` or `1440`. |
+| `minCalls` | Rates are only judged with at least this many calls in the period (default 10), so one bad call in a quiet hour does not fire an alert. |
+| `webhookUrl` | An https endpoint for a JSON notification. |
+| `slackWebhookUrl` | A Slack [incoming webhook](https://api.slack.com/messaging/webhooks) URL. |
+| `enabled` | Turn the alert off without deleting it. |
+
+Each alert needs a webhook, a Slack webhook, or both. An organization can have up to 20 alerts.
+
+## What you can watch
+
+| Metric | Value |
+|--------|-------|
+| `call_failure_rate` | Percent of finished calls that failed. Outbound calls that were not answered count as failed. |
+| `evaluation_fail_rate` | Percent of calls where at least one [success criterion](/platform/webhooks#post-call-evaluation) was judged `fail` (calls with no `pass` or `fail` verdict are not counted). |
+| `negative_sentiment_rate` | Percent of calls with negative [caller sentiment](/platform/webhooks#caller-sentiment). |
+| `tool_error_rate` | Percent of tool calls (custom tools and webhooks) that returned an error or timed out. |
+| `webhook_failure_rate` | Percent of post-call webhooks that could not be delivered after all retries. |
+| `call_count` | Number of calls. Use `below` to hear when calls stop coming in. |
+
+## How alerts are checked
+
+Every alert is checked every 5 minutes over its time window. When the value crosses the threshold the alert **fires** and sends one notification. It sends nothing more while it stays over the threshold, then sends one more when it **resolves**. Changing an alert's condition takes effect at the next check: an alert that no longer meets its new condition resolves.
+
+To see an alert's current value without sending anything, call `GET /v1/alert-rules/{id}/value`. To check your endpoints, `POST /v1/alert-rules/{id}/test` (or the send icon in the dashboard) sends a test notification. `GET /v1/alert-rules/{id}/events` lists past notifications with the delivery result for each channel.
+
+## Webhook payload
+
+```json
+{
+  "event": "alert.triggered",
+  "alert": {
+    "id": "cmuw...",
+    "name": "Failed calls on the booking line",
+    "metric": "call_failure_rate",
+    "comparator": "above",
+    "threshold": 20,
+    "windowMinutes": 60,
+    "agentId": "AGENT_ID"
+  },
+  "value": 27.5,
+  "sample": 40,
+  "summary": "Failed calls: 27.5% over the last 1 hour (40 in the sample); alert when above 20%.",
+  "timestamp": "2026-10-06T14:05:00.000Z"
+}
+```
+
+`event` is `alert.triggered`, `alert.resolved` or `alert.test`. `sample` is the number of calls (or tool calls, or webhooks) the value was computed from. Alert webhooks are signed like your other webhooks when you have a [signing secret](/platform/webhooks#verify-webhook-sources).
+
+Slack messages carry the alert name and the same summary line.

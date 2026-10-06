@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### Alerts
+Hear about problems before your customers do. Create alerts on failed calls, calls failing a success criterion, negative caller sentiment, tool errors, undelivered post-call webhooks or call volume, for one agent or all, over 15 minutes to 24 hours. Each alert sends one webhook or Slack message when it fires and one when it resolves, with a test button and a history of every notification. Open **Alerts** in the dashboard or use `/v1/alert-rules`. [Guide](/platform/alerts)
+
 ### Knowledge from whole websites, kept current
 A URL source can now read a whole help center or documentation site: add `crawl` with `maxPages` (up to 50) and an optional `includePath`, and RevRing follows the site's links under that path into one source. Set `refreshDays` to read the pages again on a schedule, or refresh a source on demand with `POST /v1/knowledge-bases/{id}/sources/{sourceId}/refresh`. Agents keep answering from the current content during a refresh, and new content replaces it only once it is fully indexed. [Guide](/platform/knowledge-bases#whole-websites)
 

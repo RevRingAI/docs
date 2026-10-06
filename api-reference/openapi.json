@@ -68,6 +68,10 @@
     {
       "name": "Webhooks",
       "description": "Webhook delivery settings for your organization"
+    },
+    {
+      "name": "Alerts",
+      "description": "Alert rules on call metrics, delivered to a webhook or Slack"
     }
   ],
   "paths": {
@@ -8645,6 +8649,420 @@
           }
         }
       }
+    },
+    "/alert-rules": {
+      "get": {
+        "summary": "List Alert Rules",
+        "operationId": "listAlertRules",
+        "tags": [
+          "Alerts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Alert rules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AlertRule"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Alert Rule",
+        "operationId": "createAlertRule",
+        "tags": [
+          "Alerts"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AlertRule"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid settings, or 20 rules already (`limit_reached`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/alert-rules/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Alert rule ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get Alert Rule",
+        "operationId": "getAlertRule",
+        "tags": [
+          "Alerts"
+        ],
+        "responses": {
+          "200": {
+            "description": "The rule with its state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AlertRule"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Alert Rule",
+        "description": "Changes take effect at the next check (within 5 minutes); a firing rule whose new condition is not met resolves.",
+        "operationId": "updateAlertRule",
+        "tags": [
+          "Alerts"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AlertRule"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Alert Rule",
+        "operationId": "deleteAlertRule",
+        "tags": [
+          "Alerts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "deleted": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/alert-rules/{id}/events": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Alert rule ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "List Alert Events",
+        "description": "Past notifications (newest first, up to 100) with the delivery result for each channel.",
+        "operationId": "listAlertEvents",
+        "tags": [
+          "Alerts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AlertEvent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/alert-rules/{id}/value": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Alert rule ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get Alert Value",
+        "description": "The rule's metric right now. Nothing is sent.",
+        "operationId": "getAlertValue",
+        "tags": [
+          "Alerts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        },
+                        "sample": {
+                          "type": "integer"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ok",
+                            "firing"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/alert-rules/{id}/test": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Alert rule ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Send Test Alert",
+        "description": "Sends an `alert.test` notification to the rule's channels with the current value.",
+        "operationId": "testAlertRule",
+        "tags": [
+          "Alerts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Delivered to every channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deliveries": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        },
+                        "value": {
+                          "type": "number"
+                        },
+                        "sample": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "At least one channel could not be reached; deliveries say which",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deliveries": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -14248,6 +14666,296 @@
           "lastAttemptAt": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "AlertRuleCreate": {
+        "type": "object",
+        "description": "Create an alert rule. Needs webhookUrl, slackWebhookUrl or both.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "agentId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Only this agent's calls; null for all agents"
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "call_failure_rate",
+              "evaluation_fail_rate",
+              "negative_sentiment_rate",
+              "tool_error_rate",
+              "webhook_failure_rate",
+              "call_count"
+            ],
+            "description": "What to watch. See [Alerts](/platform/alerts#what-you-can-watch)."
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "above",
+              "below"
+            ],
+            "default": "above"
+          },
+          "threshold": {
+            "type": "number",
+            "description": "Percent (0-100) for rates; a number of calls for call_count"
+          },
+          "windowMinutes": {
+            "type": "integer",
+            "enum": [
+              15,
+              60,
+              240,
+              1440
+            ],
+            "default": 60
+          },
+          "minCalls": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 10,
+            "description": "Rates are only judged with at least this many calls in the window"
+          },
+          "webhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "https endpoint for JSON notifications (signed when you have a signing secret)"
+          },
+          "slackWebhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Slack incoming webhook URL (https://hooks.slack.com/...)"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "name",
+          "metric",
+          "threshold"
+        ]
+      },
+      "AlertRuleUpdate": {
+        "type": "object",
+        "description": "Change an alert rule; omitted fields keep their value.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "agentId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Only this agent's calls; null for all agents"
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "call_failure_rate",
+              "evaluation_fail_rate",
+              "negative_sentiment_rate",
+              "tool_error_rate",
+              "webhook_failure_rate",
+              "call_count"
+            ],
+            "description": "What to watch. See [Alerts](/platform/alerts#what-you-can-watch)."
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "above",
+              "below"
+            ],
+            "default": "above"
+          },
+          "threshold": {
+            "type": "number",
+            "description": "Percent (0-100) for rates; a number of calls for call_count"
+          },
+          "windowMinutes": {
+            "type": "integer",
+            "enum": [
+              15,
+              60,
+              240,
+              1440
+            ],
+            "default": 60
+          },
+          "minCalls": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 10,
+            "description": "Rates are only judged with at least this many calls in the window"
+          },
+          "webhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "https endpoint for JSON notifications (signed when you have a signing secret)"
+          },
+          "slackWebhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Slack incoming webhook URL (https://hooks.slack.com/...)"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "AlertRule": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "agentId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Only this agent's calls; null for all agents"
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "call_failure_rate",
+              "evaluation_fail_rate",
+              "negative_sentiment_rate",
+              "tool_error_rate",
+              "webhook_failure_rate",
+              "call_count"
+            ],
+            "description": "What to watch. See [Alerts](/platform/alerts#what-you-can-watch)."
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "above",
+              "below"
+            ],
+            "default": "above"
+          },
+          "threshold": {
+            "type": "number",
+            "description": "Percent (0-100) for rates; a number of calls for call_count"
+          },
+          "windowMinutes": {
+            "type": "integer",
+            "enum": [
+              15,
+              60,
+              240,
+              1440
+            ],
+            "default": 60
+          },
+          "minCalls": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 10,
+            "description": "Rates are only judged with at least this many calls in the window"
+          },
+          "webhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "https endpoint for JSON notifications (signed when you have a signing secret)"
+          },
+          "slackWebhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Slack incoming webhook URL (https://hooks.slack.com/...)"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "id": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "firing"
+            ]
+          },
+          "lastValue": {
+            "type": "number",
+            "nullable": true,
+            "description": "Value at the last check"
+          },
+          "lastSample": {
+            "type": "integer",
+            "nullable": true
+          },
+          "lastEvaluatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastTriggeredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AlertEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "triggered",
+              "resolved",
+              "test"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          },
+          "sample": {
+            "type": "integer",
+            "nullable": true
+          },
+          "deliveries": {
+            "type": "object",
+            "nullable": true,
+            "description": "Per channel: \"sent\" or \"failed: ...\"",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

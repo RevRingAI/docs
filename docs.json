@@ -36,6 +36,7 @@
               "platform/knowledge-bases",
               "platform/test-suites",
               "platform/webhooks",
+              "platform/alerts",
               "platform/data-controls",
               "platform/webrtc",
               "platform/messaging",
@@ -163,6 +164,19 @@
               "api-reference/campaigns/pause",
               "api-reference/campaigns/cancel",
               "api-reference/campaigns/export"
+            ]
+          },
+          {
+            "group": "Alerts",
+            "pages": [
+              "api-reference/alerts/list",
+              "api-reference/alerts/create",
+              "api-reference/alerts/get",
+              "api-reference/alerts/update",
+              "api-reference/alerts/delete",
+              "api-reference/alerts/events",
+              "api-reference/alerts/value",
+              "api-reference/alerts/test"
             ]
           },
           {
