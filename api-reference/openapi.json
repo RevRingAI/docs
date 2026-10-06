@@ -9590,10 +9590,13 @@
             "items": {
               "type": "string",
               "enum": [
-                "call.started"
+                "call.started",
+                "transfer.started",
+                "transfer.bridged",
+                "transfer.cancelled"
               ]
             },
-            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects."
+            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects; transfer.started, transfer.bridged and transfer.cancelled report transfers as they happen."
           },
           "postCallExtraction": {
             "allOf": [
@@ -10141,10 +10144,13 @@
             "items": {
               "type": "string",
               "enum": [
-                "call.started"
+                "call.started",
+                "transfer.started",
+                "transfer.bridged",
+                "transfer.cancelled"
               ]
             },
-            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects."
+            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects; transfer.started, transfer.bridged and transfer.cancelled report transfers as they happen."
           },
           "postCallExtraction": {
             "allOf": [
@@ -10650,10 +10656,13 @@
             "items": {
               "type": "string",
               "enum": [
-                "call.started"
+                "call.started",
+                "transfer.started",
+                "transfer.bridged",
+                "transfer.cancelled"
               ]
             },
-            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects."
+            "description": "Extra events sent to the post-call webhook URL. `call.started` is sent once when a call connects; transfer.started, transfer.bridged and transfer.cancelled report transfers as they happen."
           },
           "postCallExtraction": {
             "allOf": [

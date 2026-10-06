@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### Transfer events on your webhook
+Add `transfer.started`, `transfer.bridged` and `transfer.cancelled` to an agent's `webhookEvents` (or turn on **Also send transfer events**) to hear about transfers as they happen: started (warm or cold, with the destination), connected, or not completed (declined, voicemail or failed). Agents using the Retell compatibility format receive Retell's `transfer_started`, `transfer_bridged` and `transfer_cancelled`. [Guide](/platform/webhooks#transfer-events)
+
 ### Listen to calls live
 Open any call in progress in the dashboard and select **Listen** to hear both sides as it happens. Nobody on the call can hear you or knows you are listening, so the call is never affected. The transcript on the same page updates every few seconds while the call runs.
 

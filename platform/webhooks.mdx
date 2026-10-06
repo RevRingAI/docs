@@ -533,6 +533,37 @@ To also hear when a call connects, set the agent's `webhookEvents` to `["call.st
 
 The post-call payload itself has no `event` field, so a handler can tell the two apart. With the Retell compatibility format the event is Retell's `call_started`. Started events are sent once and are not retried.
 
+### Transfer events
+
+To hear about transfers as they happen, add any of `transfer.started`, `transfer.bridged` and `transfer.cancelled` to the agent's `webhookEvents` (or turn on **Also send transfer events** in the agent's **Advanced** tab). The post-call webhook URL then receives:
+
+| Event | When |
+|---|---|
+| `transfer.started` | The agent starts a transfer. `transfer.type` is `warm` (the agent briefs the person first) or `cold` (the caller is handed straight over). |
+| `transfer.bridged` | A warm transfer connected: the person accepted and the caller is now talking to them. |
+| `transfer.cancelled` | A warm transfer did not go through. `transfer.reason` is `declined`, `voicemail` or `failed`; the agent stays with the caller. |
+
+```json
+{
+  "event": "transfer.started",
+  "at": "2026-10-06T14:02:11.418Z",
+  "call": {
+    "id": "c1f3...",
+    "organizationId": "cm...",
+    "agentId": "cm...",
+    "agentName": "Front Desk",
+    "direction": "INBOUND",
+    "fromNumber": "+14155550123",
+    "toNumber": "+14155550100",
+    "campaignId": null,
+    "startedAt": "2026-10-06T14:00:52.003Z"
+  },
+  "transfer": { "type": "warm", "to": "+14155550199" }
+}
+```
+
+With the Retell compatibility format the events are Retell's `transfer_started`, `transfer_bridged` and `transfer_cancelled`. Transfer events are sent once and are not retried; the post-call webhook still arrives when the call ends.
+
 ### Compatibility formats
 
 Moving from another voice platform? Set the agent's `postCallWebhookFormat` and the post-call webhook is sent in that platform's payload shape, so the handler you already run keeps working while you switch. Agents created by the [importer](/platform/importing-agents) get this set for you.
