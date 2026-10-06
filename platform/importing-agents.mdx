@@ -94,11 +94,11 @@ Each agent also gets a `checklist` of the steps left to you, and a `status`: `re
 | Voicemail | Hang up or leave a message | Leave a message or hang up |
 | Analysis | Custom analysis fields become [extraction](/platform/webhooks) fields; call successful becomes an evaluation criterion; user sentiment becomes an extraction field | Data collection becomes extraction fields; evaluation criteria carry over |
 | Knowledge | Knowledge bases with URL, text and document sources, plus retrieval settings | URL, text and file documents, plus retrieval settings |
-| Webhook | Post-call webhook URL | Conversation initiation webhook becomes the pre-call webhook |
+| Webhook | Post-call webhook URL | Post-call webhook URL (the agent's own workspace webhook, or the workspace default); conversation initiation webhook becomes the pre-call webhook |
 
 **Voices.** The importer picks the matching Studio voice when one is available, and otherwise the closest voice by language and gender. Preview the voice before going live. No platform lets you export a cloned voice, so clone it again from a recording you own.
 
-**Webhook payloads.** An imported Retell webhook URL keeps Retell's `call_ended` / `call_analyzed` payload shape, and ElevenLabs agents are set to the `post_call_transcription` shape, so your existing handler keeps working. Only the signature check changes: verify `X-RevRing-Signature`. See [compatibility formats](/platform/webhooks#compatibility-formats).
+**Webhook payloads.** An imported Retell webhook URL keeps Retell's `call_ended` / `call_analyzed` payload shape, and an ElevenLabs agent's post-call webhook keeps the `post_call_transcription` shape, so your existing handler keeps working. A webhook that is turned off on ElevenLabs is not set. Only the signature check changes: verify `X-RevRing-Signature`. See [compatibility formats](/platform/webhooks#compatibility-formats).
 
 **Custom tool requests.** ElevenLabs webhook tools are imported with **Send Raw Request Body** on, so your endpoint receives the same body shape. Retell tools send the arguments under `arguments` instead of `args`; update the handler or turn on Send Raw Request Body.
 
