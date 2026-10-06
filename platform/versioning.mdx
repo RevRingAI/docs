@@ -116,7 +116,7 @@ See [List Agent Environments](/api-reference/agents/list-environments), [Create 
 
 ### Split calls between versions
 
-Split an inbound number's calls between versions to see which one works better on real callers. Give the number a `trafficSplit` of 2 to 5 environments with weights; each call runs the version picked by weight (`null` is production):
+Split an inbound number's calls between versions to see which one works better on real callers. In the dashboard, open the agent's **Numbers** tab and choose **Split between versions** for the number; the **History** tab compares the versions. Through the API, give the number a `trafficSplit` of 2 to 5 environments with weights; each call runs the version picked by weight (`null` is production):
 
 ```json
 PATCH /v1/agents/{id}/phone-numbers/{phoneId}
