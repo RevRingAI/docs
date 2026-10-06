@@ -103,7 +103,7 @@ PUT /v1/agents/{id}/environments/staging
 | Entry point | How to choose the environment |
 |-------------|-------------------------------|
 | Outbound call | `environment` on `POST /calls` (omit for production) |
-| Inbound number | `environment` on the number (`POST /agents/{id}/phone-numbers` or `PATCH /agents/{id}/phone-numbers/{phoneId}`) |
+| Inbound number | `environment` on the number (`POST /agents/{id}/phone-numbers` or `PATCH /agents/{id}/phone-numbers/{phoneId}`), or a `trafficSplit` across versions (see [A/B test versions](#a-b-test-versions)) |
 | Web widget (calls and chat) | `environment` in the agent's widget config |
 | SMS replies | Production |
 | Chat, text and voice tests | The draft by default; `environment` on the run (`production` or a name) to test a live version |
@@ -113,6 +113,24 @@ Unknown names are refused on `POST /calls` with `environment_not_found` before a
 Every call record and post-call webhook carries `environment` (`null` for production) next to `agentRevision`.
 
 See [List Agent Environments](/api-reference/agents/list-environments), [Create or Update Environment](/api-reference/agents/upsert-environment) and [Delete Environment](/api-reference/agents/delete-environment).
+
+### A/B test versions
+
+Split an inbound number's calls between versions to see which one works better on real callers. Give the number a `trafficSplit` of 2 to 5 environments with weights; each call runs the version picked by weight (`null` is production):
+
+```json
+PATCH /v1/agents/{id}/phone-numbers/{phoneId}
+{ "trafficSplit": [ { "environment": null, "weight": 80 }, { "environment": "candidate", "weight": 20 } ] }
+```
+
+Every call records the version it ran on (`environment` and `agentRevision`), so you can compare them:
+
+```bash
+curl "https://api.revring.ai/v1/analytics/versions?agentId=AGENT_ID&from=2026-10-01T00:00:00Z" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+Each row is one version with its `calls`, `failureRate`, `avgDurationSeconds`, `negativeSentimentRate`, `evaluationPassRate` and per-criterion pass rates from your [success criteria](/platform/webhooks#post-call-evaluation). The period defaults to the last 7 days (up to 90). When you have a winner, publish it (or point production at it) and remove the split with `"trafficSplit": null`. The number's own `environment` is kept while a split is set, and an environment that a split uses cannot be deleted.
 
 <Tip>
 A common setup: keep `production` on manual publishing, point `staging` at the draft (`revision: null`) and bind a spare inbound number to `staging`. Call that number to hear the draft on a real phone; publish when it sounds right.

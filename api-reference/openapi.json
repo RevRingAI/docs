@@ -3428,7 +3428,7 @@
       },
       "patch": {
         "summary": "Update Phone Number",
-        "description": "Changes which environment inbound calls on this number run on. Send null for production.",
+        "description": "Changes which environment inbound calls on this number run on (null for production), or splits them across versions with `trafficSplit`.",
         "tags": [
           "Agents"
         ],
@@ -3439,14 +3439,36 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "environment"
-                ],
                 "properties": {
                   "environment": {
                     "type": "string",
                     "nullable": true,
                     "pattern": "^[a-z][a-z0-9-]{0,31}$"
+                  },
+                  "trafficSplit": {
+                    "type": "array",
+                    "nullable": true,
+                    "minItems": 2,
+                    "maxItems": 5,
+                    "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [A/B test versions](/platform/versioning#a-b-test-versions).",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "environment": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "weight": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        }
+                      },
+                      "required": [
+                        "environment",
+                        "weight"
+                      ]
+                    }
                   }
                 }
               }
@@ -9063,6 +9085,124 @@
           }
         }
       }
+    },
+    "/analytics/versions": {
+      "get": {
+        "summary": "Compare Versions",
+        "description": "An agent's calls grouped by the version they ran on (environment and revision), to compare an A/B split. Default period: the last 7 days; at most 90.",
+        "operationId": "compareVersions",
+        "tags": [
+          "Analytics"
+        ],
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One row per version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "environment": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "null = production"
+                          },
+                          "agentRevision": {
+                            "type": "integer",
+                            "nullable": true
+                          },
+                          "calls": {
+                            "type": "integer"
+                          },
+                          "finishedCalls": {
+                            "type": "integer"
+                          },
+                          "failureRate": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "Percent of finished calls that failed"
+                          },
+                          "avgDurationSeconds": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "negativeSentimentRate": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "evaluationPassRate": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "Percent of judged calls with no failing criterion"
+                          },
+                          "criteria": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "object",
+                              "properties": {
+                                "pass": {
+                                  "type": "integer"
+                                },
+                                "fail": {
+                                  "type": "integer"
+                                },
+                                "passRate": {
+                                  "type": "number",
+                                  "nullable": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid period"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -11920,6 +12060,31 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "trafficSplit": {
+            "type": "array",
+            "nullable": true,
+            "minItems": 2,
+            "maxItems": 5,
+            "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [A/B test versions](/platform/versioning#a-b-test-versions).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "environment": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "weight": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              "required": [
+                "environment",
+                "weight"
+              ]
+            }
           }
         },
         "required": [
@@ -11942,6 +12107,31 @@
             "nullable": true,
             "pattern": "^[a-z][a-z0-9-]{0,31}$",
             "description": "Environment to bind the number to. Omit for production. Must exist on the agent (400 environment_not_found otherwise)"
+          },
+          "trafficSplit": {
+            "type": "array",
+            "nullable": true,
+            "minItems": 2,
+            "maxItems": 5,
+            "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [A/B test versions](/platform/versioning#a-b-test-versions).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "environment": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "weight": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              "required": [
+                "environment",
+                "weight"
+              ]
+            }
           }
         },
         "required": [

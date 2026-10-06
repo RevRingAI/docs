@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### A/B test agent versions
+Split an inbound number's calls between versions of an agent with `trafficSplit` (2 to 5 environments with weights), then compare them with `GET /v1/analytics/versions`: failure rate, call length, negative sentiment and success-criteria pass rates per version. [Guide](/platform/versioning#a-b-test-versions)
+
 ### Response latency on every call
 Each call's `metrics.latency` now shows how quickly the agent answered: the caller's wait from the end of their speech to the agent's reply, broken into turn detection, transcription, thinking and voice, each as p50, p90 and max across the call's turns. [Guide](/platform/webhooks#response-latency)
 
