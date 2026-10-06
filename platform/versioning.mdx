@@ -103,7 +103,7 @@ PUT /v1/agents/{id}/environments/staging
 | Entry point | How to choose the environment |
 |-------------|-------------------------------|
 | Outbound call | `environment` on `POST /calls` (omit for production) |
-| Inbound number | `environment` on the number (`POST /agents/{id}/phone-numbers` or `PATCH /agents/{id}/phone-numbers/{phoneId}`), or a `trafficSplit` across versions (see [A/B test versions](#a-b-test-versions)) |
+| Inbound number | `environment` on the number (`POST /agents/{id}/phone-numbers` or `PATCH /agents/{id}/phone-numbers/{phoneId}`), or a `trafficSplit` across versions (see [Split calls between versions](#split-calls-between-versions)) |
 | Web widget (calls and chat) | `environment` in the agent's widget config |
 | SMS replies | Production |
 | Chat, text and voice tests | The draft by default; `environment` on the run (`production` or a name) to test a live version |
@@ -114,7 +114,7 @@ Every call record and post-call webhook carries `environment` (`null` for produc
 
 See [List Agent Environments](/api-reference/agents/list-environments), [Create or Update Environment](/api-reference/agents/upsert-environment) and [Delete Environment](/api-reference/agents/delete-environment).
 
-### A/B test versions
+### Split calls between versions
 
 Split an inbound number's calls between versions to see which one works better on real callers. Give the number a `trafficSplit` of 2 to 5 environments with weights; each call runs the version picked by weight (`null` is production):
 

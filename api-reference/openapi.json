@@ -3450,7 +3450,7 @@
                     "nullable": true,
                     "minItems": 2,
                     "maxItems": 5,
-                    "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [A/B test versions](/platform/versioning#a-b-test-versions).",
+                    "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [Split calls between versions](/platform/versioning#split-calls-between-versions).",
                     "items": {
                       "type": "object",
                       "properties": {
@@ -12066,7 +12066,7 @@
             "nullable": true,
             "minItems": 2,
             "maxItems": 5,
-            "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [A/B test versions](/platform/versioning#a-b-test-versions).",
+            "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [Split calls between versions](/platform/versioning#split-calls-between-versions).",
             "items": {
               "type": "object",
               "properties": {
@@ -12113,7 +12113,7 @@
             "nullable": true,
             "minItems": 2,
             "maxItems": 5,
-            "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [A/B test versions](/platform/versioning#a-b-test-versions).",
+            "description": "A/B split across versions: each inbound call runs the environment picked by weight (`null` = production). See [Split calls between versions](/platform/versioning#split-calls-between-versions).",
             "items": {
               "type": "object",
               "properties": {
