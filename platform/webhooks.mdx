@@ -104,6 +104,7 @@ The response can also decide how the call runs. Every field is optional:
 | `environment` | Run the agent's version for this [environment](/platform/versioning) |
 | `overrides.firstMessage` | Opening line for this call |
 | `overrides.voiceId` | Voice for this call (an id from [List Voices](/api-reference/voices/list)) |
+| `overrides.language` | Language for this call (e.g. `es`); the agent's [language preset](/platform/multilingual#language-presets) for it supplies the voice and opening line unless you set those too |
 | `overrides.promptAppend` | Text added to the end of the prompt for this call |
 | `overrides.prompt` | Replace the prompt for this call |
 | `reject` | `true` or `{ "reason": "..." }`: the call is not answered by the agent; it is recorded as FAILED with the reason |

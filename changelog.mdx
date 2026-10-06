@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### One agent, many languages
+Pass `language` when you place a call (or from your pre-call webhook for inbound calls) to run that call in the caller's language, and give the agent `languagePresets`: a voice and opening line per language, used whenever a call runs in that language. Agents imported from ElevenLabs bring their per-language opening lines. [Guide](/platform/multilingual#one-agent-many-languages)
+
 ### Alerts
 Hear about problems before your customers do. Create alerts on failed calls, calls failing a success criterion, negative caller sentiment, tool errors, undelivered post-call webhooks or call volume, for one agent or all, over 15 minutes to 24 hours. Each alert sends one webhook or Slack message when it fires and one when it resolves, with a test button and a history of every notification. Open **Alerts** in the dashboard or use `/v1/alert-rules`. [Guide](/platform/alerts)
 

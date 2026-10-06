@@ -10808,6 +10808,24 @@
             "minimum": 0,
             "maximum": 1,
             "description": "Minimum similarity score for retrieved chunks (0-1). Higher values return only highly relevant results."
+          },
+          "languagePresets": {
+            "type": "object",
+            "description": "Voice and opening line per language code (e.g. `es`, `pt-BR`), used when a call runs in that language. See [Language presets](/platform/multilingual#language-presets).",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "voiceId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "firstMessage": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                }
+              }
+            }
           }
         },
         "required": [
@@ -11320,6 +11338,25 @@
             "minimum": 0,
             "maximum": 1,
             "description": "Minimum similarity score for retrieved chunks (0-1). Higher values return only highly relevant results."
+          },
+          "languagePresets": {
+            "type": "object",
+            "description": "Voice and opening line per language code (e.g. `es`, `pt-BR`), used when a call runs in that language. See [Language presets](/platform/multilingual#language-presets).",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "voiceId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "firstMessage": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                }
+              }
+            },
+            "nullable": true
           }
         },
         "required": [
@@ -11837,6 +11874,25 @@
             "minimum": 0,
             "maximum": 1,
             "description": "Minimum similarity score for retrieved chunks (0-1). Higher values return only highly relevant results."
+          },
+          "languagePresets": {
+            "type": "object",
+            "description": "Voice and opening line per language code (e.g. `es`, `pt-BR`), used when a call runs in that language. See [Language presets](/platform/multilingual#language-presets).",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "voiceId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "firstMessage": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                }
+              }
+            },
+            "nullable": true
           }
         }
       },
@@ -12502,6 +12558,10 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9-]{0,31}$",
             "description": "Agent environment to run this call on. Omit for production: the published version in manual publish mode, the agent as saved otherwise. Unknown names are refused with 400 environment_not_found before anything is dialed"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for this call only (e.g. `es`, `pt-BR`); the agent's preset for that language supplies the voice and opening line. See [Language per call](/platform/multilingual#language-per-call)."
           }
         },
         "required": [

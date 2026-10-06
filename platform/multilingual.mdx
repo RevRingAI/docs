@@ -82,6 +82,50 @@ curl -X PATCH https://api.revring.ai/v1/agents/agent_123abc \
 - `sv` (Swedish)
 - `vi` (Vietnamese)
 
+## One agent, many languages
+
+Use one agent for callers in different languages: set the language per call, and give the agent a voice and opening line for each language.
+
+### Language per call
+
+When you know the caller's language before the call (from your CRM, for example), pass it when you place the call. The agent listens and speaks in that language for this call only:
+
+```bash
+curl -X POST https://api.revring.ai/v1/calls \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentId": "AGENT_ID",
+    "toNumber": "+15551234567",
+    "fromNumber": "+15559876543",
+    "language": "es"
+  }'
+```
+
+For inbound calls, your [pre-call webhook](/platform/webhooks) can answer with `"overrides": { "language": "es" }` to run that call in Spanish. The `{{language}}` variable carries the call's language.
+
+### Language presets
+
+`languagePresets` gives the agent a voice and an opening line per language. When a call runs in a language that has a preset, the agent uses that preset's voice and opening line instead of its own:
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "languagePresets": {
+      "es": { "voiceId": "SPANISH_VOICE_ID", "firstMessage": "Hola {{first_name}}, le habla Maya de Northside." },
+      "fr": { "voiceId": "FRENCH_VOICE_ID", "firstMessage": "Bonjour, ici Maya de Northside." }
+    }
+  }'
+```
+
+- A preset can set the voice, the opening line, or both. Whatever it leaves out comes from the agent.
+- A regional code uses its base language's preset when it has none of its own: a call in `pt-BR` uses the `pt` preset.
+- A voice or opening line given explicitly for one call (per-call `voiceId`, or the pre-call webhook's `voiceId` or `firstMessage`) wins over the preset.
+- Preset voices come from the [Voice Library](https://dashboard.revring.ai/app/agents/voices) (`GET /v1/voices`); unknown voices are refused.
+- Agents imported from ElevenLabs bring their per-language opening lines.
+
 ## Writing Prompts for Multilingual Agents
 
 ### Best Practice: Match Prompt Language
