@@ -36,6 +36,7 @@
               "platform/knowledge-bases",
               "platform/test-suites",
               "platform/webhooks",
+              "platform/data-controls",
               "platform/webrtc",
               "platform/messaging",
               "platform/two-way-messaging",

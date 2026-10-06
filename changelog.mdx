@@ -4,6 +4,11 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 icon: 'clock-rotate-left'
 ---
 
+## October 6, 2026
+
+### Remove personal details from call transcripts
+Set an agent's `storageMode` to `redact_pii` (or choose it under **Advanced > Call data storage**) and names, phone numbers, emails, addresses, dates of birth, ID, card, account and medical record numbers, and passwords are replaced with labels like `[phone_number]` in every call's transcript and summary, before the call is stored or sent to your webhook. Pick categories with `piiCategories`. Calls show `piiRedacted: true`. Agents imported from Retell AI or ElevenLabs carry their PII settings over. [Guide](/platform/data-controls)
+
 ## October 5, 2026
 
 ### Connect Twilio in one step

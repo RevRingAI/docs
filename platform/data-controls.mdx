@@ -1,0 +1,57 @@
+---
+title: 'Data Controls'
+description: 'Remove personal details from call transcripts and summaries before they are stored or sent to your webhook.'
+icon: 'shield-halved'
+---
+
+Each agent decides what RevRing keeps from its calls. Turn on personal-detail removal and every call's transcript and summary are cleaned before they are stored, shown in the dashboard or sent to your post-call webhook.
+
+## Remove personal details
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{id} \
+  -H "x-api-key: YOUR_API_KEY" -H "Content-Type: application/json" \
+  -d '{ "storageMode": "redact_pii" }'
+```
+
+After every call, each personal detail in the transcript and summary is replaced with a label naming what was removed:
+
+```text
+Caller: Sure, it's [person_name], [phone_number]. My date of birth is [date_of_birth].
+Agent:  Thanks [person_name], you're booked for Tuesday at 3pm.
+```
+
+What is removed (all of these by default):
+
+| Category | Examples |
+|---|---|
+| `person_name` | A caller's first, last or full name |
+| `phone_number` | Phone numbers, in digits or spoken ("four one five...") |
+| `email` | Email addresses, including spoken forms ("jane at example dot com") |
+| `address` | Street addresses, unit numbers, postal codes |
+| `date_of_birth` | Birth dates |
+| `government_id` | Social Security, passport, driver's license and tax ID numbers |
+| `payment_card` | Card numbers, expiry dates and security codes |
+| `bank_account` | Bank account, routing and IBAN numbers |
+| `account_number` | Customer, member, policy, order and claim numbers |
+| `password_or_pin` | Passwords, passcodes, PINs and security answers |
+| `medical_record_number` | Medical record, patient and health plan member IDs |
+
+To remove only some categories, list them in `piiCategories`:
+
+```json
+{ "storageMode": "redact_pii", "piiCategories": ["payment_card", "government_id", "password_or_pin"] }
+```
+
+How it behaves:
+
+- The redacted transcript and summary are what is stored, shown in the dashboard and sent in the post-call webhook (in every [webhook format](/platform/webhooks)). Tool call arguments and results in the transcript are redacted too.
+- Your agent's own name, your business name, product names, prices and appointment times are kept.
+- Extracted data (`postCallExtraction`) and evaluation results are produced from the full conversation and are **not** redacted, since they hold exactly the fields you asked for. Call variables you send are kept as you sent them.
+- Recordings are not changed.
+- If redaction cannot run for a call, its transcript text is withheld rather than stored with personal details.
+- Calls redacted this way show `"piiRedacted": true`.
+
+## In the dashboard
+
+Open the agent, go to the **Advanced** tab, and set **Call data storage** to **Remove personal details from transcripts and summaries**.

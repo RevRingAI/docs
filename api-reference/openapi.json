@@ -9613,6 +9613,36 @@
             "nullable": true,
             "description": "Success criteria judged after every call (see PostCallEvaluationConfig). null = off"
           },
+          "storageMode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "redact_pii"
+            ],
+            "description": "What call content is kept. `full` keeps everything; `redact_pii` removes personal details from the transcript and summary before the call is stored or sent. See [Data Controls](/platform/data-controls).",
+            "nullable": true
+          },
+          "piiCategories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "person_name",
+                "phone_number",
+                "email",
+                "address",
+                "date_of_birth",
+                "government_id",
+                "payment_card",
+                "bank_account",
+                "account_number",
+                "password_or_pin",
+                "medical_record_number"
+              ]
+            },
+            "description": "Personal detail categories removed in `redact_pii` mode. Default: all.",
+            "nullable": true
+          },
           "publishMode": {
             "type": "string",
             "enum": [
@@ -10134,6 +10164,36 @@
             "nullable": true,
             "description": "Success criteria judged after every call (see PostCallEvaluationConfig). null = off"
           },
+          "storageMode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "redact_pii"
+            ],
+            "description": "What call content is kept. `full` keeps everything; `redact_pii` removes personal details from the transcript and summary before the call is stored or sent. See [Data Controls](/platform/data-controls).",
+            "nullable": true
+          },
+          "piiCategories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "person_name",
+                "phone_number",
+                "email",
+                "address",
+                "date_of_birth",
+                "government_id",
+                "payment_card",
+                "bank_account",
+                "account_number",
+                "password_or_pin",
+                "medical_record_number"
+              ]
+            },
+            "description": "Personal detail categories removed in `redact_pii` mode. Default: all.",
+            "nullable": true
+          },
           "endCallEnabled": {
             "type": "boolean",
             "description": "Allow agent to end calls"
@@ -10612,6 +10672,36 @@
             ],
             "nullable": true,
             "description": "Success criteria judged after every call (see PostCallEvaluationConfig). null = off"
+          },
+          "storageMode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "redact_pii"
+            ],
+            "description": "What call content is kept. `full` keeps everything; `redact_pii` removes personal details from the transcript and summary before the call is stored or sent. See [Data Controls](/platform/data-controls).",
+            "nullable": true
+          },
+          "piiCategories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "person_name",
+                "phone_number",
+                "email",
+                "address",
+                "date_of_birth",
+                "government_id",
+                "payment_card",
+                "bank_account",
+                "account_number",
+                "password_or_pin",
+                "medical_record_number"
+              ]
+            },
+            "description": "Personal detail categories removed in `redact_pii` mode. Default: all.",
+            "nullable": true
           },
           "publishMode": {
             "type": "string",
@@ -11379,6 +11469,10 @@
             "additionalProperties": {
               "type": "number"
             }
+          },
+          "piiRedacted": {
+            "type": "boolean",
+            "description": "True when personal details were removed from the transcript and summary (agent `storageMode: redact_pii`)."
           },
           "initiatedAt": {
             "type": "string",
