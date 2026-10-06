@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### Live booking on your calendar
+Connect Cal.com or GoHighLevel (beta) on the new **Integrations** page (or `POST /v1/integrations`), then turn on **Appointment booking** on an agent's Tools tab (or set `booking`). The agent gets `check_availability` and `book_appointment`: it offers only the times your calendar returns, confirms the one the caller picks, and books it live on calls and in chats. Calendar keys stay on our side and never reach the agent. [Guide](/platform/integrations)
+
 ### Contact memory
 Agents can now remember the people they talk to. With `contactMemory` (or **Contact memory** on the agent's **Numbers** tab), each call adds what matters for next time to a short memory kept for the person's phone number: the name they go by, what they want, appointments with dates, concerns and next steps, never card numbers or IDs. The next call, inbound or outbound, starts with it. See, correct or erase memories with `/v1/contacts`. Off by default. [Guide](/platform/contact-memory)
 

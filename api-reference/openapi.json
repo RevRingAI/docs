@@ -76,6 +76,10 @@
     {
       "name": "Contacts",
       "description": "What your agents remember about people"
+    },
+    {
+      "name": "Integrations",
+      "description": "Calendars your agents book on"
     }
   ],
   "paths": {
@@ -9392,6 +9396,254 @@
           }
         }
       }
+    },
+    "/integrations": {
+      "get": {
+        "summary": "List Integrations",
+        "tags": [
+          "Integrations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Connections (credentials are never returned)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Integration"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Connect Integration",
+        "description": "Checked live before it is saved.",
+        "tags": [
+          "Integrations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "provider",
+                  "credentials"
+                ],
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "calcom",
+                      "gohighlevel"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "credentials": {
+                    "type": "object",
+                    "description": "calcom: {apiKey}; gohighlevel: {token}"
+                  },
+                  "config": {
+                    "type": "object",
+                    "description": "gohighlevel: {locationId}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Integration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body, or the connection was refused (`connection_failed` with a `message`)"
+          }
+        }
+      }
+    },
+    "/integrations/{id}": {
+      "patch": {
+        "summary": "Update Integration",
+        "description": "New credentials or settings are checked live first.",
+        "tags": [
+          "Integrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "credentials": {
+                    "type": "object"
+                  },
+                  "config": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Integration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body, or the connection was refused (`connection_failed` with a `message`)"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Disconnect Integration",
+        "description": "Agents booking on it stop offering appointments.",
+        "tags": [
+          "Integrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disconnected"
+          }
+        }
+      }
+    },
+    "/integrations/{id}/test": {
+      "post": {
+        "summary": "Test Integration",
+        "tags": [
+          "Integrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The result is recorded on status and lastError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Integration"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integrations/{id}/calendars": {
+      "get": {
+        "summary": "List Calendars",
+        "description": "What agents can book on: Cal.com event types or GoHighLevel calendars.",
+        "tags": [
+          "Integrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Calendars",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Calendar"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The provider could not be reached"
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -11189,6 +11441,14 @@
           },
           "contactMemory": {
             "$ref": "#/components/schemas/ContactMemorySettings"
+          },
+          "booking": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BookingSettings"
+              }
+            ],
+            "nullable": true
           }
         },
         "required": [
@@ -11757,6 +12017,14 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/ContactMemorySettings"
+              }
+            ],
+            "nullable": true
+          },
+          "booking": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BookingSettings"
               }
             ],
             "nullable": true
@@ -12333,6 +12601,14 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/ContactMemorySettings"
+              }
+            ],
+            "nullable": true
+          },
+          "booking": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BookingSettings"
               }
             ],
             "nullable": true
@@ -15656,6 +15932,95 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "BookingSettings": {
+        "type": "object",
+        "description": "Live booking on a connected calendar: the agent gets check_availability and book_appointment. See [Integrations](/platform/integrations).",
+        "properties": {
+          "integrationId": {
+            "type": "string"
+          },
+          "calendarId": {
+            "type": "string",
+            "description": "Cal.com event type id or GoHighLevel calendar id (GET /v1/integrations/{id}/calendars)"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 480,
+            "nullable": true,
+            "description": "Default 30; Cal.com event types set their own length"
+          },
+          "timeZone": {
+            "type": "string",
+            "nullable": true,
+            "description": "IANA zone times are offered in; default the agent time zone"
+          }
+        },
+        "required": [
+          "integrationId",
+          "calendarId"
+        ]
+      },
+      "Integration": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "calcom",
+              "gohighlevel"
+            ]
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object",
+            "description": "Non-secret settings, for example locationId"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "error"
+            ]
+          },
+          "lastError": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastCheckedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Calendar": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "nullable": true
           }
         }
       }

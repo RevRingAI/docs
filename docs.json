@@ -32,6 +32,7 @@
               "platform/campaigns",
               "platform/prompting-variables",
               "platform/tools",
+              "platform/integrations",
               "platform/multilingual",
               "platform/conversation-flows",
               "platform/knowledge-bases",
@@ -195,6 +196,17 @@
               "api-reference/contacts/get-memory",
               "api-reference/contacts/set-memory",
               "api-reference/contacts/delete-memory"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "api-reference/integrations/list",
+              "api-reference/integrations/connect",
+              "api-reference/integrations/calendars",
+              "api-reference/integrations/test",
+              "api-reference/integrations/update",
+              "api-reference/integrations/delete"
             ]
           },
           {

@@ -382,6 +382,10 @@ If **Block All Interruptions** is enabled, the interruption threshold has no eff
 
 ## Live Appointment Booking with Cal.com
 
+<Tip>
+The simplest way to book on Cal.com (or GoHighLevel) is now to [connect your calendar](/platform/integrations) and turn on booking for the agent: no tools to register. The hosted connector below keeps working for agents set up with it.
+</Tip>
+
 RevRing hosts a Cal.com connector so agents can check real availability and book appointments live on a call, with no backend required. Two custom tools point at the hosted endpoints and carry your Cal.com API key in server side header configuration, where the model never sees it.
 
 Register these two tools on the agent (dashboard Custom Tools, or `POST /v1/agents/{agentId}/custom-tools`), replacing the key, event type id, and timezone:

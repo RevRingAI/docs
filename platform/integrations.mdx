@@ -1,0 +1,43 @@
+---
+title: 'Integrations'
+description: 'Connect your calendar so agents book appointments live'
+icon: 'plug'
+---
+
+Connect a calendar once, then let any agent check open times and book appointments live, on calls and in chats. The agent only offers times your calendar returns, confirms the time with the caller before booking, and never books the same person twice.
+
+| Calendar | Connect with |
+| --- | --- |
+| Cal.com | An API key (Cal.com: Settings, Developer, API keys) |
+| GoHighLevel (beta) | A private integration token from the sub-account (Settings, Private Integrations; allow calendars, calendar events and contacts) and the sub-account's location ID |
+
+## Connect a calendar
+
+Open **Integrations** in the dashboard and choose **Connect**, or use the API:
+
+```bash
+curl -X POST https://api.revring.ai/v1/integrations \
+  -H "x-api-key: $REVRING_API_KEY" -H "Content-Type: application/json" \
+  -d '{"provider": "calcom", "credentials": {"apiKey": "cal_live_..."}}'
+```
+
+For GoHighLevel, send `"provider": "gohighlevel"`, `"credentials": {"token": "pit-..."}` and `"config": {"locationId": "..."}`.
+
+The connection is checked right away; one that is refused is not saved, and the reason comes back in `message`. Keys and tokens are never returned by the API and never reach your agents. `GET /v1/integrations/{id}/calendars` lists what you can book on (Cal.com event types, GoHighLevel calendars), and `POST /v1/integrations/{id}/test` checks the connection again.
+
+## Turn on booking for an agent
+
+On the agent's **Tools** tab, under **Appointment booking**, choose the connection, the calendar and the appointment length. Or set `booking` on the agent:
+
+```json
+"booking": { "integrationId": "cmx...", "calendarId": "1234567", "durationMinutes": 30 }
+```
+
+The agent gets two tools:
+
+- `check_availability` (optional `date`, `days_ahead`) returns the open times, read in the agent's time zone, with a rule to offer only those times.
+- `book_appointment` (`date`, `time`, `first_name`, and `last_name`, `email`, `phone`, `notes` when known) books the time and confirms it. Cal.com sends the invite to the caller's email, so the agent asks for one; GoHighLevel creates or updates the contact by phone or email.
+
+Mention booking in your prompt so the agent knows when to use them, for example: "When the caller wants an appointment, check availability, offer two of the open times, confirm the one they choose with their name and email, then book it."
+
+If an agent already has custom tools named `check_availability` or `book_appointment` (for example the [hosted Cal.com connector](/platform/tools#live-appointment-booking-with-cal-com)), those keep working and the built-in ones are not added. Disconnecting a calendar turns booking off for the agents that used it.
