@@ -188,6 +188,7 @@
             "pages": [
               "api-reference/knowledge-bases/add-source",
               "api-reference/knowledge-bases/get-source",
+              "api-reference/knowledge-bases/refresh-source",
               "api-reference/knowledge-bases/delete-source"
             ]
           },

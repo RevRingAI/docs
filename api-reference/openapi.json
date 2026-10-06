@@ -5348,7 +5348,7 @@
       ],
       "post": {
         "summary": "Add Source",
-        "description": "Add a source to a knowledge base. Supports three source types:\n- **Text**: Send JSON with `sourceType: \"text\"`, `displayName`, and `content`\n- **URL**: Send JSON with `sourceType: \"url\"` and `originalUrl`\n- **File**: Send `multipart/form-data` with a `file` field (max 20MB)\n\nMaximum of 50 sources per knowledge base. Sources are processed asynchronously.",
+        "description": "Add a source to a knowledge base. Supports three source types:\n- **Text**: Send JSON with `sourceType: \"text\"`, `displayName`, and `content`\n- **URL**: Send JSON with `sourceType: \"url\"` and `originalUrl`; add `crawl` to read linked pages of the same site and/or refresh on a schedule\n- **File**: Send `multipart/form-data` with a `file` field (max 20MB)\n\nMaximum of 50 sources per knowledge base. Sources are processed asynchronously.",
         "operationId": "addKnowledgeBaseSource",
         "tags": [
           "Knowledge Bases"
@@ -8507,6 +8507,126 @@
           },
           "404": {
             "description": "agent_not_found, or no_failing_calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/knowledge-bases/{id}/sources/{sourceId}/refresh": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Knowledge base ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "sourceId",
+          "in": "path",
+          "required": true,
+          "description": "Source ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Refresh Source",
+        "description": "Read a URL source again now, with its crawl settings. Runs in the background. Agents keep using the current content until the new content is fully indexed; unchanged content is not replaced, and a failed read keeps the current content.",
+        "operationId": "refreshKnowledgeBaseSource",
+        "tags": [
+          "Knowledge Bases"
+        ],
+        "responses": {
+          "202": {
+            "description": "Refresh started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "refreshing": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Not a URL source (`not_refreshable`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "402": {
+            "$ref": "#/components/responses/BillingInactiveError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "description": "The source's first read is still running (`busy`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Refreshed less than a minute ago (`too_soon`)",
             "content": {
               "application/json": {
                 "schema": {
@@ -12411,7 +12531,7 @@
           "content": {
             "type": "string",
             "nullable": true,
-            "description": "Text content (for text sources)"
+            "description": "Text content (text sources; for URL sources, the text read from the page or pages)"
           },
           "originalUrl": {
             "type": "string",
@@ -12442,6 +12562,34 @@
             "type": "string",
             "nullable": true,
             "description": "Error message if processing failed"
+          },
+          "crawl": {
+            "type": "object",
+            "nullable": true,
+            "description": "URL sources that read a site and/or refresh on a schedule; null for a single page read once",
+            "properties": {
+              "maxPages": {
+                "type": "integer"
+              },
+              "includePath": {
+                "type": "string",
+                "nullable": true
+              },
+              "refreshDays": {
+                "type": "integer",
+                "nullable": true
+              },
+              "pages": {
+                "type": "integer",
+                "description": "Pages read on the last successful read"
+              },
+              "lastFetchedAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "When the pages were last read"
+              }
+            }
           },
           "createdAt": {
             "type": "string",
@@ -12507,7 +12655,33 @@
           "originalUrl": {
             "type": "string",
             "format": "uri",
-            "description": "URL to fetch content from (http/https only)"
+            "description": "URL to fetch content from (http/https only). With crawl, the page the site crawl starts from."
+          },
+          "crawl": {
+            "type": "object",
+            "description": "Also read the pages this URL links to (same site, under a path), and/or read them again on a schedule. Leave out for a single page read once.",
+            "properties": {
+              "maxPages": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50,
+                "default": 1,
+                "description": "Pages to read, starting at originalUrl (1 = only originalUrl)"
+              },
+              "includePath": {
+                "type": "string",
+                "nullable": true,
+                "maxLength": 200,
+                "description": "Only follow links whose path starts with this (for example /help/). Defaults to the folder of originalUrl."
+              },
+              "refreshDays": {
+                "type": "integer",
+                "nullable": true,
+                "minimum": 1,
+                "maximum": 90,
+                "description": "Read the pages again every N days. Omit to read them once."
+              }
+            }
           }
         },
         "required": [

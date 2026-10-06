@@ -74,7 +74,7 @@ Text sources can be up to 100,000 characters.
 
 Add a web page URL. RevRing fetches and indexes the page content automatically.
 
-**Dashboard:** Click **Add Source** → **URL**, enter a **Name** and the **URL**, then click **Add URL Source**.
+**Dashboard:** Click **Add Source** → **URL**, enter a **Name** and the **URL**, then click **Add URL Source**. Turn on **Read linked pages too** to read a whole site, and pick a schedule under **Keep it current**.
 
 **API:**
 ```bash
@@ -89,8 +89,43 @@ curl -X POST https://api.revring.ai/v1/knowledge-bases/{id}/sources \
 ```
 
 <Note>
-Only `http://` and `https://` URLs are supported. The page content is fetched and indexed at the time the source is added. To update the content, delete and re-add the source.
+Only `http://` and `https://` URLs are supported. Without `crawl` settings, the single page is read once, when the source is added.
 </Note>
+
+#### Whole websites
+
+Add `crawl` to read the pages a URL links to as well, so one source covers a help center or documentation site. RevRing starts at `originalUrl` and follows links on the same site under one path, up to `maxPages` pages, and combines them into one source with each page's address. Linked files (images, PDFs, scripts, feeds, text files) are not followed; add those as file sources.
+
+```bash
+curl -X POST https://api.revring.ai/v1/knowledge-bases/{id}/sources \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sourceType": "url",
+    "originalUrl": "https://help.example.com/",
+    "displayName": "Help center",
+    "crawl": { "maxPages": 25, "includePath": "/articles/", "refreshDays": 7 }
+  }'
+```
+
+| Field | Description |
+|-------|-------------|
+| `maxPages` | Pages to read, 1 to 50 (default 1: only `originalUrl`). |
+| `includePath` | Only follow links whose path starts with this, for example `/help/`. Defaults to the folder of `originalUrl`, so `https://example.com/help/start` stays under `/help/`. |
+| `refreshDays` | Read the pages again every 1 to 90 days. Leave it out to read them once. |
+
+Reading a site takes up to a few minutes. When it finishes, the source's `crawl` shows how many `pages` were read and when (`lastFetchedAt`). The content of all pages counts toward one source.
+
+#### Keeping URL sources current
+
+With `refreshDays` set, RevRing reads the pages again on that schedule. To read a URL source again right away (after you publish a change, for example), hover the source in the dashboard and click the refresh icon, or call:
+
+```bash
+curl -X POST https://api.revring.ai/v1/knowledge-bases/{id}/sources/{sourceId}/refresh \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+The refresh runs in the background (`202`). Your agents keep using the current content the whole time: new content replaces it only once it is fully indexed, and when nothing changed, nothing is replaced. If a refresh cannot read the site, the current content stays. A source can be refreshed once a minute (`429` otherwise), not while its first read is still running (`409`), and only URL sources can be refreshed (`400`).
 
 ### File Sources
 
@@ -214,7 +249,7 @@ curl -X DELETE https://api.revring.ai/v1/knowledge-bases/{id} \
 
 - **Be specific**: Focused, well-structured content retrieves better than long, rambling documents
 - **Use clear headings**: Documents with clear sections help the retrieval system find relevant passages
-- **Keep content current**: Delete and re-add sources when the underlying content changes
+- **Keep content current**: Set `refreshDays` on URL sources, or refresh them after your site changes; replace file and text sources when the underlying content changes
 - **Avoid duplication**: Don't add the same content multiple times across different sources
 
 ### Prompt Integration
@@ -242,7 +277,7 @@ Do not make up information — only share what you can verify from your knowledg
 
 <AccordionGroup>
   <Accordion title="Source stuck in processing">
-    Most sources process within a few seconds to a minute. If a source stays in `processing` for more than 5 minutes, it may have encountered an issue. Try deleting and re-adding the source. For file sources, ensure the file is not corrupted and is in a supported format.
+    Most sources process within a few seconds to a minute; a URL source that reads a whole site can take a few minutes. If a source stays in `processing` for more than 15 minutes, it may have encountered an issue. Try deleting and re-adding the source. For file sources, ensure the file is not corrupted and is in a supported format.
   </Accordion>
 
   <Accordion title="Source failed to process">
