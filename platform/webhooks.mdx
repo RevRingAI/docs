@@ -934,7 +934,7 @@ For each call in [Call Logs](https://dashboard.revring.ai/app/calls):
   <Accordion title="Variables not appearing in agent responses">
     - Verify your pre-call webhook returns valid JSON with variable keys
     - Check variable names match exactly between webhook and prompt (case-sensitive)
-    - Ensure webhook responds within 3 seconds
+    - Ensure the webhook responds within 5 seconds; after that the call starts without its variables
     - Test webhook independently to confirm it returns expected data
     - Review the call's `variables` field in call logs to see what was actually received
   </Accordion>
