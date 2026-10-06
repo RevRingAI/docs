@@ -4,7 +4,7 @@ description: 'Build AI voice agents that speak multiple languages'
 icon: 'language'
 ---
 
-RevRing agents speak and understand 20 languages, plus a multilingual mode for callers who switch languages, with 300+ voices.
+RevRing agents speak and understand 20 languages, plus a multilingual mode for callers who switch languages.
 
 ## Supported Languages
 
@@ -56,31 +56,11 @@ curl -X PATCH https://api.revring.ai/v1/agents/agent_123abc \
   -H "Content-Type: application/json" \
   -d '{
     "language": "es",
-    "voiceId": "revring-rafael"
+    "voiceId": "studio-matilda"
   }'
 ```
 
-**Supported language codes:**
-- `en` (English)
-- `es` (Spanish)
-- `pt` (Portuguese)
-- `de` (German)
-- `it` (Italian)
-- `nl` (Dutch)
-- `zh` (Chinese)
-- `ja` (Japanese)
-- `hi` (Hindi)
-- `tr` (Turkish)
-- `el` (Greek)
-- `uk` (Ukrainian)
-- `ar` (Arabic)
-- `da` (Danish)
-- `et` (Estonian)
-- `fi` (Finnish)
-- `nb` (Norwegian Bokmål)
-- `no` (Norwegian)
-- `sv` (Swedish)
-- `vi` (Vietnamese)
+Use a code from the [Supported Languages](#supported-languages) table.
 
 ## One agent, many languages
 
@@ -184,14 +164,9 @@ Each language has multiple voices to choose from. Visit the [Voice Library](http
 
 Every agent can set a **Backup Voice** (in the dashboard Voice tab, or `fallbackVoiceId` via the API) for seamless voice continuity. In the rare case a voice is temporarily unavailable, the agent switches to its backup voice instantly and the conversation continues as normal. Leave it on **Automatic** to let the platform manage this for you. For multilingual agents we recommend choosing a backup voice in the agent's own language.
 
-### English Voice Categories
+### Studio voices
 
-English offers two categories of voices:
-
-- **English Ultra-Realistic (Beta)**: Cutting-edge voices with exceptional naturalness and expressiveness
-- **English Stable**: Reliable, production-ready voices with consistent performance
-
-If you experience instability with Ultra-Realistic voices, try switching to an **English Stable** voice for better reliability.
+Studio voices are premium voices that speak every supported language, so one Studio voice can serve a multilingual agent. They are billed an additional 2 cents per minute; new agents start on one.
 
 ## Troubleshooting
 
@@ -199,8 +174,8 @@ If you experience instability with Ultra-Realistic voices, try switching to an *
 
 If you notice inconsistent voice quality or unexpected behavior:
 
-1. **Switch Voice Category**: For English agents, try switching from Ultra-Realistic to Stable voices
-2. **Verify Language Match**: Ensure the selected voice matches your agent's language setting
+1. **Try another voice**: preview a few in the [Voice Library](https://dashboard.revring.ai/app/agents/voices); a Studio voice is the steadiest choice for most languages
+2. **Verify Language Match**: Ensure the selected voice suits your agent's language setting
 
 ### Need Help?
 
@@ -225,7 +200,7 @@ curl -X POST https://api.revring.ai/v1/agents \
     "sipTrunkId": "trunk_abc123",
     "name": "Asistente en Español",
     "language": "es",
-    "voiceId": "revring-rafael",
+    "voiceId": "studio-matilda",
     "promptTemplate": "Eres un asistente de servicio al cliente. Ayuda al cliente con sus preguntas.",
     "firstMessage": "Hola, bienvenido. ¿Cómo puedo ayudarte hoy?"
   }'
