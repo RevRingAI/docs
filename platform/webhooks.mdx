@@ -363,7 +363,15 @@ After a call ends, RevRing sends a POST request with complete call details:
     "llm_completion_tokens": 114,
     "llm_input_audio_tokens": 0,
     "llm_output_audio_tokens": 0,
-    "llm_prompt_cached_tokens": 819
+    "llm_prompt_cached_tokens": 819,
+    "latency": {
+      "turns": 9,
+      "e2e": { "count": 9, "p50_ms": 1180, "p90_ms": 1610, "max_ms": 2240 },
+      "eou_delay": { "count": 9, "p50_ms": 420, "p90_ms": 610, "max_ms": 880 },
+      "transcription_delay": { "count": 9, "p50_ms": 180, "p90_ms": 260, "max_ms": 330 },
+      "llm_ttft": { "count": 10, "p50_ms": 520, "p90_ms": 790, "max_ms": 1020 },
+      "tts_ttfb": { "count": 10, "p50_ms": 240, "p90_ms": 300, "max_ms": 410 }
+    }
   },
   "initiatedAt": "2024-03-15T14:30:00.076Z",
   "startedAt": "2024-03-15T14:30:02.529Z",
@@ -392,12 +400,27 @@ After a call ends, RevRing sends a POST request with complete call details:
 - `extraction`: Structured fields pulled from the transcript, as configured in the agent's `postCallExtraction` (see [Post-call data extraction](#post-call-data-extraction)); `null` when not configured
 - `evaluation`: Pass/fail/unknown verdicts for the agent's `postCallEvaluation` criteria, each with a rationale (see [Post-call evaluation](#post-call-evaluation)); `null` when not configured
 - `campaignId`: The [campaign](/platform/campaigns) that placed the call; `null` for calls not placed by a campaign
-- `metrics`: Token usage and audio duration metrics
+- `metrics`: Token usage, audio durations and response latency (see [Response latency](#response-latency))
 - `durationSeconds`: Total call duration (null if never answered)
 
 <Note>
 The example above shows both a custom tool (`check_order_status`) and a system tool (`end_call`). When a call is transferred using `transfer_to_number`, the transcript will contain a similar tool entry with `name: "transfer_to_number"` and `args` containing `to_number`.
 </Note>
+
+### Response latency
+
+`metrics.latency` shows how quickly the agent answered on this call, measured per agent turn and summarized as `count`, `p50_ms`, `p90_ms` and `max_ms` (milliseconds):
+
+| Field | Measures |
+|-------|----------|
+| `e2e` | What the caller waits: from the end of their speech to the start of the agent's reply (the sum of the three below) |
+| `eou_delay` | From the end of the caller's speech until the agent decides they have finished their turn |
+| `transcription_delay` | From the end of the caller's speech until their words are transcribed |
+| `llm_ttft` | From the agent starting to think to the first word of its reply |
+| `tts_ttfb` | From the reply text to the first audio the caller hears |
+| `turns` | Number of agent turns measured |
+
+Interrupted or discarded replies are not counted. Calls where the caller never spoke have `count: 0`.
 
 **Tool timing fields**
 

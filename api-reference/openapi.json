@@ -12373,6 +12373,106 @@
               "tts_characters_count": {
                 "type": "number",
                 "description": "Characters of agent speech synthesized"
+              },
+              "latency": {
+                "type": "object",
+                "description": "How quickly the agent answered, per agent turn. See [Response latency](/platform/webhooks#response-latency).",
+                "properties": {
+                  "turns": {
+                    "type": "integer",
+                    "description": "Agent turns measured"
+                  },
+                  "e2e": {
+                    "type": "object",
+                    "properties": {
+                      "count": {
+                        "type": "integer"
+                      },
+                      "p50_ms": {
+                        "type": "integer"
+                      },
+                      "p90_ms": {
+                        "type": "integer"
+                      },
+                      "max_ms": {
+                        "type": "integer"
+                      }
+                    },
+                    "description": "End of the caller's speech to the start of the agent's reply"
+                  },
+                  "eou_delay": {
+                    "type": "object",
+                    "properties": {
+                      "count": {
+                        "type": "integer"
+                      },
+                      "p50_ms": {
+                        "type": "integer"
+                      },
+                      "p90_ms": {
+                        "type": "integer"
+                      },
+                      "max_ms": {
+                        "type": "integer"
+                      }
+                    },
+                    "description": "End of the caller's speech to the end of their turn being detected"
+                  },
+                  "transcription_delay": {
+                    "type": "object",
+                    "properties": {
+                      "count": {
+                        "type": "integer"
+                      },
+                      "p50_ms": {
+                        "type": "integer"
+                      },
+                      "p90_ms": {
+                        "type": "integer"
+                      },
+                      "max_ms": {
+                        "type": "integer"
+                      }
+                    },
+                    "description": "End of the caller's speech to the transcript being available"
+                  },
+                  "llm_ttft": {
+                    "type": "object",
+                    "properties": {
+                      "count": {
+                        "type": "integer"
+                      },
+                      "p50_ms": {
+                        "type": "integer"
+                      },
+                      "p90_ms": {
+                        "type": "integer"
+                      },
+                      "max_ms": {
+                        "type": "integer"
+                      }
+                    },
+                    "description": "Start of the reply to its first token"
+                  },
+                  "tts_ttfb": {
+                    "type": "object",
+                    "properties": {
+                      "count": {
+                        "type": "integer"
+                      },
+                      "p50_ms": {
+                        "type": "integer"
+                      },
+                      "p90_ms": {
+                        "type": "integer"
+                      },
+                      "max_ms": {
+                        "type": "integer"
+                      }
+                    },
+                    "description": "Reply text to the first audio"
+                  }
+                }
               }
             },
             "additionalProperties": {
