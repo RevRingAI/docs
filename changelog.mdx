@@ -1,9 +1,13 @@
 ---
 title: "What's New"
 description: 'Platform changes that affect how you build with RevRing, newest first.'
+icon: 'clock-rotate-left'
 ---
 
 ## October 5, 2026
+
+### Fix failing calls
+Build a test suite from an agent's recent calls that failed a success criterion and run it, in one step from the dashboard Overview or `POST /v1/test-suites/from-failing-calls`. Success criteria now count a skipped required action as `fail`; an outcome the call never reached stays `unknown`. [Guide](/platform/test-suites#fix-failing-calls)
 
 ### Create a test from a real call
 One click on a call (or `POST /v1/test-suites/{id}/tests/from-call`) turns it into a test case: the caller's side becomes the script, the failed success criteria the rubric. [Guide](/platform/test-suites#from-a-real-call)

@@ -215,7 +215,8 @@
               "api-reference/test-suites/create",
               "api-reference/test-suites/update",
               "api-reference/test-suites/delete",
-              "api-reference/test-suites/create-test-from-call"
+              "api-reference/test-suites/create-test-from-call",
+              "api-reference/test-suites/from-failing-calls"
             ]
           },
           {

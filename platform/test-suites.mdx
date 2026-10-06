@@ -239,6 +239,18 @@ curl -X POST https://api.revring.ai/v1/test-suites/{suiteId}/tests/from-call \
 
 Pass `"save": false` to get the drafted test back without saving it. A test built from a failed call is the fastest way to prove a fix: run it, apply the change (or [Suggest a fix](#suggest-a-fix)), and run it again.
 
+### Fix Failing Calls
+
+When an agent's calls start failing a [success criterion](/platform/webhooks#post-call-evaluation), build a test suite from those calls in one step. On the dashboard Overview, pick the agent and select **Fix** next to the criterion, or:
+
+```bash
+curl -X POST https://api.revring.ai/v1/test-suites/from-failing-calls \
+  -H "x-api-key: YOUR_API_KEY" -H "Content-Type: application/json" \
+  -d '{ "agentId": "cm...", "criterion": "booked_appointment", "days": 7, "limit": 10 }'
+```
+
+The most recent failing calls (up to `limit`, within `days`) each become a test in a new suite, and a run starts right away. Then use [Suggest a fix for the whole run](#one-suggestion-for-a-whole-run) to get one change that addresses every case, apply it, and run the suite again to confirm.
+
 ## Suggest a fix
 
 When a test attempt fails, open it and click **Suggest a fix**. RevRing reviews the conversation, the test script, the pass criteria, and your agent's prompt, then proposes a minimal prompt update with a clear explanation and a line-by-line view of exactly what would change. If the test's pass criteria themselves look unachievable (for example, requiring an outcome outside the agent's control), that is flagged too, so you can fix the test instead of the agent. **Apply and rerun** applies the update and starts a fresh run in one step — with chat tests, you'll see the result in seconds.

@@ -7762,6 +7762,106 @@
           }
         }
       }
+    },
+    "/test-suites/from-failing-calls": {
+      "post": {
+        "summary": "Create Suite From Failing Calls",
+        "tags": [
+          "Test Suites"
+        ],
+        "description": "Build a test suite from an agent's recent calls that failed one evaluation criterion (each call becomes a test, as in Create Test From Call) and start a run.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "agentId",
+                  "criterion"
+                ],
+                "properties": {
+                  "agentId": {
+                    "type": "string"
+                  },
+                  "criterion": {
+                    "type": "string",
+                    "description": "Name of a postCallEvaluation criterion"
+                  },
+                  "days": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 30,
+                    "default": 7
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Suite created and run started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "suite": {
+                          "type": "object"
+                        },
+                        "tests": {
+                          "type": "integer"
+                        },
+                        "skipped": {
+                          "type": "integer"
+                        },
+                        "run": {
+                          "type": "object",
+                          "nullable": true
+                        },
+                        "callIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "agent_not_found, or no_failing_calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {

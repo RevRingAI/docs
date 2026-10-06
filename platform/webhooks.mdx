@@ -487,7 +487,9 @@ PATCH /v1/agents/{id}
 How it behaves:
 
 - Up to 10 criteria per agent. Set `postCallEvaluation` to `null` to turn it off.
-- `pass` and `fail` are only given when the transcript clearly settles the criterion. Anything the call never reached, or that ended before it was settled, is `unknown`, so your success rate is never inflated or deflated by guesses.
+- A criterion that asks the agent to do something is `fail` when the call reached that point and the agent did not do it: a skipped required action counts against the agent.
+- A criterion about an outcome that depends on the caller (they book, buy, pay or share information) is `fail` when the call got to that topic and it did not happen, and `unknown` when the call never got there.
+- `unknown` also covers calls that ended before the agent could respond, so your success rate reflects what actually happened rather than guesses.
 - Every criterion is present in the result, so your handler can rely on the keys.
 - Runs after the call ends, alongside the summary and extraction, and is skipped for calls with no caller speech. Those calls carry `evaluation: null`.
 - Included in the same post-call webhook delivery.
