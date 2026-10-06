@@ -353,6 +353,7 @@ After a call ends, RevRing sends a POST request with complete call details:
   "evaluation": {
     "order_status_given": { "result": "pass", "rationale": "The agent confirmed the order shipped and gave the tracking number." }
   },
+  "sentiment": "positive",
   "metrics": {
     "llm_prompt_tokens": 7585,
     "stt_audio_duration": 58.65,
@@ -509,6 +510,32 @@ Pass rates per criterion over any date range are in the [analytics overview](/ap
 <Tip>
 State each criterion as a single observable outcome. "The caller confirmed an appointment date and time" judges cleanly; "the call went well" does not. Conditional criteria work too: "If the caller asked about pricing, the agent quoted the monthly price".
 </Tip>
+
+### Caller sentiment
+
+Every call with caller speech gets a `sentiment`: how the caller felt over the call as a whole, `positive`, `neutral`, `negative` or `unknown` (the caller barely spoke or the call ended too soon to tell). It is on the call record (`GET /calls/{id}`), in the post-call webhook, and in the call-history export. Calls with no caller speech carry `sentiment: null`. With the Retell compatibility format, it fills `call_analysis.user_sentiment` (an imported `user_sentiment` extraction field takes precedence).
+
+### Re-run analysis on past calls
+
+Changed an agent's extraction fields or success criteria? Re-run extraction, evaluation and sentiment on past calls with the agent's current settings, without placing new calls:
+
+```bash
+# One call (optionally deliver the post-call webhook again with the new results)
+curl -X POST https://api.revring.ai/v1/calls/{id}/reanalyze \
+  -H "x-api-key: YOUR_API_KEY" -H "Content-Type: application/json" \
+  -d '{ "resendWebhook": false }'
+
+# Up to 50 of an agent's calls in a time window, newest first
+curl -X POST https://api.revring.ai/v1/calls/reanalyze \
+  -H "x-api-key: YOUR_API_KEY" -H "Content-Type: application/json" \
+  -d '{ "agentId": "cm...", "from": "2026-10-01T00:00:00Z", "limit": 50 }'
+```
+
+In the dashboard, open a call and select **Re-run analysis**. A field or criterion that was removed from the agent is cleared on the call. Calls still in progress, calls with no caller speech, and calls whose content was deleted under the agent's [data controls](/platform/data-controls) are skipped.
+
+### Export call history
+
+`GET /v1/calls/export` returns a CSV of calls, newest first (up to 10,000 per file), filtered by `agentId`, `status`, `direction`, `from` and `to`. Columns: call details, `sentiment`, `summary`, `recordingUrl`, one `var.*` column per call variable, one `extraction.*` column per extracted field, and one `evaluation.*` column per success criterion (its result). In the dashboard, use **Export CSV** on Call Logs. Cells that would run as a spreadsheet formula are prefixed with an apostrophe.
 
 ### Call started event
 

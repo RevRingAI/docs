@@ -143,7 +143,10 @@
               "api-reference/calls/batch-get",
               "api-reference/calls/send",
               "api-reference/calls/cancel",
-              "api-reference/calls/end"
+              "api-reference/calls/end",
+              "api-reference/calls/reanalyze",
+              "api-reference/calls/reanalyze-bulk",
+              "api-reference/calls/export"
             ]
           },
           {

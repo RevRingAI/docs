@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### Caller sentiment, re-run analysis and call export
+Every call with caller speech now carries `sentiment` (positive, neutral, negative or unknown) on the call and in the post-call webhook; Retell-format webhooks fill `user_sentiment` from it. After changing an agent's extraction fields or success criteria, re-run the analysis on past calls (`POST /v1/calls/{id}/reanalyze`, up to 50 at once with `POST /v1/calls/reanalyze`, or **Re-run analysis** on a call). Download call history as CSV with sentiment, variables, extracted data and evaluation results (`GET /v1/calls/export`, or **Export CSV** on Call Logs). [Guide](/platform/webhooks#caller-sentiment)
+
 ### Transfer events on your webhook
 Add `transfer.started`, `transfer.bridged` and `transfer.cancelled` to an agent's `webhookEvents` (or turn on **Also send transfer events**) to hear about transfers as they happen: started (warm or cold, with the destination), connected, or not completed (declined, voicemail or failed). Agents using the Retell compatibility format receive Retell's `transfer_started`, `transfer_bridged` and `transfer_cancelled`. [Guide](/platform/webhooks#transfer-events)
 
