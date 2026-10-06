@@ -215,28 +215,30 @@ Terminates the call, optionally speaking a closing message.
 
 ### Press Digit (DTMF)
 
-Waits for the caller to press a phone keypad digit. Useful for IVR-style menus or entering account numbers.
+Navigates an automated phone menu on the other end of the call. The agent stays silent, listens to the menu, and presses the digit your instruction calls for. Use it when your agent calls a business that answers with "press 1 for...".
 
 **Type**: `"press_digit"`
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `instruction` | string | Yes | What to say before listening for a digit |
-| `detectionDelaySeconds` | number | No | How long to wait for input (0–10 seconds, default 1) |
+| `instruction` | string | Yes | Which option to choose, in plain language |
+| `detectionDelaySeconds` | number | No | How long to let the menu finish before choosing (0 to 10 seconds, default 1) |
 
 **Example:**
 ```json
 {
   "id": "menu",
   "type": "press_digit",
-  "name": "Main Menu",
+  "name": "Reach billing",
   "position": { "x": 300, "y": 200 },
   "data": {
-    "instruction": "Press 1 for sales, press 2 for support, or press 3 for billing.",
+    "instruction": "Choose the option for the billing department. If the menu offers an operator, choose that instead.",
     "detectionDelaySeconds": 3
   }
 }
 ```
+
+Each time the menu speaks, the agent decides whether to press a digit; the node's transitions then move the flow on as usual.
 
 ### Extract Variable
 
