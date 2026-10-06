@@ -94,3 +94,7 @@ curl -X POST https://api.revring.ai/v1/do-not-call \
 ```
 
 List entries with `GET /do-not-call` and remove one with `DELETE /do-not-call/{e164}`.
+
+### Add callers who ask automatically
+
+Turn on `doNotCallDetection` on an agent (or **Detect do-not-call requests** on its Advanced tab) and, after each call, RevRing checks whether the caller asked not to be called again: to stop calling, to be taken off the list, or that they are on a do-not-call list. Declining an offer or asking to be called back later does not count. When they asked, the call shows `doNotCallRequested: true` (also in the post-call webhook) and their number is added to your do-not-call list with the reason `asked on call {id}`, so campaigns never dial it again. Agents imported from Retell AI with do-not-call detection on keep it.

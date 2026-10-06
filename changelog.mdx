@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 6, 2026
 
+### Do-not-call requests, handled automatically
+Turn on `doNotCallDetection` (or **Detect do-not-call requests** on an agent's Advanced tab): when a caller asks not to be called again, the call shows `doNotCallRequested: true`, the post-call webhook carries it, and their number joins your do-not-call list so campaigns never dial it. Declining an offer or asking for a call back later does not count. [Guide](/platform/campaigns#add-callers-who-ask-automatically)
+
 ### A/B test agent versions
 Split an inbound number's calls between versions of an agent with `trafficSplit` (2 to 5 environments with weights), then compare them with `GET /v1/analytics/versions`: failure rate, call length, negative sentiment and success-criteria pass rates per version. [Guide](/platform/versioning#split-calls-between-versions)
 

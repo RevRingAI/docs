@@ -10966,6 +10966,11 @@
                 }
               }
             }
+          },
+          "doNotCallDetection": {
+            "type": "boolean",
+            "default": false,
+            "description": "After each call, detect a caller's request not to be called again; when they asked, the call shows `doNotCallRequested: true` and their number goes on your do-not-call list. See [Do-not-call list](/platform/campaigns#add-callers-who-ask-automatically)."
           }
         },
         "required": [
@@ -11497,6 +11502,11 @@
               }
             },
             "nullable": true
+          },
+          "doNotCallDetection": {
+            "type": "boolean",
+            "default": false,
+            "description": "After each call, detect a caller's request not to be called again; when they asked, the call shows `doNotCallRequested: true` and their number goes on your do-not-call list. See [Do-not-call list](/platform/campaigns#add-callers-who-ask-automatically)."
           }
         },
         "required": [
@@ -12033,6 +12043,11 @@
               }
             },
             "nullable": true
+          },
+          "doNotCallDetection": {
+            "type": "boolean",
+            "default": false,
+            "description": "After each call, detect a caller's request not to be called again; when they asked, the call shows `doNotCallRequested: true` and their number goes on your do-not-call list. See [Do-not-call list](/platform/campaigns#add-callers-who-ask-automatically)."
           }
         }
       },
@@ -12766,6 +12781,11 @@
               null
             ],
             "description": "How the caller felt over the call; null when there was no caller speech."
+          },
+          "doNotCallRequested": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "The caller asked not to be called again (agents with `doNotCallDetection`); null when not checked"
           }
         },
         "required": [
