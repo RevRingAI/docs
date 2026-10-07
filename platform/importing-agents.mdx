@@ -118,6 +118,6 @@ Importing an agent you already imported **updates** the agent it created instead
 
 - Up to 25 agents per dry run, and up to 10 per import request.
 - Knowledge bases hold up to 50 sources each; larger sets are split across several knowledge bases linked to the agent.
-- Custom tool calls time out after 8 seconds. Longer source timeouts are reported.
+- Custom tool timeouts carry over, from 1 to 120 seconds. A longer source timeout is capped at 120 seconds and reported.
 
 See [Import Agents](/api-reference/imports/import) and [List Source Agents](/api-reference/imports/list-agents) in the API reference.
