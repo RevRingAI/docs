@@ -208,6 +208,50 @@ Both timeouts can also be set per route, which is useful when one agent transfer
 Warm transfer is also available as a node type in [Conversation Flows](/platform/conversation-flows), where you can configure hold and summary settings per-node.
 </Note>
 
+### Hand Off to Another Agent
+
+Pass the caller to another agent on the same call. Build a front-desk agent that hands billing questions to a billing agent and scheduling to a scheduling agent, each with its own prompt, tools and voice. The caller never redials and never waits on hold: the other agent picks up right away with the whole conversation so far.
+
+#### Configuration
+
+1. Navigate to the agent's **Tools** tab
+2. Locate **Hand Off to Another Agent** under System Tools and select **Set up**
+3. For each route, choose the agent, describe when to hand off, and optionally add a line the current agent says first ("Let me bring in our billing team.")
+4. Tick **Keep this agent's voice** if the caller should keep hearing the same voice after the handoff
+
+Or through the API:
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{frontDeskAgentId} \
+  -H "x-api-key: YOUR_API_KEY" -H "Content-Type: application/json" \
+  -d '{
+    "handoffRoutes": [
+      {
+        "agentId": "{billingAgentId}",
+        "condition": "The caller has a question about a charge, an invoice, a refund or a payment",
+        "handoffMessage": "Let me bring in our billing team."
+      },
+      { "agentId": "{schedulingAgentId}", "condition": "The caller wants to book, move or cancel an appointment", "keepVoice": true }
+    ]
+  }'
+```
+
+| Field | Description |
+|---|---|
+| `agentId` | The agent that takes over. Must be another agent in your organization. |
+| `condition` | When to hand off, in plain language. |
+| `handoffMessage` | Optional line the current agent says before the switch (up to 300 characters). |
+| `keepVoice` | `true` keeps the current voice; by default the other agent's voice takes over. |
+| `environment` | Optional [environment](/platform/versioning) of the other agent to run; by default its published version runs. |
+
+#### How It Works
+
+- The other agent opens with its own first message, or with a short greeting that shows it already knows what the caller needs. It runs its own prompt, tools, knowledge and model from then on.
+- It is still one call: one transcript with both agents' lines, one recording, one bill. The call record lists each handoff under `handoffs`.
+- Post-call summary, extraction, evaluation and the post-call webhook follow the agent that took the call.
+- Agents can hand back and forth, up to 5 handoffs per call. Handoff is available between single-prompt agents; conversation flows use their own nodes.
+- [Chat tests](/platform/test-suites) follow handoffs exactly as calls do, so you can test the whole team of agents in one run.
+
 ### Voicemail Detection
 
 Voicemail Detection automatically identifies when an outbound call reaches an answering machine or voicemail system.
@@ -282,6 +326,32 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 <Note>
 [Conversation Flows](/platform/conversation-flows) can also press digits with the `press_digit` node, which navigates a phone menu on its own: it listens to the menu and decides which digit to press.
 </Note>
+
+### Caller Keypad Input
+
+With keypad input on, digits the caller presses on their phone reach the agent as their answer, such as a PIN, a date of birth or an account number. Ask for them in the prompt, for example *"Please enter your account number on your keypad, then press pound."*
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "keypadInput": { "enabled": true, "terminationKey": "#", "digitLimit": 10, "timeoutMs": 3000 }
+  }'
+```
+
+| Field | What it does |
+|---|---|
+| `enabled` | Turns keypad input on. It is off unless set. |
+| `terminationKey` | `#`, `*` or a digit that ends the entry. It is not included in the digits; pressed on its own, it is sent as itself. |
+| `digitLimit` | Sends the digits as soon as this many are pressed (1 to 50). |
+| `timeoutMs` | Sends the digits once the caller stops pressing for this long (1000 to 15000 ms, default 2500). |
+
+- The agent gets the digits as the caller's turn and answers them. If it is speaking, it stops first, unless interruptions are blocked.
+- In the transcript, the entry is a caller line marked `"input": "keypad"`.
+- Available to single-prompt agents.
+- Agents imported from Retell AI keep keypad input on, with their digit limit, termination key and timeout.
+- In the dashboard: the agent's **Advanced** tab, **Caller keypad input**.
 
 ## Advanced Settings
 
@@ -529,6 +599,7 @@ By default, RevRing sends a `POST` request with a JSON body to your webhook URL 
 | **Headers** | Custom HTTP headers to include in the request (e.g., `Authorization: Bearer token123`) | None |
 | **Query Parameters** | Custom query parameters appended to the webhook URL (e.g., `source=revring`) | None |
 | **Send Raw Request Body** | When enabled, sends the tool arguments directly as the request body instead of the default `{ callId, tool, arguments }` wrapper | Off |
+| **Timeout** | How long the agent waits for your webhook before it moves on and tells the caller it could not complete the request (`timeoutSeconds`, 1 to 120) | 8 seconds |
 
 These settings are configured per-tool in the dashboard or via the API:
 
@@ -547,6 +618,7 @@ curl -X POST https://api.revring.ai/v1/agents/{agentId}/custom-tools \
       { "key": "source", "value": "revring" }
     ],
     "sendRawRequestBody": false,
+    "timeoutSeconds": 20,
     "enabled": true,
     "schema": {
       "type": "function",
@@ -709,6 +781,50 @@ All tool invocations appear in call transcripts with detailed information:
 
 Navigate to [Call Logs](https://dashboard.revring.ai/app/calls), select a call, and review the transcript pane.
 
+## MCP Servers
+
+Connect an agent to an MCP (Model Context Protocol) server and it can use that server's tools, next to its custom tools: look up an order in your systems, create a ticket in your helpdesk, check a CRM record. An agent can use up to 5 servers.
+
+**Dashboard:** open the agent's **Tools** tab, then **MCP Servers > Add MCP server**. Enter a name and the server URL, add any headers it needs (for example `Authorization`), and click **Test connection** to see its tools. Untick the tools this agent should not use, then **Save**.
+
+**API:**
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mcpServers": [
+      {
+        "name": "Orders",
+        "url": "https://mcp.example.com/mcp",
+        "headers": [{ "key": "Authorization", "value": "Bearer YOUR_SERVER_KEY" }],
+        "allowedTools": ["lookup_order", "update_delivery_date"],
+        "timeoutSeconds": 20
+      }
+    ]
+  }'
+```
+
+| Field | Description |
+|-------|-------------|
+| `name` | A label for the server, unique on the agent. |
+| `url` | The server's address. Must use `https://`. |
+| `headers` | Sent with every request to the server, usually for authentication. |
+| `allowedTools` | Only these tools, by name. Leave it out to use every tool the server lists. |
+| `transport` | `streamable_http` or `sse`. Leave it out to use SSE only for URLs ending in `/sse`. |
+| `timeoutSeconds` | How long one tool call may take, 1 to 120 seconds (default 20). |
+
+To check a server before saving it, `POST /v1/agents/mcp-servers/test` with the same fields returns the tools it lists.
+
+How MCP tools behave:
+
+- The agent loads the server's tools when each call, chat or text conversation starts. The call never waits for it: if a server is slow or cannot be reached, the conversation goes on without that server's tools.
+- Built-in tools and custom tools keep their names. An MCP tool with the same name as one of them, or as a tool from a server listed earlier, is not used.
+- Tool calls and results appear in the transcript like custom tools, and chat tests use the same tools as calls.
+- MCP servers are available to single-prompt agents.
+- Agents imported from Retell AI or ElevenLabs bring their MCP servers. Header values the other platform stores as secrets cannot be read and are listed in the import report so you can add them.
+
 ## Tool Limitations
 
 ### System Tool Constraints
@@ -719,7 +835,7 @@ Navigate to [Call Logs](https://dashboard.revring.ai/app/calls), select a call, 
 
 ### Custom Tool Constraints
 
-- **Response time**: 8 second timeout - webhooks must respond within this window
+- **Response time**: webhooks must respond within the tool's timeout, 8 seconds unless you set `timeoutSeconds` (up to 120). For side effects the caller should not wait on (logging, CRM updates, notifications), set `responseMode` to `async` and the agent carries on while the webhook is delivered in the background
 - **Concurrent invocations**: Agents invoke tools sequentially, not in parallel
 
 ## Managing Tools

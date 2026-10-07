@@ -107,7 +107,8 @@ Each agent also gets a `checklist` of the steps left to you, and a `status`: `re
 - **Blocked agents:** agents that run on your own language model server (custom LLM), and Retell Conversation Flow agents. ElevenLabs workflows import the main agent prompt only.
 - **Secrets:** secret header values and OAuth connections cannot be exported from the source. The tool is created with the header name and an empty value for you to fill in.
 - **Phone numbers:** connect your carrier numbers or SIP trunk after importing and assign them to the agent. See [Telephony](/platform/telephony).
-- Other unsupported settings, such as pronunciation dictionaries or ambient sound, are listed in the report with the reason.
+- **Phonetic spellings:** pronunciation entries written in IPA or CMU are listed in the report with their words; add how each word is said under [pronunciations](/platform/multilingual#pronunciation). ElevenLabs alias rules are imported.
+- Other unsupported settings, such as ambient sound, are listed in the report with the reason.
 
 ## Importing again
 

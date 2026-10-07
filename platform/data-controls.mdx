@@ -48,9 +48,17 @@ How it behaves:
 - The redacted transcript and summary are what is stored, shown in the dashboard and sent in the post-call webhook (in every [webhook format](/platform/webhooks)). Tool call arguments and results in the transcript are redacted too.
 - Your agent's own name, your business name, product names, prices and appointment times are kept.
 - Extracted data (`postCallExtraction`) and evaluation results are produced from the full conversation and are **not** redacted, since they hold exactly the fields you asked for. Call variables you send are kept as you sent them.
-- Recordings are not changed.
+- Recordings are not changed. To keep no audio, turn recording off (`recordingEnabled: false`).
 - If redaction cannot run for a call, its transcript text is withheld rather than stored with personal details.
 - Calls redacted this way show `"piiRedacted": true`.
+
+## Turn recording off
+
+```json
+{ "recordingEnabled": false }
+```
+
+No audio is recorded for the agent's calls; transcripts, summaries and analysis are kept as usual (combine with a `storageMode` to limit those too). Calls show no recording. In the dashboard: the agent's **Advanced** tab, **Record calls**.
 
 ## In the dashboard
 

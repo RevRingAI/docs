@@ -140,6 +140,22 @@ curl -X POST https://api.revring.ai/v1/calls \
 
 Campaigns never dial a number on your [do-not-call list](/platform/campaigns). For single calls, set `"honorDoNotCall": true` and a number on the list is refused with `409` and `"error": "number_on_do_not_call_list"` instead of being dialed.
 
+## Steer or End a Call in Progress
+
+Your system can talk to the agent while a call is live, for inbound and outbound calls alike. Send an instruction with the call's `id`:
+
+```bash
+curl -X POST https://api.revring.ai/v1/calls/{id}/instructions \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "instruction": "The refund was approved a minute ago. Tell the caller it arrives in 3 to 5 days.", "speak": true }'
+```
+
+- `"speak": true`: the agent says it now, in its own words. If it is in the middle of a sentence, it finishes first.
+- `"speak": false` (default): nothing is said right away; the instruction shapes the agent's next reply. Use it for context such as "the caller is a returning customer" or "offer the Thursday slot instead".
+
+Instructions appear in the call transcript as `instruction` items, so you can see what was sent and when. To hang up a call from your system, use [End Call](/api-reference/calls/end). Both are also available as tools in the [MCP server](/mcp-server).
+
 ## Configuring Outbound Agent Behavior
 
 ### First Message

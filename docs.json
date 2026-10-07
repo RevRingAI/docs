@@ -98,7 +98,8 @@
               "api-reference/agents/list-custom-tools",
               "api-reference/agents/create-custom-tool",
               "api-reference/agents/update-custom-tool",
-              "api-reference/agents/delete-custom-tool"
+              "api-reference/agents/delete-custom-tool",
+              "api-reference/agents/test-mcp-server"
             ]
           },
           {
@@ -146,6 +147,7 @@
               "api-reference/calls/batch-get",
               "api-reference/calls/send",
               "api-reference/calls/cancel",
+              "api-reference/calls/send-instruction",
               "api-reference/calls/end",
               "api-reference/calls/reanalyze",
               "api-reference/calls/reanalyze-bulk",

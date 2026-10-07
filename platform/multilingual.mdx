@@ -25,7 +25,7 @@ The agent's `language` setting chooses how the agent listens and speaks:
 
 ### Multilingual mode
 
-With `"language": "multi"` the agent understands callers speaking English, Spanish, French, German, Italian, Portuguese, Dutch, Russian, Hindi or Japanese, including callers who switch mid-call, and replies in the language the caller speaks. Tell the agent how to choose in the prompt, for example: *"Reply in the language the caller uses. If they switch to Spanish, continue in Spanish."* Pick a voice that sounds natural in every language you expect.
+With `"language": "multi"` the agent understands callers speaking English, Spanish, French, German, Italian, Portuguese, Dutch, Russian, Hindi or Japanese, including callers who switch mid-call, and replies in the language the caller speaks. Tell the agent how to choose in the prompt, for example: *"Reply in the language the caller uses. If they switch to Spanish, continue in Spanish."* Pick a voice that sounds natural in every language you expect, or give each language its own voice with [language presets](#language-presets): the voice then follows the caller.
 
 Voices are also available in Turkish, Greek, Ukrainian, Danish, Estonian, Finnish, Norwegian, Swedish and Vietnamese; preview them in the [Voice Library](https://dashboard.revring.ai/app/agents/voices).
 
@@ -106,6 +106,13 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 - Preset voices come from the [Voice Library](https://dashboard.revring.ai/app/agents/voices) (`GET /v1/voices`); unknown voices are refused.
 - Agents imported from ElevenLabs bring their per-language opening lines.
 
+### The voice follows the caller
+
+On a multilingual agent (`"language": "multi"`), language presets also apply mid-call: when the caller clearly switches to a language that has a preset voice, the agent continues in that language and voice, and it goes back to its own voice for a language without one. A full sentence in the new language, or two short replies in a row, counts as a switch, so a lone "sí" or "OK" never changes the voice.
+
+- The agent's next reply is in the caller's language and the new voice, and so are its replies after a handoff to another agent.
+- A call that switches to a Studio voice is priced at the Studio rate.
+
 ## Writing Prompts for Multilingual Agents
 
 ### Best Practice: Match Prompt Language
@@ -167,6 +174,30 @@ Every agent can set a **Backup Voice** (in the dashboard Voice tab, or `fallback
 ### Studio voices
 
 Studio voices are premium voices that speak every supported language, so one Studio voice can serve a multilingual agent. They are billed an additional 2 cents per minute; new agents start on one.
+
+### Pronunciation
+
+`pronunciations` tells the agent how to say specific words, such as names, brands or abbreviations. Write each word the way it should sound:
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pronunciations": [
+      { "word": "Nguyen", "alias": "Win" },
+      { "word": "SQL", "alias": "sequel" },
+      { "word": "US", "alias": "U S", "caseSensitive": true }
+    ]
+  }'
+```
+
+- Only what the caller hears changes. Transcripts, summaries and messages keep the word as written.
+- Whole words and phrases only: "Nguyen" leaves "Nguyens" alone. When one entry is part of a longer one (SQL and SQL Server), the longer one wins.
+- Matching ignores case unless `caseSensitive` is `true`. Turn it on for abbreviations that are also everyday words, like US or IT.
+- Up to 200 words per agent, each listed once. Applies to everything the agent says to the caller, including opening lines and voicemail messages.
+- In the dashboard: the agent's **Voice** tab, **Pronunciation**.
+- Agents imported from ElevenLabs bring the alias rules of their pronunciation dictionaries. Phonetic spellings (IPA or CMU) from either platform are listed in the import report so you can add how each word is said.
 
 ## Troubleshooting
 

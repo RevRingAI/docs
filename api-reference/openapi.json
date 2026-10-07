@@ -9693,6 +9693,216 @@
           }
         }
       }
+    },
+    "/calls/{id}/instructions": {
+      "post": {
+        "summary": "Send Instruction",
+        "description": "Tell the agent something while the call is in progress, from your own system: new information (\"the caller's order shipped today\"), a change of direction (\"offer the Thursday slot instead\"), or something to say right away. With `speak: false` (default) the instruction shapes the agent's next reply. With `speak: true` the agent says it now, in its own words; if the agent is mid-sentence it says it as soon as it finishes. Instructions are recorded in the call transcript as `instruction` items.",
+        "tags": [
+          "Calls"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "instruction"
+                ],
+                "properties": {
+                  "instruction": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "description": "What the agent should know or say, in plain language, written for the agent",
+                    "example": "The caller's refund was approved a minute ago. Let them know it should arrive in 3 to 5 days."
+                  },
+                  "speak": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "true: the agent says it now. false: it shapes the next reply."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Delivered to the live call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "callId": {
+                          "type": "string"
+                        },
+                        "delivered": {
+                          "type": "boolean"
+                        },
+                        "speak": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "call_not_active (the call is not in progress) or call_not_addressable (this call cannot receive instructions)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/mcp-servers/test": {
+      "post": {
+        "summary": "Test MCP Server",
+        "description": "Connect to an MCP server with the given settings and list its tools, before saving it on an agent. Nothing is stored.",
+        "operationId": "testMcpServer",
+        "tags": [
+          "Agents"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McpServer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The server's tools",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tools": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "422": {
+            "description": "The server could not be reached or did not list its tools (`mcp_unreachable`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -11498,6 +11708,132 @@
               }
             ],
             "nullable": true
+          },
+          "handoffRoutes": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "agentId": {
+                  "type": "string",
+                  "description": "Agent to hand the caller to (same organization)"
+                },
+                "environment": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Run that agent's version for this environment; omit for production"
+                },
+                "condition": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "description": "When to hand off, in plain language"
+                },
+                "keepVoice": {
+                  "type": "boolean",
+                  "description": "Keep this agent's voice after the handoff (default: the other agent's voice)"
+                },
+                "handoffMessage": {
+                  "type": "string",
+                  "maxLength": 300,
+                  "description": "Line said before the handoff"
+                }
+              },
+              "required": [
+                "agentId",
+                "condition"
+              ]
+            },
+            "description": "Agents this agent can hand the caller to on the same call. See [Hand Off to Another Agent](/platform/tools#hand-off-to-another-agent)."
+          },
+          "mcpServers": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "$ref": "#/components/schemas/McpServer"
+            },
+            "description": "MCP servers whose tools the agent can use (single-prompt agents). See [MCP Servers](/platform/tools#mcp-servers). Empty in minimal listings."
+          },
+          "recordingEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Record the agent's calls. `false`: no audio is recorded. See [Data Controls](/platform/data-controls#turn-recording-off)."
+          },
+          "pronunciations": {
+            "type": "array",
+            "maxItems": 200,
+            "description": "How the agent says specific words on calls; transcripts keep the word as written. Words are unique (ignoring case). See [Pronunciation](/platform/multilingual#pronunciation).",
+            "items": {
+              "type": "object",
+              "required": [
+                "word",
+                "alias"
+              ],
+              "properties": {
+                "word": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "description": "The word or phrase as written (whole words only)"
+                },
+                "alias": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "description": "How to say it, spelled the way it sounds"
+                },
+                "caseSensitive": {
+                  "type": "boolean",
+                  "nullable": true,
+                  "description": "Match the word's case exactly (default: ignore case)"
+                }
+              }
+            }
+          },
+          "keypadInput": {
+            "type": "object",
+            "nullable": true,
+            "description": "Digits the caller presses reach the agent as their turn (single-prompt agents). Off unless set. See [Caller Keypad Input](/platform/tools#caller-keypad-input).",
+            "required": [
+              "enabled"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Keypad input on or off"
+              },
+              "terminationKey": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                  "#",
+                  "*",
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9"
+                ],
+                "description": "Key that ends the entry (not included in the digits)"
+              },
+              "digitLimit": {
+                "type": "integer",
+                "nullable": true,
+                "minimum": 1,
+                "maximum": 50,
+                "description": "Send as soon as this many digits are pressed"
+              },
+              "timeoutMs": {
+                "type": "integer",
+                "nullable": true,
+                "minimum": 1000,
+                "maximum": 15000,
+                "description": "Send after the caller stops pressing for this long (default 2500)"
+              }
+            }
           }
         },
         "required": [
@@ -12077,6 +12413,136 @@
               }
             ],
             "nullable": true
+          },
+          "handoffRoutes": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "agentId": {
+                  "type": "string",
+                  "description": "Agent to hand the caller to (same organization)"
+                },
+                "environment": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Run that agent's version for this environment; omit for production"
+                },
+                "condition": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "description": "When to hand off, in plain language"
+                },
+                "keepVoice": {
+                  "type": "boolean",
+                  "description": "Keep this agent's voice after the handoff (default: the other agent's voice)"
+                },
+                "handoffMessage": {
+                  "type": "string",
+                  "maxLength": 300,
+                  "description": "Line said before the handoff"
+                }
+              },
+              "required": [
+                "agentId",
+                "condition"
+              ]
+            },
+            "description": "Agents this agent can hand the caller to on the same call. See [Hand Off to Another Agent](/platform/tools#hand-off-to-another-agent).",
+            "nullable": true
+          },
+          "mcpServers": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "$ref": "#/components/schemas/McpServer"
+            },
+            "description": "MCP servers whose tools the agent can use (single-prompt agents). See [MCP Servers](/platform/tools#mcp-servers).",
+            "nullable": true
+          },
+          "recordingEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Record the agent's calls. `false`: no audio is recorded. See [Data Controls](/platform/data-controls#turn-recording-off).",
+            "nullable": true
+          },
+          "pronunciations": {
+            "type": "array",
+            "maxItems": 200,
+            "description": "How the agent says specific words on calls; transcripts keep the word as written. Words are unique (ignoring case). See [Pronunciation](/platform/multilingual#pronunciation).",
+            "items": {
+              "type": "object",
+              "required": [
+                "word",
+                "alias"
+              ],
+              "properties": {
+                "word": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "description": "The word or phrase as written (whole words only)"
+                },
+                "alias": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "description": "How to say it, spelled the way it sounds"
+                },
+                "caseSensitive": {
+                  "type": "boolean",
+                  "nullable": true,
+                  "description": "Match the word's case exactly (default: ignore case)"
+                }
+              }
+            },
+            "nullable": true
+          },
+          "keypadInput": {
+            "type": "object",
+            "nullable": true,
+            "description": "Digits the caller presses reach the agent as their turn (single-prompt agents). Off unless set. See [Caller Keypad Input](/platform/tools#caller-keypad-input).",
+            "required": [
+              "enabled"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Keypad input on or off"
+              },
+              "terminationKey": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                  "#",
+                  "*",
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9"
+                ],
+                "description": "Key that ends the entry (not included in the digits)"
+              },
+              "digitLimit": {
+                "type": "integer",
+                "nullable": true,
+                "minimum": 1,
+                "maximum": 50,
+                "description": "Send as soon as this many digits are pressed"
+              },
+              "timeoutMs": {
+                "type": "integer",
+                "nullable": true,
+                "minimum": 1000,
+                "maximum": 15000,
+                "description": "Send after the caller stops pressing for this long (default 2500)"
+              }
+            }
           }
         },
         "required": [
@@ -12661,6 +13127,136 @@
               }
             ],
             "nullable": true
+          },
+          "handoffRoutes": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "agentId": {
+                  "type": "string",
+                  "description": "Agent to hand the caller to (same organization)"
+                },
+                "environment": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Run that agent's version for this environment; omit for production"
+                },
+                "condition": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "description": "When to hand off, in plain language"
+                },
+                "keepVoice": {
+                  "type": "boolean",
+                  "description": "Keep this agent's voice after the handoff (default: the other agent's voice)"
+                },
+                "handoffMessage": {
+                  "type": "string",
+                  "maxLength": 300,
+                  "description": "Line said before the handoff"
+                }
+              },
+              "required": [
+                "agentId",
+                "condition"
+              ]
+            },
+            "description": "Agents this agent can hand the caller to on the same call. See [Hand Off to Another Agent](/platform/tools#hand-off-to-another-agent).",
+            "nullable": true
+          },
+          "mcpServers": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "$ref": "#/components/schemas/McpServer"
+            },
+            "description": "MCP servers whose tools the agent can use (single-prompt agents). See [MCP Servers](/platform/tools#mcp-servers).",
+            "nullable": true
+          },
+          "recordingEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Record the agent's calls. `false`: no audio is recorded. See [Data Controls](/platform/data-controls#turn-recording-off).",
+            "nullable": true
+          },
+          "pronunciations": {
+            "type": "array",
+            "maxItems": 200,
+            "description": "How the agent says specific words on calls; transcripts keep the word as written. Words are unique (ignoring case). See [Pronunciation](/platform/multilingual#pronunciation).",
+            "items": {
+              "type": "object",
+              "required": [
+                "word",
+                "alias"
+              ],
+              "properties": {
+                "word": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "description": "The word or phrase as written (whole words only)"
+                },
+                "alias": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "description": "How to say it, spelled the way it sounds"
+                },
+                "caseSensitive": {
+                  "type": "boolean",
+                  "nullable": true,
+                  "description": "Match the word's case exactly (default: ignore case)"
+                }
+              }
+            },
+            "nullable": true
+          },
+          "keypadInput": {
+            "type": "object",
+            "nullable": true,
+            "description": "Digits the caller presses reach the agent as their turn (single-prompt agents). Off unless set. See [Caller Keypad Input](/platform/tools#caller-keypad-input).",
+            "required": [
+              "enabled"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Keypad input on or off"
+              },
+              "terminationKey": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                  "#",
+                  "*",
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9"
+                ],
+                "description": "Key that ends the entry (not included in the digits)"
+              },
+              "digitLimit": {
+                "type": "integer",
+                "nullable": true,
+                "minimum": 1,
+                "maximum": 50,
+                "description": "Send as soon as this many digits are pressed"
+              },
+              "timeoutMs": {
+                "type": "integer",
+                "nullable": true,
+                "minimum": 1000,
+                "maximum": 15000,
+                "description": "Send after the caller stops pressing for this long (default 2500)"
+              }
+            }
           }
         }
       },
@@ -16147,6 +16743,71 @@
             "nullable": true
           }
         }
+      },
+      "McpServer": {
+        "type": "object",
+        "description": "An MCP server whose tools the agent can use",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Label, unique on the agent"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Server address (https only)"
+          },
+          "headers": {
+            "type": "array",
+            "nullable": true,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ]
+            },
+            "description": "Sent with every request to the server"
+          },
+          "allowedTools": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            },
+            "description": "Only these tools, by name; omit to use every tool the server lists"
+          },
+          "transport": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "streamable_http",
+              "sse"
+            ],
+            "description": "Omit to use SSE only for URLs ending in /sse"
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 120,
+            "description": "How long one tool call may take (default 20)"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ]
       }
     }
   }

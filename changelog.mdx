@@ -6,6 +6,33 @@ icon: 'clock-rotate-left'
 
 ## October 7, 2026
 
+### Talk to the agent during a call
+Send the agent an instruction while a call is live with `POST /v1/calls/{id}/instructions`: have it say something now (`"speak": true`) or shape its next reply. Instructions appear in the transcript, and the MCP server has a matching tool. [Guide](/platform/outbound#steer-or-end-a-call-in-progress)
+
+### Timeout per tool
+Set `timeoutSeconds` (1 to 120) on a custom tool to give a slow webhook more time; the default stays 8 seconds. [Guide](/platform/tools)
+
+### Hand off to another agent
+An agent can pass the caller to another agent on the same call, with its own prompt, tools and voice, using `handoffRoutes`. The caller never redials, and the other agent picks up with the whole conversation. Chat tests follow handoffs too. [Guide](/platform/tools#hand-off-to-another-agent)
+
+### Turn call recording off
+Set `recordingEnabled: false` on an agent (or turn off **Record calls** on its Advanced tab) and no audio is recorded for its calls; transcripts and analysis are kept as usual. [Guide](/platform/data-controls#turn-recording-off)
+
+### Failed tool calls are marked
+Tool calls in call transcripts carry `isError: true` when the tool failed or timed out, so your systems and [alerts](/platform/alerts) can tell them apart from normal results.
+
+### Pronunciation
+Tell an agent how to say names, brands and abbreviations with `pronunciations` (for example Nguyen said as "Win"). Only the voice changes; transcripts keep the word as written. Agents imported from ElevenLabs bring their pronunciation dictionaries' alias rules. [Guide](/platform/multilingual#pronunciation)
+
+### Caller keypad input
+Turn on `keypadInput` and digits the caller presses, such as a PIN or an account number, reach the agent as their answer, with an optional finish key, digit limit and pause. Agents imported from Retell AI keep it on. [Guide](/platform/tools#caller-keypad-input)
+
+### The voice follows a multilingual caller
+A multilingual agent with language presets now switches to a language's preset voice when the caller changes language mid-call, and back to its own voice for other languages. [Guide](/platform/multilingual#the-voice-follows-the-caller)
+
+### MCP servers on agents
+Give an agent the tools of up to 5 MCP servers, such as your CRM, helpdesk or internal systems, next to its custom tools. Add them on the agent's **Tools** tab (with **Test connection** to pick the tools it may use) or with `mcpServers` on the agent. Tools load when each call, chat or text starts and never delay the call. Agents imported from Retell AI or ElevenLabs bring their MCP servers. [Guide](/platform/tools#mcp-servers)
+
 ### Per-call content, your own data, and safe retries
 `POST /v1/calls` now takes `firstMessage`, `promptAppend`, `maxDurationSeconds` and `voicemailMessage` for a single call, `metadata` (your own data, up to 16 KB, stored on the call and sent in its webhooks), an `Idempotency-Key` so a retried request never dials twice, and `honorDoNotCall` to refuse numbers on your do-not-call list. [Guide](/platform/outbound#per-call-content-and-your-own-data)
 
