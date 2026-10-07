@@ -531,7 +531,7 @@ The **Friendly Name** is just a label for the dashboard. The actual function nam
 
 ### Defining the Tool Schema
 
-The schema defines what parameters the tool accepts using OpenAI's function calling format:
+The schema is a function definition: a name, a description, and the parameters the tool accepts as a JSON Schema object:
 
 1. Click **Edit** on your custom tool
 2. In the **Schema JSON** field, enter your tool definition:
@@ -564,7 +564,7 @@ The `description` fields are critical - they tell the agent when and how to use 
 
 ### Schema Format Reference
 
-Follow the [OpenAI function calling format](https://platform.openai.com/docs/guides/function-calling#defining-functions):
+A tool schema is a function definition with these fields:
 
 - **type**: Always `"function"` at the root level (required)
 - **name**: Unique identifier for the tool (lowercase, underscores allowed) (required)

@@ -13384,7 +13384,7 @@
           },
           "schema": {
             "type": "object",
-            "description": "OpenAI function schema defining parameters"
+            "description": "Function definition: type `function`, a name, a description and JSON Schema parameters"
           },
           "createdAt": {
             "type": "string",
@@ -13461,7 +13461,7 @@
           },
           "schema": {
             "type": "object",
-            "description": "OpenAI function calling schema"
+            "description": "Function definition: type `function`, a name, a description and JSON Schema parameters"
           },
           "httpMethod": {
             "type": "string",
@@ -13527,7 +13527,7 @@
           "schema": {
             "type": "object",
             "nullable": true,
-            "description": "OpenAI function schema (can be null to remove)"
+            "description": "Function definition: type `function`, a name, a description and JSON Schema parameters (null to remove)"
           },
           "httpMethod": {
             "type": "string",
