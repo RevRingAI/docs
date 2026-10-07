@@ -4,6 +4,14 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 icon: 'clock-rotate-left'
 ---
 
+## October 7, 2026
+
+### Per-call content, your own data, and safe retries
+`POST /v1/calls` now takes `firstMessage`, `promptAppend`, `maxDurationSeconds` and `voicemailMessage` for a single call, `metadata` (your own data, up to 16 KB, stored on the call and sent in its webhooks), an `Idempotency-Key` so a retried request never dials twice, and `honorDoNotCall` to refuse numbers on your do-not-call list. [Guide](/platform/outbound#per-call-content-and-your-own-data)
+
+### Voicemail rate and call filters
+The dashboard **Overview** shows your voicemail rate (answered outbound calls that reached a voicemail box), and `GET /v1/calls` and the CSV export filter by hang-up cause, for example `?hangupCause=VOICEMAIL_DETECTED`. [Guide](/platform/outbound#call-logs)
+
 ## October 6, 2026
 
 ### Live booking on your calendar

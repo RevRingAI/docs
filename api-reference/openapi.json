@@ -4132,6 +4132,15 @@
               "type": "string",
               "maxLength": 64
             }
+          },
+          {
+            "name": "hangupCause",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only calls that ended with these hang-up causes, comma-separated (e.g. `VOICEMAIL_DETECTED,IVR_REACHED`)."
           }
         ],
         "responses": {
@@ -4229,8 +4238,39 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "The number is on your do-not-call list (honorDoNotCall was set)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "number_on_do_not_call_list"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Makes a retried request return the call already placed (24 hours)."
+          }
+        ]
       }
     },
     "/calls/batch-get": {
@@ -4359,6 +4399,15 @@
               "type": "string",
               "format": "date-time"
             }
+          },
+          {
+            "name": "hangupCause",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only calls that ended with these hang-up causes, comma-separated (e.g. `VOICEMAIL_DETECTED,IVR_REACHED`)."
           }
         ],
         "responses": {
@@ -13350,6 +13399,12 @@
             "type": "boolean",
             "nullable": true,
             "description": "The caller asked not to be called again (agents with `doNotCallDetection`); null when not checked"
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "Your own data sent with POST /v1/calls."
           }
         },
         "required": [
@@ -13436,6 +13491,45 @@
           "language": {
             "type": "string",
             "description": "Language for this call only (e.g. `es`, `pt-BR`); the agent's preset for that language supplies the voice and opening line. See [Language per call](/platform/multilingual#language-per-call)."
+          },
+          "firstMessage": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "description": "The opening line for this call only (variables work as in the agent's opening)."
+          },
+          "promptAppend": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "description": "Added to the end of the agent's prompt for this call only."
+          },
+          "maxDurationSeconds": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 7200,
+            "description": "The longest this call may run, in seconds."
+          },
+          "voicemailMessage": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "The message left if this call reaches voicemail."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Your own data for this call, up to 16 KB: stored on the call, returned by GET /v1/calls/{id} and sent in the call's webhooks. Never shown to the agent (use `variables` for that)."
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "A retried request with the same key within 24 hours returns the call already placed instead of dialing again. Also accepted as the `Idempotency-Key` header (the body field wins)."
+          },
+          "honorDoNotCall": {
+            "type": "boolean",
+            "description": "Refuse to dial a number on your do-not-call list (409 `number_on_do_not_call_list`). Campaigns always honour the list."
           }
         },
         "required": [
@@ -13639,6 +13733,36 @@
                   },
                   "value": {
                     "type": "integer"
+                  }
+                }
+              },
+              "voicemailRate": {
+                "type": "object",
+                "description": "Outbound calls that reached a voicemail box, as a share of answered outbound calls.",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "example": "Voicemail Rate"
+                  },
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "0 to 1; null when no outbound call was answered in the range."
+                  },
+                  "voicemails": {
+                    "type": "integer"
+                  },
+                  "faxes": {
+                    "type": "integer",
+                    "description": "Outbound calls a fax machine answered."
+                  },
+                  "phoneMenus": {
+                    "type": "integer",
+                    "description": "Outbound calls that reached a phone menu nobody came on to."
+                  },
+                  "outboundConnected": {
+                    "type": "integer",
+                    "description": "Answered outbound calls (the base of the rate)."
                   }
                 }
               }

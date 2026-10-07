@@ -101,6 +101,45 @@ The API returns a call object with an `id` that you can use to track the call's 
 
 See the [API Reference](/api-reference/calls/send) for complete documentation.
 
+### Per-Call Content and Your Own Data
+
+A single call can change what the agent says without editing the agent, and carry your own data:
+
+```json
+{
+  "agentId": "agent_abc123",
+  "toNumber": "+14155551234",
+  "fromNumber": "+14155550000",
+  "firstMessage": "Hi {{first_name}}, this is Ava from Bright Smiles about tomorrow's cleaning.",
+  "promptAppend": "This patient asked for an early morning slot last time.",
+  "maxDurationSeconds": 300,
+  "voicemailMessage": "Hi {{first_name}}, Bright Smiles here about tomorrow's cleaning. Please call us back at 555-0100.",
+  "metadata": { "crmContactId": "c_8812", "campaign": "recall-q4" }
+}
+```
+
+- `firstMessage`: the opening line for this call (variables work as in the agent's opening).
+- `promptAppend`: added to the end of the agent's prompt for this call only.
+- `maxDurationSeconds`: the longest this call may run (10 to 7200).
+- `voicemailMessage`: the message left if this call reaches voicemail.
+- `metadata`: your own data, up to 16 KB. It is stored on the call, returned by `GET /v1/calls/{id}` and included in the call's webhooks. The agent never sees it: use `variables` for anything the agent should know.
+
+### Retrying Safely
+
+Send an `Idempotency-Key` header (or `idempotencyKey` in the body) with a value unique to the call you mean to place. If the request is retried with the same key within 24 hours, for example after a timeout, the API returns the call already placed instead of dialing the number again. Two identical requests sent at the same moment also produce a single call.
+
+```bash
+curl -X POST https://api.revring.ai/v1/calls \
+  -H "x-api-key: $REVRING_API_KEY" \
+  -H "Idempotency-Key: recall-q4-c_8812" \
+  -H "Content-Type: application/json" \
+  -d '{"agentId": "agent_abc123", "toNumber": "+14155551234", "fromNumber": "+14155550000"}'
+```
+
+### Respecting Your Do-Not-Call List
+
+Campaigns never dial a number on your [do-not-call list](/platform/campaigns). For single calls, set `"honorDoNotCall": true` and a number on the list is refused with `409` and `"error": "number_on_do_not_call_list"` instead of being dialed.
+
 ## Configuring Outbound Agent Behavior
 
 ### First Message
@@ -317,6 +356,8 @@ Track all outbound calls in [Call Logs](https://dashboard.revring.ai/app/calls):
    - Duration and timestamps
    - Variables used
    - Hangup cause and error messages (if applicable)
+
+To list the calls that ended a particular way, filter by hang-up cause: `GET /v1/calls?hangupCause=VOICEMAIL_DETECTED` (several, comma-separated). The CSV export (`GET /v1/calls/export`) takes the same filter. The dashboard **Overview** shows your **Voicemail Rate**: the share of answered outbound calls that reached a voicemail box.
 
 ### Success Metrics
 
