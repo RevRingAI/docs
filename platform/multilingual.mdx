@@ -27,7 +27,7 @@ The agent's `language` setting chooses how the agent listens and speaks:
 
 With `"language": "multi"` the agent understands callers speaking English, Spanish, French, German, Italian, Portuguese, Dutch, Russian, Hindi or Japanese, including callers who switch mid-call, and replies in the language the caller speaks. Tell the agent how to choose in the prompt, for example: *"Reply in the language the caller uses. If they switch to Spanish, continue in Spanish."* Pick a voice that sounds natural in every language you expect, or give each language its own voice with [language presets](#language-presets): the voice then follows the caller.
 
-Voices are also available in Turkish, Greek, Ukrainian, Danish, Estonian, Finnish, Norwegian, Swedish and Vietnamese; preview them in the [Voice Library](https://dashboard.revring.ai/app/agents/voices).
+Voices are also available in Turkish, Greek, Ukrainian, Danish, Estonian, Finnish, Norwegian, Swedish and Vietnamese; preview them in the [Voices page](https://dashboard.revring.ai/app/agents/voices).
 
 <Note>
 **Voice Flexibility:** Any voice can be used with any language setting. For example, you can use a Spanish-labeled voice on an English-language agent to achieve a Spanish accent, or mix and match voices and languages to create the exact speaking style you need.
@@ -44,7 +44,7 @@ Voices are also available in Turkish, Greek, Ukrainian, Danish, Estonian, Finnis
 5. Choose a **Voice** that matches your selected language
 6. Click **Save Voice**
 
-You can preview all available voices in the [Voice Library](https://dashboard.revring.ai/app/agents/voices).
+You can preview all available voices in the [Voices page](https://dashboard.revring.ai/app/agents/voices).
 
 ### Via API
 
@@ -103,7 +103,7 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 - A preset can set the voice, the opening line, or both. Whatever it leaves out comes from the agent.
 - A regional code uses its base language's preset when it has none of its own: a call in `pt-BR` uses the `pt` preset.
 - A voice or opening line given explicitly for one call (per-call `voiceId`, or the pre-call webhook's `voiceId` or `firstMessage`) wins over the preset.
-- Preset voices come from the [Voice Library](https://dashboard.revring.ai/app/agents/voices) (`GET /v1/voices`); unknown voices are refused.
+- Preset voices come from the [Voices page](https://dashboard.revring.ai/app/agents/voices) (`GET /v1/voices`); unknown voices are refused.
 - Agents imported from ElevenLabs bring their per-language opening lines.
 
 ### The voice follows the caller
@@ -165,7 +165,7 @@ This can be useful for building flexible prompts or logging purposes.
 
 ## Voice Selection
 
-Each language has multiple voices to choose from. Visit the [Voice Library](https://dashboard.revring.ai/app/agents/voices) to preview all available voices in your selected language.
+Each language has multiple voices to choose from. Visit the [Voices page](https://dashboard.revring.ai/app/agents/voices) to preview all available voices in your selected language.
 
 ### Backup Voice
 
@@ -205,7 +205,7 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 
 If you notice inconsistent voice quality or unexpected behavior:
 
-1. **Try another voice**: preview a few in the [Voice Library](https://dashboard.revring.ai/app/agents/voices); a Studio voice is the steadiest choice for most languages
+1. **Try another voice**: preview a few in the [Voices page](https://dashboard.revring.ai/app/agents/voices); a Studio voice is the steadiest choice for most languages
 2. **Verify Language Match**: Ensure the selected voice suits your agent's language setting
 
 ### Need Help?

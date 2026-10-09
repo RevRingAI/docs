@@ -18,11 +18,11 @@ When you send an outbound call through RevRing:
 
 ## Sending Test Calls via Dashboard
 
-### Using the Send Call Page
+### Using the Make a Call Page
 
-The [Send Call](https://dashboard.revring.ai/app/testing/send) page is the primary way to test outbound calls from the dashboard.
+The [Make a Call](https://dashboard.revring.ai/app/testing/send) page is the primary way to test outbound calls from the dashboard.
 
-1. Navigate to [Send Call](https://dashboard.revring.ai/app/testing/send)
+1. Navigate to [Make a Call](https://dashboard.revring.ai/app/testing/send)
 2. Select your **Agent** from the dropdown
 3. Enter the **From Number** (must be a number on your SIP trunk, E.164 format)
 4. Enter the **To Number** (the recipient's phone number, E.164 format)
@@ -40,7 +40,7 @@ Save frequently used configurations by entering a name and clicking **Save Confi
 
 The test panel on the right side of the agent page lets you call your agent directly from the browser via WebRTC. This is useful for quick iteration — you can tweak the prompt and immediately test without needing a phone. Use **Test Variables** to set `direction`, `customer_name`, or any other variables your prompt expects.
 
-To test outbound calling over the phone network (with real caller ID and SIP routing), use the **Send Call** page instead.
+To test outbound calling over the phone network (with real caller ID and SIP routing), use the **Make a Call** page instead.
 
 ## Sending Calls via API
 
@@ -359,9 +359,9 @@ View active outbound calls on the [Overview](https://dashboard.revring.ai/app) p
 - **Active Calls**: See current ongoing outbound calls
 - Filter by agent to monitor specific campaigns
 
-### Call Logs
+### Calls
 
-Track all outbound calls in [Call Logs](https://dashboard.revring.ai/app/calls):
+Track all outbound calls in [Calls](https://dashboard.revring.ai/app/calls):
 
 1. Filter by **Direction**: Select "Outbound"
 2. Filter by **Status**: View completed, failed, ongoing, or canceled calls
@@ -550,7 +550,7 @@ Are you able to make a payment today, or would you like to discuss payment optio
   <Card title="API Reference" icon="code" href="/api-reference/calls/send">
     View complete API documentation for sending calls
   </Card>
-  <Card title="Call Logs" icon="list" href="/api-reference/calls/list">
+  <Card title="Calls" icon="list" href="/api-reference/calls/list">
     Query and analyze call history via API
   </Card>
 </CardGroup>
