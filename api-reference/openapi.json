@@ -13433,6 +13433,54 @@
             ],
             "default": "sync",
             "description": "How the agent treats the webhook call. `sync`: the agent waits for your webhook's response (up to the tool timeout) and can use it in the conversation. `async`: the agent acknowledges the tool call immediately and keeps the conversation going while your webhook is delivered in the background; the response is not used. Use `async` for side effects such as logging, CRM updates or notifications."
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 120,
+            "description": "Seconds a `sync` tool waits for the webhook before the agent moves on. Default 8."
+          },
+          "executionMessage": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 300,
+            "description": "A line the agent says while a slow `sync` tool runs, for example \"One moment while I check that.\" The agent answers from the real result when it arrives. Empty or null: the agent waits without speaking."
+          },
+          "responseVariables": {
+            "type": "array",
+            "nullable": true,
+            "maxItems": 20,
+            "description": "Fields of a successful JSON response saved as call variables for later tools, by name and response path (for example `order.id`).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Variable name: letters, digits and underscores"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "Path in the JSON response, such as `order.id` or `items[0].sku`"
+                }
+              },
+              "required": [
+                "name",
+                "path"
+              ]
+            }
+          },
+          "speakAfterResult": {
+            "type": "boolean",
+            "default": true,
+            "description": "When false, the agent does not reply to the tool's result and keeps listening. Only for `sync` tools."
+          },
+          "maxRetries": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 3,
+            "description": "Extra attempts after a connection error or an HTTP 429, 502, 503 or 504 response, within the tool's time limit. A request that times out is not retried."
           }
         },
         "required": [
@@ -13502,6 +13550,54 @@
             ],
             "default": "sync",
             "description": "How the agent treats the webhook call. `sync`: the agent waits for your webhook's response (up to the tool timeout) and can use it in the conversation. `async`: the agent acknowledges the tool call immediately and keeps the conversation going while your webhook is delivered in the background; the response is not used. Use `async` for side effects such as logging, CRM updates or notifications."
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 120,
+            "description": "Seconds a `sync` tool waits for the webhook before the agent moves on. Default 8."
+          },
+          "executionMessage": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 300,
+            "description": "A line the agent says while a slow `sync` tool runs, for example \"One moment while I check that.\" The agent answers from the real result when it arrives. Empty or null: the agent waits without speaking."
+          },
+          "responseVariables": {
+            "type": "array",
+            "nullable": true,
+            "maxItems": 20,
+            "description": "Fields of a successful JSON response saved as call variables for later tools, by name and response path (for example `order.id`).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Variable name: letters, digits and underscores"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "Path in the JSON response, such as `order.id` or `items[0].sku`"
+                }
+              },
+              "required": [
+                "name",
+                "path"
+              ]
+            }
+          },
+          "speakAfterResult": {
+            "type": "boolean",
+            "default": true,
+            "description": "When false, the agent does not reply to the tool's result and keeps listening. Only for `sync` tools."
+          },
+          "maxRetries": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 3,
+            "description": "Extra attempts after a connection error or an HTTP 429, 502, 503 or 504 response, within the tool's time limit. A request that times out is not retried."
           }
         },
         "required": [
@@ -13568,6 +13664,54 @@
             ],
             "default": "sync",
             "description": "How the agent treats the webhook call. `sync`: the agent waits for your webhook's response (up to the tool timeout) and can use it in the conversation. `async`: the agent acknowledges the tool call immediately and keeps the conversation going while your webhook is delivered in the background; the response is not used. Use `async` for side effects such as logging, CRM updates or notifications."
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 120,
+            "description": "Seconds a `sync` tool waits for the webhook before the agent moves on. Default 8."
+          },
+          "executionMessage": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 300,
+            "description": "A line the agent says while a slow `sync` tool runs, for example \"One moment while I check that.\" The agent answers from the real result when it arrives. Empty or null: the agent waits without speaking."
+          },
+          "responseVariables": {
+            "type": "array",
+            "nullable": true,
+            "maxItems": 20,
+            "description": "Fields of a successful JSON response saved as call variables for later tools, by name and response path (for example `order.id`).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Variable name: letters, digits and underscores"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "Path in the JSON response, such as `order.id` or `items[0].sku`"
+                }
+              },
+              "required": [
+                "name",
+                "path"
+              ]
+            }
+          },
+          "speakAfterResult": {
+            "type": "boolean",
+            "default": true,
+            "description": "When false, the agent does not reply to the tool's result and keeps listening. Only for `sync` tools."
+          },
+          "maxRetries": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 3,
+            "description": "Extra attempts after a connection error or an HTTP 429, 502, 503 or 504 response, within the tool's time limit. A request that times out is not retried."
           }
         }
       },

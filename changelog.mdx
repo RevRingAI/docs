@@ -4,6 +4,23 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 icon: 'clock-rotate-left'
 ---
 
+## October 8, 2026
+
+### The agent speaks while a tool runs
+Give a custom tool an `executionMessage` such as "Hang tight, I'm pulling up your order" and the agent says it while a slow webhook works, then answers from the real result. Fast responses get no line. In the dashboard, open the tool and fill in **Say While It Runs**. Agents imported from Retell AI and ElevenLabs keep their execution speech. [Guide](/platform/tools#saying-something-while-a-tool-runs)
+
+### Call variables in tool requests, and saving response fields
+Use `{{name}}` in a tool's URL path, query values and header values, and save fields of a tool's JSON response as call variables with `responseVariables` for the tools that run next. In the dashboard: **Save Response Fields as Variables**. [Guide](/platform/tools#call-variables-in-requests)
+
+### Silent tools and retries
+`speakAfterResult: false` makes a tool run without the agent commenting on its result. `maxRetries` (0 to 3) retries a lookup after a connection error or a 429, 502, 503 or 504 response, within the tool's time limit. [Guide](/platform/tools#tools-that-do-not-need-a-reply)
+
+### Calls that never connect fail fast
+An outbound call that cannot be picked up by an agent within seconds is retried automatically, and if it still cannot be placed it fails right away with `no_agent_available` instead of staying in progress for up to 30 minutes.
+
+### Voicemail
+A recognised voicemail keeps the outcome `VOICEMAIL_DETECTED` even when the mailbox hangs up before a message can be left, hang-ups after a message are faster, and call screening assistants are answered with one short line and held quietly until the person or the voicemail prompt.
+
 ## October 7, 2026
 
 ### Talk to the agent during a call

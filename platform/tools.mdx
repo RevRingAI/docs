@@ -635,6 +635,89 @@ curl -X POST https://api.revring.ai/v1/agents/{agentId}/custom-tools \
   }'
 ```
 
+### Call Variables in Requests
+
+A custom tool's webhook URL, header values and query parameter values can use the call's variables with `{{name}}`, the same way prompts do. Each time the tool runs, RevRing fills them in from the call's variables: the ones you pass when the call is created, your agent's default variables, values from your pre-call webhook, and fields earlier tools saved (see below).
+
+```json
+{
+  "webhookUrl": "https://api.yourcompany.com/customers/{{customer_id}}/orders",
+  "headers": [{ "key": "X-Account", "value": "{{account_id}}" }],
+  "queryParams": [{ "key": "lang", "value": "{{language}}" }]
+}
+```
+
+- Variables can be used anywhere after the host in the URL: in the path, the query string and the fragment. A variable in the scheme or host is refused when the tool is saved, so a call can never send a request to a different server.
+- Values placed in the URL are percent-encoded, so a value like `A 12/3` becomes `A%2012%2F3` and cannot change the shape of the URL.
+- Line breaks are removed from values placed in headers.
+- A name the call has no value for is sent as written, for example `{{customer_id}}`, which makes a missing variable easy to spot in your webhook's logs.
+
+### Saving Response Fields as Variables
+
+A tool can save fields of its JSON response as call variables, so the tools that run after it can use them. List each field with the variable name to save it as and its path in the response (`order.id`, `items[0].sku`, `$.status`), up to 20 per tool:
+
+```json
+{
+  "name": "find_order",
+  "webhookUrl": "https://api.yourcompany.com/customers/{{customer_id}}/orders/latest",
+  "httpMethod": "GET",
+  "responseVariables": [
+    { "name": "order_id", "path": "order.id" },
+    { "name": "order_status", "path": "order.status" }
+  ]
+}
+```
+
+A second tool can then use what the first one found:
+
+```json
+{
+  "name": "order_eta",
+  "webhookUrl": "https://api.yourcompany.com/orders/{{order_id}}/eta",
+  "httpMethod": "GET"
+}
+```
+
+- Fields are saved only from a successful response (HTTP 2xx) that contains JSON. A field that is missing or `null` is skipped.
+- Numbers and true/false are saved as text (`3`, `true`); objects and lists are saved as JSON.
+- Saved variables last for the rest of the call, including after a handoff to another agent, and apply in chat tests, SMS and web chat the same way they do on calls.
+
+In the dashboard, open the tool and use **Save Response Fields as Variables**.
+
+When you [import an agent](/platform/importing-agents), Retell `response_variables` and ElevenLabs `assignments` become response variables, and ElevenLabs path, query and header values taken from a variable become `{{variable}}`.
+
+### Saying Something While a Tool Runs
+
+A tool that waits for its result can have a short line the agent says while your webhook works, so the caller never sits in silence:
+
+```json
+{
+  "name": "check_order",
+  "webhookUrl": "https://api.yourcompany.com/orders/latest",
+  "httpMethod": "GET",
+  "executionMessage": "Hang tight, I'm pulling up your order now."
+}
+```
+
+- The agent says the line only when your webhook takes more than a moment. A fast response is answered directly, with no line.
+- After the line, the agent answers from the real result as soon as it arrives. It does not guess the result while it waits.
+- If the request fails, the agent responds to the failure as it would without a line.
+- The call transcript shows the tool as running with the line, then the result with how long the request took.
+- Up to 300 characters. Leave it empty to wait without speaking.
+- Tools set to continue without waiting (`"responseMode": "async"`) do not use a line: the agent never waits for them.
+
+In the dashboard, open the tool and fill in **Say While It Runs**.
+
+When you [import an agent](/platform/importing-agents), a Retell tool's static execution message carries over as written. A generated execution message, and ElevenLabs pre-tool speech, become "One moment while I check that.", which you can edit.
+
+### Tools That Do Not Need a Reply
+
+Some tools only record something, for example logging a note to your CRM. Set `"speakAfterResult": false` and the agent does not say anything about the result when the tool returns. It keeps listening, and the conversation continues from the caller's next words. The default, `true`, has the agent respond to the result as usual. Tools that continue without waiting (`"responseMode": "async"`) never speak about results either.
+
+### Retrying a Failed Request
+
+Set `"maxRetries"` (0 to 3, default 0) and a tool retries its request when it fails quickly: a connection error, or an HTTP 429, 502, 503 or 504 response. The first attempt always gets the tool's full time limit. A request that times out is not retried, and a retry runs only while at least one second of the time limit remains. Use this for lookups that are safe to repeat, not for actions that must happen once.
+
 ### Webhook Request Format
 
 When the agent invokes your custom tool, RevRing sends a request to your webhook URL.
