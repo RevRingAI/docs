@@ -151,8 +151,8 @@ curl -X POST https://api.revring.ai/v1/calls/{id}/instructions \
   -d '{ "instruction": "The refund was approved a minute ago. Tell the caller it arrives in 3 to 5 days.", "speak": true }'
 ```
 
-- `"speak": true`: the agent says it now, in its own words. If it is in the middle of a sentence, it finishes first.
-- `"speak": false` (default): nothing is said right away; the instruction shapes the agent's next reply. Use it for context such as "the caller is a returning customer" or "offer the Thursday slot instead".
+- `"speak": true` (**Say this now** in the dashboard): the agent says it right away, in its own words. If it is in the middle of a sentence, it finishes first. If the caller talks over it before it is out, the agent brings it up again in its next reply, so the line is never lost.
+- `"speak": false` (default; **Keep in mind** in the dashboard): nothing is said out loud. The agent follows the note from its next reply for the rest of the call, like a whisper from a supervisor. Use it for context such as "the caller is a returning customer" or "offer the Thursday slot instead".
 
 Instructions appear in the call transcript as `instruction` items, so you can see what was sent and when. To hang up a call from your system, use [End Call](/api-reference/calls/end). Both are also available as tools in the [MCP server](/mcp-server).
 
@@ -161,7 +161,7 @@ Instructions appear in the call transcript as `instruction` items, so you can se
 The dashboard's **Live** page shows every call in progress, with its running time and what the caller and the agent are saying as they say it. From each call you can:
 
 - **Listen** to the call without anyone on it hearing you or knowing you are there.
-- **Guide** the agent with an instruction, either said now or used from its next reply (the same as `/instructions` above).
+- **Tell the agent** something: **Say this now** or **Keep in mind** (the same as `/instructions` above).
 - **End** the call after a confirmation.
 
 Calls that ended in the last 30 minutes are listed below, so a call that just finished is one click away. Filter by agent or direction; the filters stay in the page address, so a filtered view can be bookmarked.
