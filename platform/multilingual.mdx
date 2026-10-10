@@ -108,7 +108,7 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
 
 ### The voice follows the caller
 
-On a multilingual agent (`"language": "multi"`), language presets also apply mid-call: when the caller clearly switches to a language that has a preset voice, the agent continues in that language and voice, and it goes back to its own voice for a language without one. A full sentence in the new language, or two short replies in a row, counts as a switch, so a lone "sí" or "OK" never changes the voice.
+On a multilingual agent (`"language": "multi"`), language presets also apply mid-call: when the caller clearly switches to a language that has a preset voice, the agent continues in that language and voice, and it goes back to its own voice for a language without one. Only a full sentence in the new language counts as a switch: short replies such as "sí", "oui" or "OK" never change the voice or the language, however many come in a row.
 
 - The agent's next reply is in the caller's language and the new voice, and so are its replies after a handoff to another agent.
 - A call that switches to a Studio voice is priced at the Studio rate.

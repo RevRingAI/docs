@@ -156,6 +156,16 @@ curl -X POST https://api.revring.ai/v1/calls/{id}/instructions \
 
 Instructions appear in the call transcript as `instruction` items, so you can see what was sent and when. To hang up a call from your system, use [End Call](/api-reference/calls/end). Both are also available as tools in the [MCP server](/mcp-server).
 
+### Watching Calls Live in the Dashboard
+
+The dashboard's **Live** page shows every call in progress, with its running time and what the caller and the agent are saying as they say it. From each call you can:
+
+- **Listen** to the call without anyone on it hearing you or knowing you are there.
+- **Guide** the agent with an instruction, either said now or used from its next reply (the same as `/instructions` above).
+- **End** the call after a confirmation.
+
+Calls that ended in the last 30 minutes are listed below, so a call that just finished is one click away. Filter by agent or direction; the filters stay in the page address, so a filtered view can be bookmarked.
+
 ## Configuring Outbound Agent Behavior
 
 ### First Message
