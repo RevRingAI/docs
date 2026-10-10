@@ -10389,6 +10389,87 @@
         }
       }
     },
+    "/agents/{id}/test-call": {
+      "post": {
+        "summary": "Talk to an Agent From a Browser",
+        "description": "Start a test call that a browser joins directly over WebRTC, as the dashboard's test panel does. Returns the call's `callId`, the media `url` and a join `token` for a WebRTC client. The agent runs its draft (or the named `environment`) with your test `variables`, exactly as in a voice test; transfers and keypad tones are simulated, so a test never rings a real number. The call appears in call logs as a web call, with its transcript and recording, and is billed like any call.\n\nUp to 20 test calls per minute per organization.",
+        "operationId": "startAgentTestCall",
+        "tags": [
+          "Agents"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Agent ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "variables": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Variables for this test, as on a call. Override the agent's default variables"
+                  },
+                  "environment": {
+                    "type": "string",
+                    "description": "Version to test: `production` or an environment name. Defaults to the saved draft"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The call is ready to join",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "callId": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "Media server address for the WebRTC client"
+                        },
+                        "token": {
+                          "type": "string",
+                          "description": "Join token, valid for one hour"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The agent does not exist or is disabled"
+          },
+          "409": {
+            "description": "All of your call lines are in use, or billing is not active"
+          },
+          "429": {
+            "description": "Too many test calls"
+          }
+        }
+      }
+    },
     "/analytics/reply-times": {
       "get": {
         "tags": [
@@ -10990,6 +11071,20 @@
           "status": {
             "type": "string",
             "description": "Readiness of the voice: 'ready', 'processing', or 'failed'"
+          },
+          "accent": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Built-in Studio voices: the accent (American, British, Australian). Null for other voices"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Built-in Studio voices: how the voice sounds, for example \"Calm, reassuring and confident\". Null for other voices"
           }
         },
         "required": [

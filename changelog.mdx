@@ -6,6 +6,12 @@ icon: 'clock-rotate-left'
 
 ## October 10, 2026
 
+### More female Studio voices
+Three new American Studio voices: Audrey (bright, warm and professional), Natalie (calm, reassuring and confident) and Chloe (friendly, bright and warm). The voice list now shows each voice's gender, accent and tone, filters by gender, and lists female voices first. `GET /voices` returns `accent` and `description` for Studio voices.
+
+### Test calls straight from the browser
+The test panel's **Talk** button now connects your browser to the agent directly: clearer audio and a faster line than a phone connection. Transfers are simulated during a test, so nobody is dialed. Also available as `POST /agents/{id}/test-call`.
+
 ### Describe an agent and get a ready prompt
 On **Create agent**, choose **Describe it** and say what the agent should do. You get a name, an opening line and a prompt organized for phone calls to review, with transfers from any number you mention and a list of facts to add. Also available as `POST /agents/draft`. [Guide](/quickstart#create-the-agent)
 

@@ -69,6 +69,7 @@
               "api-reference/agents/draft",
               "api-reference/agents/update",
               "api-reference/agents/test-chat",
+              "api-reference/agents/test-call",
               "api-reference/agents/duplicate",
               "api-reference/agents/delete"
             ]
