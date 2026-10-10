@@ -388,7 +388,7 @@ Block All Interruptions applies to all agent speech globally. In [Conversation F
 
 ### Ignore Brief Acknowledgments
 
-Callers naturally say things like "okay", "yeah", or "uh-huh" while listening. By default, these brief acknowledgments do not interrupt the agent, so it finishes its sentence smoothly instead of stopping mid-thought. Anything beyond a brief acknowledgment, such as "wait", "stop", a question, or "okay but wait", interrupts the agent immediately. When the agent is not speaking, acknowledgment words behave like any other reply.
+Callers naturally say things like "okay", "yeah", "yes", "sure", "exactly" or "sounds good" while listening, often on a speakerphone. By default, these brief acknowledgments do not interrupt the agent: it keeps talking without pausing, so it finishes its thought smoothly. Anything beyond a brief acknowledgment, such as "wait", "stop", "no", a question, or "yes but wait", interrupts the agent immediately. When the agent is not speaking, acknowledgment words behave like any other reply, so a "yes" to a question is answered as a yes.
 
 This is enabled by default with a recommended list that covers common acknowledgments and adapts to the agent's language setting (for example, Spanish agents also recognize "ajá" and "claro"). You can customize it per agent:
 
@@ -403,6 +403,19 @@ curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
     "interruptionIgnoreWords": ["okay", "yeah", "got it", "claro"]
   }'
 ```
+
+### Backchannels (Beta)
+
+On long caller turns, the agent can add a short "mm-hmm", "right" or "I see" in its own voice at a natural pause, the way a person shows they are listening. It never takes the turn, never speaks over the caller mid-word, and stays quiet during the opening, voicemail, phone menus and transfers. Off by default; turn it on per agent:
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "backchannels": true }'
+```
+
+English agents vary the phrase; agents in other languages use a neutral "mm-hmm".
 
 ### Interruption Word Count
 

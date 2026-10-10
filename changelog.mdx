@@ -6,6 +6,21 @@ icon: 'clock-rotate-left'
 
 ## October 10, 2026
 
+### Acknowledgments never stop the agent
+"Yes", "sure", "exactly", "sounds good" and similar words said while the agent is speaking no longer pause or restart it; "wait", "stop" or a question still interrupt at once. [Guide](/platform/tools#ignore-brief-acknowledgments)
+
+### Warm transfers to a line that answers in silence
+When the person you transfer to picks up without speaking, the agent introduces the caller right away, and a line where nobody ever speaks is given up after a minute with the caller told, instead of holding them.
+
+### Call screening with a pause before speaking
+When a call screening assistant answers during the agent's pause before its opening, the agent answers the screener once and does not also play its opening.
+
+### Reply time on every turn
+Agent turns in the transcript carry `latency.replyMs`, what the caller waited for that reply, and `metrics.latency.stop_to_audio` summarizes it per call. [Guide](/platform/webhooks#response-latency)
+
+### Backchannels (beta)
+Agents can add a short "mm-hmm" during long caller turns. Off by default. [Guide](/platform/tools#backchannels-beta)
+
 ### Inbound lines held for callers
 An inbound reserve keeps lines that outbound calls (API calls, campaigns, tests) never take, so callers and website visitors get through while a dialer runs. [Guide](/platform/outbound#keeping-lines-free-for-inbound-callers)
 

@@ -12248,6 +12248,10 @@
                 "description": "Send after the caller stops pressing for this long (default 2500)"
               }
             }
+          },
+          "backchannels": {
+            "type": "boolean",
+            "description": "Beta. Short listening sounds (\"mm-hmm\", \"right\") in the agent's voice at natural pauses in long caller turns. Never takes the turn. Default false."
           }
         },
         "required": [
@@ -12957,6 +12961,10 @@
                 "description": "Send after the caller stops pressing for this long (default 2500)"
               }
             }
+          },
+          "backchannels": {
+            "type": "boolean",
+            "description": "Beta. Short listening sounds (\"mm-hmm\", \"right\") in the agent's voice at natural pauses in long caller turns. Never takes the turn. Default false."
           }
         },
         "required": [
@@ -13671,6 +13679,10 @@
                 "description": "Send after the caller stops pressing for this long (default 2500)"
               }
             }
+          },
+          "backchannels": {
+            "type": "boolean",
+            "description": "Beta. Short listening sounds (\"mm-hmm\", \"right\") in the agent's voice at natural pauses in long caller turns. Never takes the turn. Default false."
           }
         }
       },

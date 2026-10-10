@@ -414,14 +414,35 @@ The example above shows both a custom tool (`check_order_status`) and a system t
 
 | Field | Measures |
 |-------|----------|
-| `e2e` | What the caller waits: from the end of their speech to the start of the agent's reply (the sum of the three below) |
+| `stop_to_audio` | What the caller waits: from the moment they stop talking to the agent's first sound |
+| `stop_to_eot` | From the moment the caller stops talking until the agent decides they have finished their turn |
+| `e2e` | The agent's processing time once it has decided the caller finished, to the start of its reply (the sum of the three below) |
 | `eou_delay` | From the end of the caller's speech until the agent decides they have finished their turn |
 | `transcription_delay` | From the end of the caller's speech until their words are transcribed |
 | `llm_ttft` | From the agent starting to think to the first word of its reply |
 | `tts_ttfb` | From the reply text to the first audio the caller hears |
 | `turns` | Number of agent turns measured |
 
-Interrupted or discarded replies are not counted. Calls where the caller never spoke have `count: 0`.
+Interrupted or discarded replies are not counted, and neither are acknowledgments the caller says while the agent is talking. Calls where the caller never spoke have `count: 0`. `stop_to_audio` and `stop_to_eot` are present on calls from October 10, 2026.
+
+**Timing on each agent turn**
+
+Agent turns in a call's `transcript` carry a `latency` object with how long that reply took, in milliseconds. Only measured values are included.
+
+| Field | What it measures |
+|---|---|
+| `replyMs` | From the moment the caller stopped talking to the agent's first sound. This is what the caller waits. |
+| `thinkingMs` | From the end of the caller's turn to the first words of the reply. |
+| `voiceMs` | From the first words of the reply to the first audio of them. |
+| `totalMs` | From the end of the caller's turn to the first audio. |
+
+```json
+{ "type": "message", "role": "assistant", "text": "Thursday works. See you then.", "at": 63.6,
+  "latency": { "replyMs": 1180, "thinkingMs": 410, "voiceMs": 95, "totalMs": 520 } }
+```
+
+The call page shows each reply's time next to the turn, and the agent page shows the agent's typical reply time over its recent calls (`GET /v1/analytics/reply-times?agentId=`).
+
 
 **Tool timing fields**
 
