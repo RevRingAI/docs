@@ -67,6 +67,7 @@
               "api-reference/agents/batch-get",
               "api-reference/agents/create",
               "api-reference/agents/update",
+              "api-reference/agents/test-chat",
               "api-reference/agents/duplicate",
               "api-reference/agents/delete"
             ]
@@ -250,7 +251,8 @@
             "pages": [
               "api-reference/analytics/overview",
               "api-reference/analytics/active",
-              "api-reference/analytics/versions"
+              "api-reference/analytics/versions",
+              "api-reference/analytics/reply-times"
             ]
           },
           {

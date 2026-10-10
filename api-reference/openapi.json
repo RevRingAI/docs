@@ -9903,6 +9903,420 @@
           }
         }
       }
+    },
+    "/agents/{id}/test-chat": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Agent ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Test Agent by Chat",
+        "description": "Type to the agent and get its reply, without a phone call. Each request returns the agent's next turn. The agent answers exactly as it does in a chat test: its own model tier, prompt, variables, knowledge base, custom tools and MCP tools. Phone actions (ending the call, transfers, keypad tones, handoffs) are simulated and listed in `toolCalls`; custom tools call your webhooks for real.\n\nThe conversation is kept by you: send the messages so far (send none to get the agent's opening line) and the `state` from the previous reply. When `ended` is true the agent ended the conversation.\n\nUp to 60 messages of up to 4,000 characters each per request, and up to 60 requests per minute per organization. Test chats are billed like chat tests: at your listed per-minute rates, based on conversation length. Each test chat is recorded once in your call logs as a test call. Single-prompt agents only; use a voice test for conversation flow agents and agents on a custom model.",
+        "operationId": "testChatAgent",
+        "tags": [
+          "Agents"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "messages"
+                ],
+                "properties": {
+                  "messages": {
+                    "type": "array",
+                    "maxItems": 60,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "role",
+                        "content"
+                      ],
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "assistant"
+                          ],
+                          "description": "Who said it: `user` is you, `assistant` is the agent"
+                        },
+                        "content": {
+                          "type": "string",
+                          "maxLength": 4000
+                        }
+                      }
+                    },
+                    "description": "The conversation so far, oldest first. Empty for the agent's opening line; otherwise the last message is yours"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Variables for this test, as on a call (for example `{\"first_name\": \"Sam\"}`). Override the agent's default variables"
+                  },
+                  "environment": {
+                    "type": "string",
+                    "description": "Version to test: `production` (the published version) or the name of one of the agent's environments. Omit to test the saved draft"
+                  },
+                  "state": {
+                    "type": "object",
+                    "description": "Conversation state from the previous reply. Send it back unchanged with the next message so the conversation continues where it left off (the same test call, any handoff to another agent, and variables set by the pre-call webhook or by tools). Omit it, or send no messages, to start a new conversation.",
+                    "properties": {
+                      "callId": {
+                        "type": "string",
+                        "description": "The test call this conversation is recorded and billed on"
+                      },
+                      "agentId": {
+                        "type": "string",
+                        "description": "The agent answering now. Differs from the agent in the path after a handoff"
+                      },
+                      "environment": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "handoffs": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "variables": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "description": "Variables set during the conversation"
+                      }
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "opening": {
+                  "summary": "Start a conversation",
+                  "value": {
+                    "messages": []
+                  }
+                },
+                "next": {
+                  "summary": "Continue it",
+                  "value": {
+                    "messages": [
+                      {
+                        "role": "assistant",
+                        "content": "Hi, thanks for calling. How can I help?"
+                      },
+                      {
+                        "role": "user",
+                        "content": "Can I book a table for two tonight?"
+                      }
+                    ],
+                    "variables": {
+                      "first_name": "Sam"
+                    },
+                    "state": {
+                      "agentId": "cm_agent_id",
+                      "environment": null,
+                      "handoffs": 0,
+                      "variables": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The agent's next turn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "reply": {
+                          "type": "string",
+                          "description": "What the agent said. Empty when the agent waits for you to speak first"
+                        },
+                        "toolCalls": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "description": "Tool name, for example a custom tool's name, `end_call`, `transfer_to_number`, `play_keypad_touch_tone` or `hand_off_to_agent`"
+                              },
+                              "arguments": {
+                                "type": "object",
+                                "additionalProperties": true
+                              },
+                              "result": {
+                                "description": "What the tool returned to the agent"
+                              },
+                              "ok": {
+                                "type": "boolean",
+                                "description": "false when the tool failed"
+                              }
+                            }
+                          },
+                          "description": "Tools the agent used during this turn, in order"
+                        },
+                        "ended": {
+                          "type": "boolean",
+                          "description": "true when the agent ended the conversation"
+                        },
+                        "endReason": {
+                          "type": "string",
+                          "enum": [
+                            "end_call",
+                            "transfer",
+                            "voicemail"
+                          ],
+                          "description": "How it ended, when `ended` is true"
+                        },
+                        "state": {
+                          "type": "object",
+                          "description": "Conversation state from the previous reply. Send it back unchanged with the next message so the conversation continues where it left off (the same test call, any handoff to another agent, and variables set by the pre-call webhook or by tools). Omit it, or send no messages, to start a new conversation.",
+                          "properties": {
+                            "callId": {
+                              "type": "string",
+                              "description": "The test call this conversation is recorded and billed on"
+                            },
+                            "agentId": {
+                              "type": "string",
+                              "description": "The agent answering now. Differs from the agent in the path after a handoff"
+                            },
+                            "environment": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "handoffs": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "variables": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "description": "Variables set during the conversation"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, or the environment does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "invalid_body",
+                        "environment_not_found"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "402": {
+            "$ref": "#/components/responses/BillingInactiveError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "422": {
+            "description": "This agent can't be tested by chat; use a voice test",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "test_chat_unsupported"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many test messages; retry after the `Retry-After` seconds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "rate_limited"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The agent could not reply; try again",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "agent_reply_failed"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Chat testing is temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "test_chat_unavailable"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/reply-times": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Agent Reply Times",
+        "operationId": "getAgentReplyTimes",
+        "description": "How fast an agent answers, from its last 100 finished calls with a conversation. `caller` is what callers wait: from the moment they stop talking to the agent's first sound (null until calls have measured it). `server` is the agent's own processing time once it has decided the caller finished; it reads lower than `caller`. Each figure is the median across calls of that call's typical (median) and slow (90th percentile) turn.",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reply times",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "calls": {
+                          "type": "integer",
+                          "description": "Finished calls with turns among the last 100."
+                        },
+                        "caller": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "calls": {
+                              "type": "integer"
+                            },
+                            "typicalMs": {
+                              "type": "integer",
+                              "nullable": true
+                            },
+                            "slowMs": {
+                              "type": "integer",
+                              "nullable": true
+                            }
+                          }
+                        },
+                        "server": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "typicalMs": {
+                              "type": "integer",
+                              "nullable": true
+                            },
+                            "slowMs": {
+                              "type": "integer",
+                              "nullable": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found"
+          }
+        }
+      }
     }
   },
   "webhooks": {

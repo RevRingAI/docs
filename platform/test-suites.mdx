@@ -95,6 +95,35 @@ The run must be finished before requesting a suggestion, and it must contain at 
 
 Every `ready` response includes a `stale` boolean next to `status` and `result`. It is `false` when the agent's prompt is still the one the suggestion was written against, and `true` if the prompt has changed since, in which case saving `result.suggestedPrompt` would overwrite those newer edits. When `stale` is `true`, request a fresh suggestion instead of applying the old one. This applies to both the per-attempt and the run-level endpoints.
 
+## Chat With an Agent
+
+Type to your agent instead of calling it. In the dashboard, open the agent and switch the test panel to **Chat**. Through the API:
+
+```bash
+curl -X POST https://api.revring.ai/v1/agents/{agentId}/test-chat \
+  -H "x-api-key: YOUR_API_KEY" -H "Content-Type: application/json" \
+  -d '{ "messages": [] }'
+```
+
+An empty `messages` list returns the agent's opening line. Then send the conversation so far, ending with your message, and pass back the `state` from the previous response:
+
+```json
+{
+  "messages": [
+    { "role": "assistant", "content": "Thank you for calling Acme. How can I help?" },
+    { "role": "user", "content": "Can I book a cleaning for Thursday?" }
+  ],
+  "variables": { "customer_name": "Dana" },
+  "state": "<state from the previous response>"
+}
+```
+
+The response has the agent's `reply`, the `toolCalls` it made (name, arguments, result and whether it succeeded), `ended` when the agent ended the conversation (with `endReason`: `end_call`, `transfer` or `voicemail`), and the `state` to send with your next message. Custom tools are called for real; call-control tools such as transfer and end call are simulated.
+
+The agent answers on its own model and prompt, with its tools and knowledge base, exactly as on a call. Each chat is billed as one test call (it appears in your call history marked as a test), at the same rate as chat tests.
+
+Limits: 60 messages per conversation, 4,000 characters per message, 60 requests per minute per organization.
+
 ## Creating a Test Suite
 
 ### From the Dashboard

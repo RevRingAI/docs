@@ -4,6 +4,26 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 icon: 'clock-rotate-left'
 ---
 
+## October 10, 2026
+
+### Inbound lines held for callers
+An inbound reserve keeps lines that outbound calls (API calls, campaigns, tests) never take, so callers and website visitors get through while a dialer runs. [Guide](/platform/outbound#keeping-lines-free-for-inbound-callers)
+
+### Clearer reasons when a call fails
+`errorMessage` is a short code or a plain sentence everywhere: the API, the dashboard and webhooks. [Guide](/platform/outbound#why-a-call-failed)
+
+### Chat with an agent
+Test an agent by typing, in the dashboard's test panel or with `POST /agents/{id}/test-chat`. [Guide](/platform/test-suites#chat-with-an-agent)
+
+### Reply times
+`GET /analytics/reply-times` reports how fast an agent answers over its recent calls, and the agent page shows it.
+
+### Studio voices have new names
+The built-in Studio voices are now Maya, Evan, Lena, Caleb, Grant, Wesley, Bennett, Rowan, Imogen, Harriet, Oliver, Hugh and Lachlan. Voice IDs are unchanged and every agent keeps its voice.
+
+### A new dashboard
+A cleaner look with a dark theme, faster pages, search with ⌘K, an agent builder organized by section with one save button and a warning before you leave unsaved changes, templates for new agents, and a call page that explains why a call failed.
+
 ## October 8, 2026
 
 ### The agent speaks while a tool runs
@@ -16,7 +36,7 @@ Use `{{name}}` in a tool's URL path, query values and header values, and save fi
 `speakAfterResult: false` makes a tool run without the agent commenting on its result. `maxRetries` (0 to 3) retries a lookup after a connection error or a 429, 502, 503 or 504 response, within the tool's time limit. [Guide](/platform/tools#tools-that-do-not-need-a-reply)
 
 ### Calls that never connect fail fast
-An outbound call that cannot be picked up by an agent within seconds is retried automatically, and if it still cannot be placed it fails right away with `no_agent_available` instead of staying in progress for up to 30 minutes.
+An outbound call that cannot be picked up by an agent within seconds is retried automatically, and if it still cannot be placed it fails right away with `agent_unavailable` instead of staying in progress for up to 30 minutes.
 
 ### Voicemail
 A recognised voicemail keeps the outcome `VOICEMAIL_DETECTED` even when the mailbox hangs up before a message can be left, hang-ups after a message are faster, and call screening assistants are answered with one short line and held quietly until the person or the voicemail prompt.

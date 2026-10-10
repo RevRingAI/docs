@@ -319,6 +319,10 @@ curl -X POST https://api.revring.ai/v1/calls/{callId}/cancel \
 Only calls with status `QUEUED` can be cancelled. Once a call moves to `INITIATED` or `ONGOING`, it cannot be cancelled through this endpoint.
 </Note>
 
+### Keeping Lines Free for Inbound Callers
+
+If the same organization makes outbound calls and also takes inbound calls or website calls, a busy dialer can use every line. An inbound reserve keeps a number of lines that outbound calls (API calls, campaigns and tests) never take, so callers and website visitors always get through. Inbound and website calls can still use every line. Contact support to set the reserve for your organization; `GET /v1/analytics/active` reports it as `concurrency.inboundReserve`, and `concurrency.limit` is what outbound calls may use.
+
 ### Opting Out of Queuing
 
 If you prefer to handle queuing in your own system, pass `skipQueue: true` when creating the call. This tells RevRing to return an immediate `429` error instead of queuing when the concurrency limit is reached:
@@ -351,6 +355,26 @@ curl -X POST https://api.revring.ai/v1/calls \
 - **Respect time zones**: Schedule calls during appropriate hours for the recipient's location
 
 ## Monitoring Outbound Calls
+
+### Why a Call Failed
+
+When a call ends with status `FAILED`, its `errorMessage` (in the API, the dashboard and the post-call webhook) says why. Reasons that come from your carrier or the person you called are plain sentences; the others are short codes.
+
+| `errorMessage` | What happened | What to do |
+|---|---|---|
+| `no answer: the callee did not pick up` | The number rang and nobody answered. | Retry later, or let a campaign retry by outcome. |
+| `call rejected by the callee (busy or declined)` | The person was busy or declined the call. | Retry later. |
+| `call rejected (SIP <code>: <reason>)` | Your carrier or the far end refused the call and gave a SIP code, for example `SIP 503: Trunk CPS limit exceeded` (your trunk's calls-per-second limit) or `SIP 404: Not Found`. | Check the code with your carrier; for a calls-per-second limit, slow your dialing or raise the limit on your trunk. |
+| `carrier rejected the call` | Your carrier refused the call without a SIP reason. | Check the number and your trunk. |
+| `no response from the carrier` | Your carrier did not answer the call request. | Check your trunk's address and credentials. |
+| `the line disconnected before the call was answered` | The line dropped while ringing. | Retry. |
+| `concurrency_limit` | All of your plan's concurrent call slots were in use. | Queue calls (the default) or raise your concurrency. |
+| `billing_inactive` | Your plan is not active. | Update billing in the dashboard. |
+| `agent_unavailable` | The agent could not join the call. | Placing the call again usually works. If it repeats, contact support with the call ID. |
+| `flow_not_configured` / `flow_invalid` | The agent's conversation flow is missing or has an error. | Open the agent's flow and fix the highlighted node. |
+| `trunk_not_configured` | The agent's phone number has no outbound trunk set up. | Assign a trunk to the number on the Phone Numbers page. |
+| `the call could not be completed` | Any other reason. | Retry; contact support with the call ID if it repeats. |
+
 
 ### Real-Time Monitoring
 
