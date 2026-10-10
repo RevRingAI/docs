@@ -2416,6 +2416,154 @@
         }
       }
     },
+    "/agents/draft": {
+      "post": {
+        "summary": "Draft an Agent From a Description",
+        "description": "Write an agent from a plain description of what it should do: a name, an opening line, a prompt organized for phone calls, the language, and transfer routes when the description gives a number to transfer to. Nothing is saved: review and edit the draft, then create the agent with [Create Agent](/api-reference/agents/create).\n\nThe draft uses only facts from the description. Facts the agent will need but the description does not give (opening hours, prices, an address) are listed in `toFillIn` instead of being made up; until they are added to the prompt, the agent offers a callback for them. Details that differ for each call (the person's name, an appointment time) appear as `{{variables}}` and are listed in `variables`.\n\nA draft takes about 10 seconds. Up to 30 drafts per hour per organization.",
+        "operationId": "draftAgent",
+        "tags": [
+          "Agents"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "description"
+                ],
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 4000,
+                    "description": "What the agent should do, in your own words: who calls or who it calls, what it should get done, what it must not do, and where to send callers it cannot help"
+                  },
+                  "companyName": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "The business the agent works for. Used in the prompt and the opening line"
+                  }
+                }
+              },
+              "example": {
+                "companyName": "Bright Smile Dental",
+                "description": "Answer calls for our dental office. Book cleanings and checkups, answer basic questions, and send billing questions to our office manager at 415-555-0142."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The draft",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "A short name for the agent"
+                        },
+                        "direction": {
+                          "type": "string",
+                          "enum": [
+                            "inbound",
+                            "outbound",
+                            "either"
+                          ],
+                          "description": "Whether the agent answers calls, places them, or both"
+                        },
+                        "language": {
+                          "type": "string",
+                          "description": "The language code the agent speaks, or `multi`. Pass it as `language` when you create the agent"
+                        },
+                        "firstMessage": {
+                          "type": "string",
+                          "description": "The opening line"
+                        },
+                        "promptTemplate": {
+                          "type": "string",
+                          "description": "The prompt"
+                        },
+                        "variables": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Variables the prompt and opening line use, to send with each call"
+                        },
+                        "endCallEnabled": {
+                          "type": "boolean",
+                          "description": "Whether the agent should end calls itself"
+                        },
+                        "transferRoutes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "to_number": {
+                                "type": "string",
+                                "description": "E.164 number"
+                              },
+                              "condition": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "description": "Transfer routes, only when the description gave a number. Pass them as `transferRoutes` with `transferEnabled: true`"
+                        },
+                        "toFillIn": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Up to five facts to add to the prompt, most important first"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "name": "Dental front desk",
+                    "direction": "inbound",
+                    "language": "en",
+                    "firstMessage": "Thank you for calling Bright Smile Dental. How can I help you today?",
+                    "promptTemplate": "Role:\nYou are Maya, the front desk agent for Bright Smile Dental...",
+                    "variables": [],
+                    "endCallEnabled": true,
+                    "transferRoutes": [
+                      {
+                        "to_number": "+14155550142",
+                        "condition": "Billing questions about charges or payments"
+                      }
+                    ],
+                    "toFillIn": [
+                      "Weekday opening hours",
+                      "Office address"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The description is missing, too short or too long"
+          },
+          "429": {
+            "description": "Too many drafts this hour"
+          },
+          "502": {
+            "description": "The draft could not be written; try again"
+          }
+        }
+      }
+    },
     "/agents/batch-get": {
       "post": {
         "summary": "Batch Get Agents",
