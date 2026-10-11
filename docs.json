@@ -254,7 +254,8 @@
               "api-reference/analytics/overview",
               "api-reference/analytics/active",
               "api-reference/analytics/versions",
-              "api-reference/analytics/reply-times"
+              "api-reference/analytics/reply-times",
+              "api-reference/analytics/agent-activity"
             ]
           },
           {

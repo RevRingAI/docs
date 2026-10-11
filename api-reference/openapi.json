@@ -10470,6 +10470,83 @@
         }
       }
     },
+    "/analytics/agents": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Agent Activity",
+        "operationId": "getAgentActivity",
+        "description": "Activity per agent over the last `days` (default 7, at most 90): how many calls each agent handled, how many connected, how many failed, the typical call length and when its last call was. One row per agent that had a call in the window; agents with none are not listed. This is what the dashboard's Agents list shows.",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90,
+              "default": 7
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activity per agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "days": {
+                          "type": "integer"
+                        },
+                        "agents": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "agentId": {
+                                "type": "string"
+                              },
+                              "calls": {
+                                "type": "integer",
+                                "description": "Calls created in the window, any outcome."
+                              },
+                              "connected": {
+                                "type": "integer",
+                                "description": "Calls that reached a conversation."
+                              },
+                              "failed": {
+                                "type": "integer"
+                              },
+                              "averageDurationSeconds": {
+                                "type": "integer",
+                                "nullable": true,
+                                "description": "Mean length of the connected calls, in seconds."
+                              },
+                              "lastCallAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analytics/reply-times": {
       "get": {
         "tags": [
