@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 11, 2026
 
+### Activity across the account
+A new **Activity** page (under Monitor) lists every change to your agents, newest first: who made it (a teammate or an API key), when, which agent, and which settings changed, with filters for range, agent and person. Each row opens the agent's History, where the full before and after can be read and a version restored. Also available as `GET /activity`. [Reference](/api-reference/activity/list)
+
 ### Agent activity at a glance
 The **Agents** list shows each agent's calls over the last 7 days (connected, failed and typical length on hover) and when its last call was. The **Home** page lists the busiest agents for the selected range, each opening that agent's Insights. Each agent's page has an **Insights** section with calls, cost, duration, transfers, reply time and voicemail rate against the period before, a trend that opens the calls behind any point, and call outcomes with a one-click way to turn failing calls into tests. Also available as `GET /analytics/agents`. [Reference](/api-reference/analytics/agent-activity)
 

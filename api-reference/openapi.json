@@ -80,6 +80,10 @@
     {
       "name": "Integrations",
       "description": "Calendars your agents book on"
+    },
+    {
+      "name": "Activity",
+      "description": "Who changed what, across the account."
     }
   ],
   "paths": {
@@ -10620,6 +10624,141 @@
           },
           "404": {
             "description": "Agent not found"
+          }
+        }
+      }
+    },
+    "/activity": {
+      "get": {
+        "tags": [
+          "Activity"
+        ],
+        "summary": "List Activity",
+        "operationId": "listActivity",
+        "description": "Who changed which agent, when and what, across your whole account, newest first: every create, update, delete, restore, publish, tool, phone number and knowledge base change, with the person (dashboard user) or API key that made it and the fields that changed. The same records back each agent's version history (`GET /agents/{id}/revisions`), where the full before and after of a change can be read and a version restored.",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90,
+              "default": 7
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only this agent's changes."
+          },
+          {
+            "name": "actor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only changes by this person or API key (substring of the email or key name, case-insensitive)."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Changes, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "actorType": {
+                            "type": "string",
+                            "enum": [
+                              "user",
+                              "apiKey",
+                              "system"
+                            ]
+                          },
+                          "actorLabel": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "The user's email or the API key's name."
+                          },
+                          "agentId": {
+                            "type": "string"
+                          },
+                          "agentName": {
+                            "type": "string",
+                            "description": "The agent's name at the time of the change (kept for deleted agents)."
+                          },
+                          "reason": {
+                            "type": "string",
+                            "description": "created, updated, deleted, restored, published, duplicated, custom_tool_created, custom_tool_updated, custom_tool_deleted, phone_number_added, phone_number_removed, knowledge_base_linked, knowledge_base_unlinked"
+                          },
+                          "changedFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Top-level agent fields whose value changed (`*` for the first version)."
+                          },
+                          "revision": {
+                            "type": "integer",
+                            "description": "The agent's version number this change produced."
+                          }
+                        }
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "hasNextPage": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

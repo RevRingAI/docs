@@ -249,6 +249,12 @@
             ]
           },
           {
+            "group": "Activity",
+            "pages": [
+              "api-reference/activity/list"
+            ]
+          },
+          {
             "group": "Analytics",
             "pages": [
               "api-reference/analytics/overview",
