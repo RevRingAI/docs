@@ -293,7 +293,9 @@ For high-volume outbound campaigns, choose "Hangup" to minimize costs and focus 
 
 ### When Nobody Speaks
 
-Some voicemail systems answer without any greeting the agent can hear, so there is nothing for voicemail detection to key on. The platform closes these calls automatically: if nobody has spoken by the third re-engagement attempt (and the call is at least 20 seconds old), the agent says a short sign-off and ends the call with hangup cause `SILENCE_TIMEOUT`. This applies only while the other side has said nothing at all. Once a person has spoken, the agent stays patient through quiet stretches and keeps re-engaging normally.
+Some voicemail systems answer without any greeting the agent can hear, so there is nothing for voicemail detection to key on. The platform closes these calls automatically: if nobody has spoken by the third re-engagement attempt (and the call is at least 20 seconds old), the agent says a short sign-off and ends the call with hangup cause `SILENCE_TIMEOUT`. This applies only while the other side has said nothing at all.
+
+**A line that goes dead mid-call.** Once a person has spoken, the agent stays patient through quiet stretches and keeps checking in. If five check-ins in a row go unanswered (about 40 seconds of silence at the default cadence), the agent says a short sign-off and ends the call with hangup cause `SILENCE_TIMEOUT`, so a caller who walked away or a line that dropped without a hangup does not run to the maximum call length. A caller whose last words asked for a moment ("hold on", "one second") gets about twice as long. Set your own silence end call timeout (`silenceEndCallTimeoutSeconds`) and that takes over instead.
 
 ## Call Pacing and Concurrency
 
