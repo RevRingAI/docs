@@ -4293,6 +4293,15 @@
               "type": "string"
             },
             "description": "Only calls that ended with these hang-up causes, comma-separated (e.g. `VOICEMAIL_DETECTED,IVR_REACHED`)."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only calls that ran in this language (exact code, e.g. `es`)."
           }
         ],
         "responses": {
@@ -14973,6 +14982,11 @@
               null
             ],
             "description": "Tier of the voice the call ran on, fixed at call start. 'studio' calls are billed an additional 2 cents per minute. null for calls placed before voice tiers existed (billed at the regular rate)."
+          },
+          "language": {
+            "type": "string",
+            "nullable": true,
+            "description": "The language the call ran in (e.g. `es`): the agent's or the per-call language when the call was created, updated to the language a multilingual call switched to. null for calls recorded before this field existed."
           },
           "postCallWebhookStatus": {
             "type": "string",
