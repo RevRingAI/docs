@@ -68,7 +68,7 @@ Tools that only make sense on a phone call (transferring the call, touch-tone di
 
 Each chat reply is generated with:
 
-- **The current date and time** in the agent's timezone, so rules like opening hours or seasonal schedules apply on their own. You can also place `{{current_time}}` anywhere in the prompt to control exactly where it appears.
+- **The current date and time** in the agent's timezone, so rules like opening hours or seasonal schedules apply on their own. It is stated once at the end of the agent's instructions; where you place `{{current_time}}` in the prompt, the prompt refers to that statement (so the prompt text itself stays the same from reply to reply, which keeps replies fast).
 - **The page the visitor is on** (title and URL), so the agent can speak to what they're looking at — a specific product or listing, for example. Available in the prompt as `{{page_context}}` if you want to reference it explicitly.
 - **The agent's default variables**, which render into the prompt with `{{variable}}` templating, the same as on calls.
 
