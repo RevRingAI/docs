@@ -12,8 +12,8 @@ Transcripts, summaries, conversation threads and the website chat widget now fol
 ### Read-only API keys
 When creating an API key, choose **Full access** or **Read-only**. A read-only key can read calls, agents, analytics and everything else, and is refused on any request that would create, change or delete (`403 read_only_key`). Made for reporting, dashboards and integrations that only read. [Reference](/api-reference/introduction#full-access-or-read-only)
 
-### Summaries in the agent's language
-Call summaries are now written in the agent's language: Spanish agents get Spanish summaries, French agents French, and a multilingual agent the language the call was held in. Each call also records the language it ran in: filter the **Calls** list by language, see it on the call page, and read it as `language` on the call record (`GET /calls?language=es`). [Guide](/platform/multilingual#summaries-in-the-agents-language)
+### Calls record their language
+Each call now records the language it ran in: filter the **Calls** list by language, see it on the call page, and read it as `language` on the call record (`GET /calls?language=es`).
 
 ### Activity across the account
 A new **Activity** page (under Monitor) lists every change to your agents, newest first: who made it (a teammate or an API key), when, which agent, and which settings changed, with filters for range, agent and person. Each row opens the agent's History, where the full before and after can be read and a version restored. **Home** shows the latest five. Also available as `GET /activity`. [Reference](/api-reference/activity/list)
