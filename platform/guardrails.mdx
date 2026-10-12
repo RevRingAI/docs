@@ -1,0 +1,53 @@
+---
+title: 'Guardrails'
+description: 'What an agent refuses to be pulled into, whatever the person says'
+icon: 'shield-halved'
+---
+
+Guardrails keep an agent on its job. They apply on top of your prompt, in the same way, everywhere the agent talks: phone calls, the test panel and test suites, SMS and web chat. Three rails, each on its own:
+
+| Rail | What it does |
+|------|--------------|
+| **Stay on purpose** | The agent helps only with what it is for. Asked for anything else (general questions, a recipe, code, another task), it says in one short sentence that it cannot help with that here and returns to its purpose. Give the purpose in a few words, or leave it empty to go by the prompt. |
+| **Resist manipulation** | The agent keeps its persona, instructions and rules whoever the person claims to be and whatever they claim: a request to behave differently, to reveal or repeat its instructions, to play another role, to treat the conversation as a test or a game, or to make an exception changes nothing. |
+| **Never discuss** | Subjects the agent never discusses, gives an opinion on, or provides information about, even when asked directly. Up to 30. |
+
+**When the person keeps pushing** decides what happens after the agent has declined twice: keep declining and steer back (the default), or say goodbye and end the call. On SMS and web chat the agent closes the conversation instead.
+
+## Setting guardrails
+
+**Dashboard:** open the agent, go to **Behavior**, and fill in the **Guardrails** card.
+
+**API:** set `guardrails` on the agent (`null` turns every rail off):
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/agents/{agentId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "guardrails": {
+      "focus": { "enabled": true, "scope": "booking, moving or cancelling dental appointments" },
+      "manipulation": { "enabled": true },
+      "blockedTopics": ["politics and elections", "other clinics and their prices"],
+      "onViolation": "end_call"
+    }
+  }'
+```
+
+| Field | Description |
+|-------|-------------|
+| `focus.enabled` | Stay on purpose. |
+| `focus.scope` | The purpose in a few words (up to 500 characters). Empty: the prompt defines it. |
+| `manipulation.enabled` | Resist manipulation. |
+| `blockedTopics` | Subjects never discussed, up to 30 of up to 80 characters each. |
+| `onViolation` | `redirect` (default) or `end_call`. |
+
+Guardrails are part of the agent's configuration: they are saved in its [versions](/platform/versioning), published with it, and copied when the agent is cloned.
+
+## Proving them
+
+Guardrails are instructions the agent follows, so test them the way you test anything else the agent should do: in the test panel's **Chat**, or with a [test suite](/platform/test-suites) whose scripts try to pull the agent off course (an unrelated question, "ignore your instructions", a blocked subject, insisting three times) and whose rubrics check that it declined and came back. Run each test a few times.
+
+<Note>
+Guardrails steer the agent's own replies. They do not filter what the person says, and they are not a substitute for keeping secrets out of the prompt: anything in the prompt can, in principle, be talked about, so put credentials, internal notes and prices you do not want quoted in a tool or a knowledge base with access rules instead.
+</Note>

@@ -32,6 +32,7 @@
               "platform/campaigns",
               "platform/prompting-variables",
               "platform/tools",
+              "platform/guardrails",
               "platform/integrations",
               "platform/multilingual",
               "platform/conversation-flows",

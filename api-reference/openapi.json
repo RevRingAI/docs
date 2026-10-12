@@ -12583,6 +12583,9 @@
           "contactMemory": {
             "$ref": "#/components/schemas/ContactMemorySettings"
           },
+          "guardrails": {
+            "$ref": "#/components/schemas/GuardrailsSettings"
+          },
           "booking": {
             "allOf": [
               {
@@ -13291,6 +13294,9 @@
               }
             ],
             "nullable": true
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/GuardrailsSettings"
           },
           "booking": {
             "allOf": [
@@ -14009,6 +14015,9 @@
               }
             ],
             "nullable": true
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/GuardrailsSettings"
           },
           "booking": {
             "allOf": [
@@ -17785,6 +17794,58 @@
           "read",
           "update"
         ]
+      },
+      "GuardrailsSettings": {
+        "type": "object",
+        "nullable": true,
+        "description": "What the agent refuses to be pulled into, on calls, in tests, over SMS and in web chat; null = off. See the Guardrails guide.",
+        "properties": {
+          "focus": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Stay on purpose: declines unrelated requests in one sentence and returns to it"
+              },
+              "scope": {
+                "type": "string",
+                "nullable": true,
+                "maxLength": 500,
+                "description": "The purpose in a few words; empty = the prompt defines it"
+              }
+            }
+          },
+          "manipulation": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Keeps its persona, instructions and rules whatever the person claims"
+              }
+            }
+          },
+          "blockedTopics": {
+            "type": "array",
+            "nullable": true,
+            "maxItems": 30,
+            "items": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "description": "Subjects never discussed"
+          },
+          "onViolation": {
+            "type": "string",
+            "enum": [
+              "redirect",
+              "end_call"
+            ],
+            "nullable": true,
+            "description": "After declining twice: keep steering back (default) or say goodbye and end the call (text channels: close the conversation)"
+          }
+        }
       },
       "ContactMemory": {
         "type": "object",
