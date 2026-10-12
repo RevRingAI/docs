@@ -11182,7 +11182,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "x-api-key",
-        "description": "API key for authentication. Generate API keys from the RevRing dashboard."
+        "description": "API key for authentication. Generate API keys from the RevRing dashboard. A key is either full access or read-only; a read-only key is refused with 403 read_only_key on any request that creates, changes or deletes."
       }
     },
     "responses": {

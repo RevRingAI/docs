@@ -18,6 +18,13 @@ API Keys are sensitive credentials, so ensure to store them securely and limit a
   Create a new API Key from the RevRing Dashboard
 </Card>
 
+### Full access or read-only
+
+Each key has an access level, chosen when it is created:
+
+- **Full access**: every endpoint, including creating agents, placing calls and deleting things.
+- **Read-only**: reads only (`GET` endpoints and the batch lookups). Any request that would create, change or delete something is refused with `403 read_only_key`. Use read-only keys for reporting, dashboards and integrations that only need to read.
+
 ## Authentication
 
 All API endpoints are authenticated using the `x-api-key` header:

@@ -6,6 +6,9 @@ icon: 'clock-rotate-left'
 
 ## October 11, 2026
 
+### Read-only API keys
+When creating an API key, choose **Full access** or **Read-only**. A read-only key can read calls, agents, analytics and everything else, and is refused on any request that would create, change or delete (`403 read_only_key`). Made for reporting, dashboards and integrations that only read. [Reference](/api-reference/introduction#full-access-or-read-only)
+
 ### Summaries in the agent's language
 Call summaries are now written in the agent's language: Spanish agents get Spanish summaries, French agents French, and a multilingual agent the language the call was held in. Each call also records the language it ran in: filter the **Calls** list by language, see it on the call page, and read it as `language` on the call record (`GET /calls?language=es`). [Guide](/platform/multilingual#summaries-in-the-agents-language)
 
