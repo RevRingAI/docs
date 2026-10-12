@@ -4,6 +4,11 @@ description: 'Platform changes that affect how you build with RevRing, newest fi
 icon: 'clock-rotate-left'
 ---
 
+## October 12, 2026
+
+### Tests with canned tool responses
+A test suite or a single test can pin what the agent's custom tools return (`toolMocks`), so a booking or lookup scenario runs against a known answer and never reaches your live systems: the webhook is not called and the agent gets the pinned response, with the HTTP status you choose. A test's entries win over the suite's; tools without an entry are called for real. Works in chat, SMS and web chat tests (voice tests are next), and mocked calls are marked in the transcript. On the dashboard: **Tool responses** on the suite and on each test. [Guide](/platform/test-suites#tool-mocks)
+
 ## October 11, 2026
 
 ### Right-to-left languages read correctly

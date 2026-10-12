@@ -866,6 +866,8 @@ The agent will communicate the error to the caller appropriately.
    - Your webhook's response
    - How the agent incorporated the result into conversation
 
+To test the conversation around a tool without touching your live systems, give a [test suite](/platform/test-suites#tool-mocks) canned responses for the tool: the webhook is not called and the agent gets the pinned answer.
+
 ### Viewing Tool Invocations
 
 All tool invocations appear in call transcripts with detailed information:

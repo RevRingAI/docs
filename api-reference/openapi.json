@@ -15911,6 +15911,25 @@
             "nullable": true,
             "description": "Default variables for all test cases in this suite"
           },
+          "toolMocks": {
+            "type": "object",
+            "nullable": true,
+            "description": "Canned results for the agent's custom tools during every test in this suite, keyed by tool name: { \"<tool>\": { \"response\": <any JSON>, \"status\"?: <HTTP status, default 200> } }. A mocked tool is not called; its response reaches the agent exactly as the webhook's body would, and a non-2xx status means the tool's response variables are not saved. A test case's entries win over the suite. Up to 50 tools; null clears. Transcript rows of mocked calls carry mocked: true and httpStatus.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "description": "What the webhook would have returned (any JSON)"
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 599,
+                  "description": "The HTTP status the webhook would have answered with (default 200)"
+                }
+              }
+            }
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -15967,6 +15986,25 @@
             "type": "object",
             "nullable": true,
             "description": "Default variables for all test cases"
+          },
+          "toolMocks": {
+            "type": "object",
+            "nullable": true,
+            "description": "Canned results for the agent's custom tools during every test in this suite, keyed by tool name: { \"<tool>\": { \"response\": <any JSON>, \"status\"?: <HTTP status, default 200> } }. A mocked tool is not called; its response reaches the agent exactly as the webhook's body would, and a non-2xx status means the tool's response variables are not saved. A test case's entries win over the suite. Up to 50 tools; null clears. Transcript rows of mocked calls carry mocked: true and httpStatus.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "description": "What the webhook would have returned (any JSON)"
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 599,
+                  "description": "The HTTP status the webhook would have answered with (default 200)"
+                }
+              }
+            }
           }
         },
         "required": [
@@ -16012,6 +16050,25 @@
             "type": "object",
             "nullable": true,
             "description": "Default variables for all test cases"
+          },
+          "toolMocks": {
+            "type": "object",
+            "nullable": true,
+            "description": "Canned results for the agent's custom tools during every test in this suite, keyed by tool name: { \"<tool>\": { \"response\": <any JSON>, \"status\"?: <HTTP status, default 200> } }. A mocked tool is not called; its response reaches the agent exactly as the webhook's body would, and a non-2xx status means the tool's response variables are not saved. A test case's entries win over the suite. Up to 50 tools; null clears. Transcript rows of mocked calls carry mocked: true and httpStatus.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "description": "What the webhook would have returned (any JSON)"
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 599,
+                  "description": "The HTTP status the webhook would have answered with (default 200)"
+                }
+              }
+            }
           }
         }
       },
@@ -16049,6 +16106,25 @@
             "type": "object",
             "nullable": true,
             "description": "Test case specific variables (override suite defaults)"
+          },
+          "toolMocks": {
+            "type": "object",
+            "nullable": true,
+            "description": "Canned results for the agent's custom tools during this test (its entries win over the suite's), keyed by tool name: { \"<tool>\": { \"response\": <any JSON>, \"status\"?: <HTTP status, default 200> } }. A mocked tool is not called; its response reaches the agent exactly as the webhook's body would, and a non-2xx status means the tool's response variables are not saved. A test case's entries win over the suite. Up to 50 tools; null clears. Transcript rows of mocked calls carry mocked: true and httpStatus.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "description": "What the webhook would have returned (any JSON)"
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 599,
+                  "description": "The HTTP status the webhook would have answered with (default 200)"
+                }
+              }
+            }
           },
           "createdAt": {
             "type": "string",
@@ -16099,6 +16175,25 @@
             "type": "object",
             "nullable": true,
             "description": "Test case specific variables (override suite defaults)"
+          },
+          "toolMocks": {
+            "type": "object",
+            "nullable": true,
+            "description": "Canned results for the agent's custom tools during this test (its entries win over the suite's), keyed by tool name: { \"<tool>\": { \"response\": <any JSON>, \"status\"?: <HTTP status, default 200> } }. A mocked tool is not called; its response reaches the agent exactly as the webhook's body would, and a non-2xx status means the tool's response variables are not saved. A test case's entries win over the suite. Up to 50 tools; null clears. Transcript rows of mocked calls carry mocked: true and httpStatus.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "description": "What the webhook would have returned (any JSON)"
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 599,
+                  "description": "The HTTP status the webhook would have answered with (default 200)"
+                }
+              }
+            }
           }
         },
         "required": [
@@ -16135,6 +16230,25 @@
             "type": "object",
             "nullable": true,
             "description": "Test case specific variables (override suite defaults)"
+          },
+          "toolMocks": {
+            "type": "object",
+            "nullable": true,
+            "description": "Canned results for the agent's custom tools during this test (its entries win over the suite's), keyed by tool name: { \"<tool>\": { \"response\": <any JSON>, \"status\"?: <HTTP status, default 200> } }. A mocked tool is not called; its response reaches the agent exactly as the webhook's body would, and a non-2xx status means the tool's response variables are not saved. A test case's entries win over the suite. Up to 50 tools; null clears. Transcript rows of mocked calls carry mocked: true and httpStatus.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "description": "What the webhook would have returned (any JSON)"
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 599,
+                  "description": "The HTTP status the webhook would have answered with (default 200)"
+                }
+              }
+            }
           }
         }
       },

@@ -236,6 +236,26 @@ curl -X POST https://api.revring.ai/v1/test-suites/{suiteId}/tests \
 
 The `attemptsPerRun` field (1–10, default 1) controls how many times each test case is executed per run. Use multiple attempts to test for consistency.
 
+### Tool mocks
+
+A test can pin what the agent's [custom tools](/platform/tools#custom-tools) return, so a booking or lookup scenario runs against a known answer and never reaches your live systems: a mocked tool is not called, its canned response is handed to the agent exactly as the webhook's body would be. Set `toolMocks` on the suite (applies to every test in it) or on a test case (its entries win over the suite's), keyed by tool name:
+
+```bash
+curl -X PATCH https://api.revring.ai/v1/test-suites/{suiteId}/tests/{testId} \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "toolMocks": {
+      "check_availability": { "response": { "slots": ["Tuesday at 10:00", "Thursday at 14:00"] } },
+      "book_slot": { "response": { "error": "slot no longer available" }, "status": 409 }
+    }
+  }'
+```
+
+`response` is any JSON; `status` (optional, default 200) is the HTTP status the webhook would have answered with. Like a real response, a non-2xx status means the tool's [response variables](/platform/tools#saving-response-fields-as-variables) are not saved. Tools without an entry are called for real. In the transcript a mocked call is marked `"mocked": true` with its `httpStatus`. Mocks apply to chat, SMS and web chat tests; voice tests are next, and until then a voice run on a suite or test with mocks is refused (`tool_mocks_voice_pending`) rather than calling your webhooks for real. Up to 50 tools per suite or test; set `toolMocks` to `null` to clear.
+
+**Dashboard:** in the suite's **Edit** dialog and in each test's editor, **Tool responses** takes the same JSON.
+
 ### AI-Generated Test Cases
 
 You can also generate test cases automatically using AI. Provide a prompt describing the scenarios you want to test, and RevRing generates test cases based on your target agent's configuration:
