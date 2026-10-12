@@ -14,7 +14,7 @@ Guardrails keep an agent on its job. They apply on top of your prompt, in the sa
 
 **When the person keeps pushing** decides what happens after the agent has declined twice: keep declining and steer back (the default), or say goodbye and end the call on the third decline. On SMS and web chat the agent closes the conversation instead.
 
-Every decline is recorded: it appears in the call's transcript and in test results as a `guardrail_declined` event with its reason (`off_topic`, `manipulation` or `blocked_topic`), so you can see how often callers run into a rail and which one.
+Declines are recorded: they appear in the call's transcript and in test results as `guardrail_declined` events with a reason (`off_topic`, `manipulation` or `blocked_topic`), so you can see how often callers run into a rail and which one. The agent reports the great majority of its declines; treat the count as a close measure rather than an exact one.
 
 ## Setting guardrails
 
