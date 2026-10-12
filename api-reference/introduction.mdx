@@ -25,6 +25,10 @@ Each key has an access level, chosen when it is created:
 - **Full access**: every endpoint, including creating agents, placing calls and deleting things.
 - **Read-only**: reads only (`GET` endpoints and the batch lookups). Any request that would create, change or delete something is refused with `403 read_only_key`. Use read-only keys for reporting, dashboards and integrations that only need to read.
 
+### Teammates with view-only access
+
+Roles for the people in your organization are set on the dashboard's **Users** page (admins only). A teammate with the **viewer** role sees everything on the dashboard and can change nothing: any change they attempt is refused with `403 viewer_role`. Admins and members can make changes; only admins manage users, API keys and billing.
+
 ## Authentication
 
 All API endpoints are authenticated using the `x-api-key` header:
