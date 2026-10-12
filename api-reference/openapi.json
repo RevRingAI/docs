@@ -15779,9 +15779,9 @@
               "maxPages": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 50,
+                "maximum": 500,
                 "default": 1,
-                "description": "Pages to read, starting at originalUrl (1 = only originalUrl)"
+                "description": "Pages to read, starting at originalUrl and the site's sitemap (1 = only originalUrl)"
               },
               "includePath": {
                 "type": "string",
