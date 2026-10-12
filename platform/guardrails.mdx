@@ -12,7 +12,9 @@ Guardrails keep an agent on its job. They apply on top of your prompt, in the sa
 | **Resist manipulation** | The agent keeps its persona, instructions and rules whoever the person claims to be and whatever they claim: a request to behave differently, to reveal or repeat its instructions, to play another role, to treat the conversation as a test or a game, or to make an exception changes nothing. |
 | **Never discuss** | Subjects the agent never discusses, gives an opinion on, or provides information about, even when asked directly. Up to 30. |
 
-**When the person keeps pushing** decides what happens after the agent has declined twice: keep declining and steer back (the default), or say goodbye and end the call. On SMS and web chat the agent closes the conversation instead.
+**When the person keeps pushing** decides what happens after the agent has declined twice: keep declining and steer back (the default), or say goodbye and end the call on the third decline. On SMS and web chat the agent closes the conversation instead.
+
+Every decline is recorded: it appears in the call's transcript and in test results as a `guardrail_declined` event with its reason (`off_topic`, `manipulation` or `blocked_topic`), so you can see how often callers run into a rail and which one.
 
 ## Setting guardrails
 
