@@ -12119,7 +12119,7 @@
               "revring-max",
               "revring-ultra"
             ],
-            "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.065/min. Defaults to revring-standard."
+            "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.09/min. Defaults to revring-standard."
           },
           "timezone": {
             "type": "string",
@@ -12868,7 +12868,7 @@
               "revring-max",
               "revring-ultra"
             ],
-            "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.065/min. Defaults to revring-standard."
+            "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.09/min. Defaults to revring-standard."
           },
           "timezone": {
             "type": "string",
@@ -13582,7 +13582,7 @@
               "revring-max",
               "revring-ultra"
             ],
-            "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.065/min. Defaults to revring-standard."
+            "description": "Language model tier powering the agent. Usage is billed per minute at the tier's rate: revring-standard $0.03/min, revring-max $0.05/min, revring-ultra $0.09/min. Defaults to revring-standard."
           },
           "timezone": {
             "type": "string",
